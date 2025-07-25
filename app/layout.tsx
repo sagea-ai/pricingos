@@ -6,12 +6,14 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from 'next-themes'
 import { Toaster } from 'sonner'
+import { TrialProvider } from '@/components/trial/trial-provider'
+import { TrialBannerWrapper } from '@/components/trial/trial-banner-wrapper'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'PricingOS Web',
-  description: 'AI Powered Business Insights for SMBs',
+  description: 'AI Pricing Engine For SMBs',
 }
 
 export default function RootLayout({

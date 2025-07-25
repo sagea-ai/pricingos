@@ -164,7 +164,7 @@ function OnboardingContent() {
       const result = await response.json()
 
       if (response.ok && result.success) {
-        toast.success('Welcome to PricingOS!')
+        toast.success('Welcome to Reasonet!')
         router.push('/dashboard') 
       } else {
         console.error('Onboarding failed:', result)
@@ -189,14 +189,14 @@ function OnboardingContent() {
             <div className="flex justify-center items-center mb-6">
               <Image
                 src="/logohq.png"
-                alt="PricingOS"
+                alt="Reasonet"
                 width={48}
                 height={48}
                 className="rounded-lg"
               />
             </div>
             <h1 className="text-3xl font-extralight text-gray-900 dark:text-white mb-3 tracking-tight">
-              Welcome to PricingOS
+              Welcome to Reasonet
             </h1>
             <p className="text-gray-500 dark:text-gray-400 text-lg font-light leading-relaxed">
               Set up your organization to start analyzing code and catching bugs
