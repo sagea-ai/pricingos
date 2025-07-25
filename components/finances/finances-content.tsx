@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { FaStripe } from "react-icons/fa";
 import { Badge } from '@/components/ui/badge'
 import { 
   DollarSign, 
@@ -20,7 +21,9 @@ import {
   TrendingDown as TrendingDownIcon,
   Calendar,
   BarChart3,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Clock,
+  Zap
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -743,159 +746,146 @@ export function FinancesContent({ organizationName, organizationId, productProfi
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white dark:from-green-950 dark:to-gray-950">
-      <div className="p-6 space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Finances</h1>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+        
+        {/* Header Section */}
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div className="space-y-2">
+            <h1 className="text-4xl font-light text-gray-900 dark:text-white tracking-tight">
+              Financial Overview
+            </h1>
+            <p className="text-lg text-gray-500 dark:text-gray-400 font-light max-w-2xl">
               {productProfile?.productName 
-                ? `Track ${productProfile.productName}'s financial performance, revenue streams, and cash runway`
-                : 'Track your product\'s financial performance, revenue streams, and cash runway'
+                ? `Monitor ${productProfile.productName}'s revenue performance and financial health with real-time insights.`
+                : 'Monitor your product\'s revenue performance and financial health with real-time insights.'
               }
             </p>
           </div>
           
           <div className="flex items-center gap-3">
-            {/* Upload Data Button */}
             <Button 
               onClick={() => setShowUploadModal(true)}
               variant="outline"
-              className="border-amber-200 text-amber-700 hover:bg-amber-50 dark:border-amber-800 dark:text-amber-400 dark:hover:bg-amber-950"
+              className="h-11 px-6 border-amber-200 text-amber-600 hover:bg-amber-50 hover:border-amber-300 transition-all duration-200 font-medium dark:border-amber-800 dark:text-amber-400 dark:hover:bg-amber-950/30"
             >
               <Upload className="h-4 w-4 mr-2" />
-              Upload CSV Data
+              Import Data
             </Button>
           </div>
         </div>
 
-        {/* Critical Cash Runway Warning - Only show when data is loaded */}
+        {/* Critical Alert - Redesigned */}
         {(stripeIntegration.isConnected || khaltiIntegration.isConnected || uploadedData.length > 0) && 
          (cashRunwayData.runwayDays && cashRunwayData.runwayDays < 30 || cashRunwayData.runwayMonths < 1) && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
           >
-            <Card className={`border-2 ${
+            <div className={`relative overflow-hidden rounded-2xl ${
               (cashRunwayData.runwayDays && cashRunwayData.runwayDays < 7) || cashRunwayData.runwayMonths < 0.25
-                ? 'border-red-500 bg-red-50 dark:border-red-800 dark:bg-red-950/30 shadow-lg' 
-                : 'border-red-400 bg-red-50 dark:border-red-700 dark:bg-red-950/20'
-            }`}>
-              <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className={`h-6 w-6 mt-0.5 ${
-                    (cashRunwayData.runwayDays && cashRunwayData.runwayDays < 7) || cashRunwayData.runwayMonths < 0.25 
-                      ? 'text-red-600 dark:text-red-400 animate-pulse' 
-                      : 'text-red-500 dark:text-red-400'
-                  }`} />
-                  <div className="flex-1">
-                    <h3 className={`font-semibold text-lg ${
+                ? 'bg-gradient-to-r from-red-50 to-orange-50 border border-red-200' 
+                : 'bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200'
+            } dark:from-red-950/20 dark:to-orange-950/20 dark:border-red-800/30`}>
+              <div className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center ${
+                    (cashRunwayData.runwayDays && cashRunwayData.runwayDays < 7) || cashRunwayData.runwayMonths < 0.25
+                      ? 'bg-red-100 dark:bg-red-900/40' 
+                      : 'bg-amber-100 dark:bg-amber-900/40'
+                  }`}>
+                    <AlertTriangle className={`h-6 w-6 ${
                       (cashRunwayData.runwayDays && cashRunwayData.runwayDays < 7) || cashRunwayData.runwayMonths < 0.25 
-                        ? 'text-red-900 dark:text-red-100' 
-                        : 'text-red-800 dark:text-red-200'
-                    }`}>
-                      🚨 Critical Cash Runway Alert
+                        ? 'text-red-600 dark:text-red-400' 
+                        : 'text-amber-600 dark:text-amber-400'
+                    }`} />
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                      Cash Runway Alert
                     </h3>
-                    <p className={`text-sm mb-3 ${
-                      (cashRunwayData.runwayDays && cashRunwayData.runwayDays < 7) || cashRunwayData.runwayMonths < 0.25 
-                        ? 'text-red-800 dark:text-red-200 font-medium' 
-                        : 'text-red-700 dark:text-red-300'
-                    }`}>
+                    <p className="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
                       {cashRunwayData.runwayDays && cashRunwayData.runwayDays < 30 ? (
-                        <>You have only <strong className="text-red-900 dark:text-red-100">{cashRunwayData.runwayDays} days</strong> of runway remaining!</>
+                        <>Your current runway is <span className="font-semibold text-red-600">{cashRunwayData.runwayDays} days</span>. Immediate action recommended.</>
                       ) : (
-                        <>You have <strong>{Math.floor(cashRunwayData.runwayMonths)} months</strong> of runway remaining</>
+                        <>Your runway is <span className="font-semibold">{Math.floor(cashRunwayData.runwayMonths)} months</span>. Consider optimization strategies.</>
                       )}
-                      {' '}(projected cash depletion: <strong>{formatDate(cashRunwayData.projectedCashDepletion)}</strong>).
                     </p>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
                       {mockFinancialData.cashRunway.recommendations.map((rec, index) => (
-                        <div key={index} className={`p-2 rounded-lg border text-xs ${
-                          cashRunwayData.runwayMonths < 3 
-                            ? 'border-red-200 bg-red-100 dark:border-red-700 dark:bg-red-900/30' 
-                            : 'border-yellow-200 bg-yellow-100 dark:border-yellow-700 dark:bg-yellow-900/30'
-                        }`}>
-                          <div className={`font-medium ${
-                            cashRunwayData.runwayMonths < 3 ? 'text-red-900 dark:text-red-100' : 'text-yellow-900 dark:text-yellow-100'
-                          }`}>
+                        <div key={index} className="p-3 bg-white/60 dark:bg-gray-800/60 rounded-xl border border-white/40 dark:border-gray-700/40 backdrop-blur-sm">
+                          <div className="text-sm font-medium text-gray-900 dark:text-white mb-1">
                             {rec.action}
                           </div>
-                          <div className={`${
-                            cashRunwayData.runwayMonths < 3 ? 'text-red-700 dark:text-red-300' : 'text-yellow-700 dark:text-yellow-300'
-                          }`}>
+                          <div className="text-sm text-amber-600 dark:text-amber-400 font-medium">
                             {rec.impact}
                           </div>
                         </div>
                       ))}
                     </div>
                     
-                    <div className="flex items-center gap-4 text-xs">
-                      <div className="flex items-center gap-1">
-                        <DollarSign className="h-3 w-3" />
-                        <span>Current Cash: {formatCurrency(cashRunwayData.currentCash)}</span>
+                    <div className="flex flex-wrap gap-6 text-sm text-gray-600 dark:text-gray-400">
+                      <div className="flex items-center gap-2">
+                        <DollarSign className="h-4 w-4 text-amber-500" />
+                        <span>Cash: {formatCurrency(cashRunwayData.currentCash)}</span>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <TrendingDownIcon className="h-3 w-3" />
-                        <span>Monthly Burn: {formatCurrency(cashRunwayData.monthlyBurnRate)}</span>
+                      <div className="flex items-center gap-2">
+                        <TrendingDownIcon className="h-4 w-4 text-red-500" />
+                        <span>Burn: {formatCurrency(cashRunwayData.monthlyBurnRate)}/mo</span>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <TrendingUp className="h-3 w-3" />
-                        <span>Monthly Revenue: {formatCurrency(cashRunwayData.monthlyRevenue)}</span>
+                      <div className="flex items-center gap-2">
+                        <TrendingUp className="h-4 w-4 text-green-500" />
+                        <span>Revenue: {formatCurrency(cashRunwayData.monthlyRevenue)}/mo</span>
                       </div>
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </motion.div>
         )}
 
-        {/* Data Upload Summary */}
+        {/* Data Summary */}
         {uploadedData.length > 0 && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
           >
-            <Card className="border-blue-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-                  <FileSpreadsheet className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  Uploaded Data Summary
+            <Card className="border-0 shadow-sm bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-3 text-xl font-semibold text-gray-900 dark:text-white">
+                  <div className="w-8 h-8 bg-amber-100 dark:bg-amber-900/40 rounded-lg flex items-center justify-center">
+                    <FileSpreadsheet className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  Data Overview
                 </CardTitle>
-                <CardDescription>
-                  {uploadedData.length} transactions loaded from CSV files
+                <CardDescription className="text-base">
+                  {uploadedData.length} transactions imported from your financial data
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
-                    <div className="text-sm font-medium text-green-800 dark:text-green-200">Revenue Records</div>
-                    <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                      {uploadedData.filter(d => d.type === 'revenue').length}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  {[
+                    { label: 'Revenue Records', value: uploadedData.filter(d => d.type === 'revenue').length, color: 'green' },
+                    { label: 'Expense Records', value: uploadedData.filter(d => d.type === 'expense').length, color: 'red' },
+                    { label: 'Stripe Transactions', value: uploadedData.filter(d => d.gateway === 'stripe').length, color: 'blue' },
+                    { label: 'Khalti Transactions', value: uploadedData.filter(d => d.gateway === 'khalti').length, color: 'purple' }
+                  ].map((item, index) => (
+                    <div key={index} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                      <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{item.label}</div>
+                      <div className={`text-2xl font-bold ${
+                        item.color === 'green' ? 'text-green-600' :
+                        item.color === 'red' ? 'text-red-600' :
+                        item.color === 'blue' ? 'text-blue-600' : 'text-purple-600'
+                      }`}>
+                        {item.value}
+                      </div>
                     </div>
-                  </div>
-                  <div className="p-3 bg-red-50 dark:bg-red-950/20 rounded-lg">
-                    <div className="text-sm font-medium text-red-800 dark:text-red-200">Expense Records</div>
-                    <div className="text-2xl font-bold text-red-600 dark:text-red-400">
-                      {uploadedData.filter(d => d.type === 'expense').length}
-                    </div>
-                  </div>
-                  <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
-                    <div className="text-sm font-medium text-blue-800 dark:text-blue-200">Stripe Transactions</div>
-                    <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                      {uploadedData.filter(d => d.gateway === 'stripe').length}
-                    </div>
-                  </div>
-                  <div className="p-3 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
-                    <div className="text-sm font-medium text-purple-800 dark:text-purple-200">Khalti Transactions</div>
-                    <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                      {uploadedData.filter(d => d.gateway === 'khalti').length}
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -903,322 +893,232 @@ export function FinancesContent({ organizationName, organizationId, productProfi
         )}
 
         {!stripeIntegration.isConnected && !khaltiIntegration.isConnected && uploadedData.length === 0 ? (
-          /* Integration Setup */
-          <Card className="border-amber-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
-            <CardHeader className="text-center">
-              <CardTitle className="flex items-center justify-center gap-2 text-gray-900 dark:text-white">
-                <CreditCard className="h-6 w-6 text-amber-600 dark:text-amber-400" />
-                Connect Your Payment Providers
-              </CardTitle>
-              <CardDescription className="max-w-md mx-auto text-gray-600 dark:text-gray-400">
-                Connect Stripe & Khalti for automatic data sync, or upload CSV files to get comprehensive financial insights and cash runway analysis.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center space-y-6">
-              {/* Features */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
-                <div className="p-4 border rounded-lg border-amber-200 dark:border-gray-700 bg-amber-50 dark:bg-gray-800">
-                  <Activity className="h-8 w-8 text-amber-600 dark:text-amber-400 mx-auto mb-2" />
-                  <h3 className="font-medium mb-1 text-gray-900 dark:text-white">Cash Runway</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Monitor burn rate & runway</p>
-                </div>
-                <div className="p-4 border rounded-lg border-amber-200 dark:border-gray-700 bg-amber-50 dark:bg-gray-800">
-                  <TrendingUp className="h-8 w-8 text-amber-600 dark:text-amber-400 mx-auto mb-2" />
-                  <h3 className="font-medium mb-1 text-gray-900 dark:text-white">MRR Tracking</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Monthly recurring revenue</p>
-                </div>
-                <div className="p-4 border rounded-lg border-amber-200 dark:border-gray-700 bg-amber-50 dark:bg-gray-800">
-                  <BarChart3 className="h-8 w-8 text-amber-600 dark:text-amber-400 mx-auto mb-2" />
-                  <h3 className="font-medium mb-1 text-gray-900 dark:text-white">Revenue Analytics</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Multi-gateway insights</p>
-                </div>
-              </div>
-              
-              {/* Connection Options */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
-                {/* Stripe */}
-                <div className="p-4 border rounded-lg border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center justify-center mb-3">
-                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-                      <CreditCard className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                    </div>
-                  </div>
-                  <h3 className="font-medium mb-2 text-gray-900 dark:text-white">Stripe</h3>
-                  <Button 
-                    onClick={handleStripeConnect} 
-                    disabled={isConnecting}
-                    size="sm"
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    {isConnecting ? 'Connecting...' : 'Connect'}
-                  </Button>
+          /* Setup Section - Redesigned */
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="text-center py-16">
+              <div className="max-w-3xl mx-auto">
+                <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/40 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <BarChart3 className="h-8 w-8 text-amber-600 dark:text-amber-400" />
                 </div>
                 
-                {/* Khalti */}
-                <div className="p-4 border rounded-lg border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center justify-center mb-3">
-                    <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
-                      <Wallet className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                <h2 className="text-3xl font-light text-gray-900 dark:text-white mb-4">
+                  Connect Your Financial Data
+                </h2>
+                <p className="text-lg text-gray-500 dark:text-gray-400 mb-12 font-light">
+                  Integrate with payment providers or upload CSV files to unlock comprehensive financial insights and cash runway analysis.
+                </p>
+                
+                {/* Features Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                  {[
+                    { icon: Clock, title: 'Cash Runway', desc: 'Real-time burn rate monitoring' },
+                    { icon: TrendingUp, title: 'Revenue Analytics', desc: 'MRR and growth tracking' },
+                    { icon: Activity, title: 'Multi-Gateway', desc: 'Unified payment insights' }
+                  ].map((feature, index) => (
+                    <div key={index} className="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
+                      <feature.icon className="h-8 w-8 text-amber-500 mx-auto mb-4" />
+                      <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{feature.title}</h3>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm">{feature.desc}</p>
                     </div>
-                  </div>
-                  <h3 className="font-medium mb-2 text-gray-900 dark:text-white">Khalti</h3>
-                  <Button 
-                    onClick={handleKhaltiConnect} 
-                    disabled={isConnecting}
-                    size="sm"
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-                  >
-                    {isConnecting ? 'Connecting...' : 'Connect'}
-                  </Button>
+                  ))}
                 </div>
                 
-                {/* CSV Upload */}
-                <div className="p-4 border rounded-lg border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center justify-center mb-3">
-                    <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
-                      <FileSpreadsheet className="h-6 w-6 text-green-600 dark:text-green-400" />
+                {/* Connection Options */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-2xl mx-auto">
+                  {[
+                    { name: 'Stripe', icon: FaStripe, color: 'blue', action: handleStripeConnect },
+                    { name: 'Khalti', icon: Wallet, color: 'purple', action: handleKhaltiConnect },
+                    { name: 'Upload CSV', icon: Upload, color: 'amber', action: () => setShowUploadModal(true) }
+                  ].map((option, index) => (
+                    <div key={index} className="group">
+                      <Button
+                        onClick={option.action}
+                        disabled={isConnecting}
+                        className={`w-full h-28 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-amber-400 dark:hover:border-amber-500 bg-transparent hover:bg-amber-50 dark:hover:bg-amber-950/20 text-gray-700 dark:text-gray-300 hover:text-amber-700 dark:hover:text-amber-400 transition-all duration-200 rounded-xl group-hover:scale-[1.02]`}
+                      >
+                        <option.icon className={option.name === 'Stripe' ? "h-10 w-10" : "h-6 w-6"} />
+                        <span className="font-medium">{isConnecting ? 'Connecting...' : option.name}</span>
+                      </Button>
                     </div>
-                  </div>
-                  <h3 className="font-medium mb-2 text-gray-900 dark:text-white">Upload CSV</h3>
-                  <Button 
-                    onClick={() => setShowUploadModal(true)}
-                    size="sm"
-                    variant="outline"
-                    className="w-full border-green-200 text-green-700 hover:bg-green-50 dark:border-green-800 dark:text-green-400"
-                  >
-                    Upload Data
-                  </Button>
+                  ))}
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </motion.div>
         ) : (
-          /* Financial Dashboard */
-          <div className="space-y-6">
-            {/* Overview Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Card className="border-amber-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-900 dark:text-white">Total Revenue</CardTitle>
-                    <DollarSign className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{formatCurrency(financialMetrics.totalRevenue)}</div>
-                    <p className="text-xs text-muted-foreground">
-                      <span className={`flex items-center ${financialMetrics.revenueGrowthRate >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {financialMetrics.revenueGrowthRate >= 0 ? (
-                          <ArrowUpRight className="h-3 w-3 mr-1" />
-                        ) : (
-                          <ArrowDownRight className="h-3 w-3 mr-1" />
+          /* Dashboard Section - Redesigned */
+          <div className="space-y-8">
+            {/* Metrics Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+              {[
+                {
+                  title: 'Total Revenue',
+                  value: formatCurrency(financialMetrics.totalRevenue),
+                  change: financialMetrics.revenueGrowthRate,
+                  icon: DollarSign,
+                  color: 'amber'
+                },
+                {
+                  title: 'Monthly Recurring',
+                  value: formatCurrency(financialMetrics.monthlyRecurring),
+                  change: financialMetrics.mrrGrowthRate,
+                  icon: TrendingUp,
+                  color: 'green'
+                },
+                {
+                  title: 'Active Subscriptions',
+                  value: financialMetrics.activeSubscriptions.toString(),
+                  change: financialMetrics.subscriptionGrowthRate,
+                  icon: Users,
+                  color: 'blue'
+                },
+                {
+                  title: 'Revenue per User',
+                  value: formatCurrency(financialMetrics.averageRevenuePerUser),
+                  change: 0,
+                  icon: Target,
+                  color: 'purple'
+                },
+                {
+                  title: 'Cash Runway',
+                  value: cashRunwayData.runwayDays && cashRunwayData.runwayDays < 30 
+                    ? `${cashRunwayData.runwayDays} days` 
+                    : `${Math.floor(cashRunwayData.runwayMonths)} months`,
+                  change: null,
+                  icon: Calendar,
+                  color: cashRunwayData.runwayMonths < 1 ? 'red' : cashRunwayData.runwayMonths < 6 ? 'yellow' : 'green',
+                  isRunway: true
+                }
+              ].map((metric, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                >
+                  <Card className={`border-0 shadow-sm bg-white dark:bg-gray-800 hover:shadow-md transition-all duration-200 ${
+                    metric.isRunway && metric.color === 'red' ? 'ring-2 ring-red-200 dark:ring-red-800' : ''
+                  }`}>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                          metric.color === 'amber' ? 'bg-amber-100 dark:bg-amber-900/40' :
+                          metric.color === 'green' ? 'bg-green-100 dark:bg-green-900/40' :
+                          metric.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900/40' :
+                          metric.color === 'purple' ? 'bg-purple-100 dark:bg-purple-900/40' :
+                          metric.color === 'red' ? 'bg-red-100 dark:bg-red-900/40' :
+                          'bg-yellow-100 dark:bg-yellow-900/40'
+                        }`}>
+                          <metric.icon className={`h-5 w-5 ${
+                            metric.color === 'amber' ? 'text-amber-600 dark:text-amber-400' :
+                            metric.color === 'green' ? 'text-green-600 dark:text-green-400' :
+                            metric.color === 'blue' ? 'text-blue-600 dark:text-blue-400' :
+                            metric.color === 'purple' ? 'text-purple-600 dark:text-purple-400' :
+                            metric.color === 'red' ? 'text-red-600 dark:text-red-400' :
+                            'text-yellow-600 dark:text-yellow-400'
+                          }`} />
+                        </div>
+                        {metric.change !== null && metric.change !== 0 && (
+                          <div className={`flex items-center gap-1 text-sm ${
+                            metric.change >= 0 ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {metric.change >= 0 ? (
+                              <ArrowUpRight className="h-4 w-4" />
+                            ) : (
+                              <ArrowDownRight className="h-4 w-4" />
+                            )}
+                            {Math.abs(metric.change).toFixed(1)}%
+                          </div>
                         )}
-                        {financialMetrics.revenueGrowthRate >= 0 ? '+' : ''}{financialMetrics.revenueGrowthRate.toFixed(1)}% from last month
-                      </span>
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.1 }}
-              >
-                <Card className="border-amber-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-900 dark:text-white">Monthly Recurring</CardTitle>
-                    <TrendingUp className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{formatCurrency(financialMetrics.monthlyRecurring)}</div>
-                    <p className="text-xs text-muted-foreground">
-                      <span className={`flex items-center ${financialMetrics.mrrGrowthRate >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {financialMetrics.mrrGrowthRate >= 0 ? (
-                          <ArrowUpRight className="h-3 w-3 mr-1" />
-                        ) : (
-                          <ArrowDownRight className="h-3 w-3 mr-1" />
+                      </div>
+                      
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                          {metric.title}
+                        </p>
+                        <p className={`text-2xl font-bold ${
+                          metric.isRunway && metric.color === 'red' ? 'text-red-600 dark:text-red-400' :
+                          'text-gray-900 dark:text-white'
+                        }`}>
+                          {metric.value}
+                        </p>
+                        {metric.change !== null && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            vs. last month
+                          </p>
                         )}
-                        {financialMetrics.mrrGrowthRate >= 0 ? '+' : ''}{financialMetrics.mrrGrowthRate.toFixed(1)}% from last month
-                      </span>
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.2 }}
-              >
-                <Card className="border-amber-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-900 dark:text-white">Active Subscriptions</CardTitle>
-                    <Users className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{financialMetrics.activeSubscriptions}</div>
-                    <p className="text-xs text-muted-foreground">
-                      <span className={`flex items-center ${financialMetrics.subscriptionGrowthRate >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {financialMetrics.subscriptionGrowthRate >= 0 ? (
-                          <ArrowUpRight className="h-3 w-3 mr-1" />
-                        ) : (
-                          <ArrowDownRight className="h-3 w-3 mr-1" />
-                        )}
-                        {financialMetrics.subscriptionGrowthRate >= 0 ? '+' : ''}{financialMetrics.subscriptionGrowthRate.toFixed(1)}% from last month
-                      </span>
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.3 }}
-              >
-                <Card className="border-amber-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-900 dark:text-white">Avg Revenue/User</CardTitle>
-                    <Target className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{formatCurrency(financialMetrics.averageRevenuePerUser)}</div>
-                    <p className="text-xs text-muted-foreground">
-                      <span className="text-gray-500 flex items-center">
-                        <TrendingUp className="h-3 w-3 mr-1" />
-                        Based on current data
-                      </span>
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.4 }}
-              >
-                <Card className={`border-amber-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm ${
-                  (cashRunwayData.runwayDays && cashRunwayData.runwayDays < 7) || cashRunwayData.runwayMonths < 0.25
-                    ? 'ring-2 ring-red-400 dark:ring-red-600 border-red-200 dark:border-red-800' 
-                    : cashRunwayData.runwayMonths < 1 
-                      ? 'ring-2 ring-red-300 dark:ring-red-700 border-red-200 dark:border-red-800'
-                      : cashRunwayData.runwayMonths < 6 
-                        ? 'ring-2 ring-yellow-200 dark:ring-yellow-800' 
-                        : ''
-                }`}>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-900 dark:text-white">Cash Runway</CardTitle>
-                    <Calendar className={`h-4 w-4 ${
-                      (cashRunwayData.runwayDays && cashRunwayData.runwayDays < 7) || cashRunwayData.runwayMonths < 0.25
-                        ? 'text-red-600 dark:text-red-400 animate-pulse' 
-                        : cashRunwayData.runwayMonths < 1 
-                          ? 'text-red-500 dark:text-red-400' 
-                          : cashRunwayData.runwayMonths < 6 
-                            ? 'text-yellow-600 dark:text-yellow-400'
-                            : 'text-amber-600 dark:text-amber-400'
-                    }`} />
-                  </CardHeader>
-                  <CardContent>
-                    <div className={`text-2xl font-bold ${
-                      (cashRunwayData.runwayDays && cashRunwayData.runwayDays < 7) || cashRunwayData.runwayMonths < 0.25
-                        ? 'text-red-600 dark:text-red-400' 
-                        : cashRunwayData.runwayMonths < 1 
-                          ? 'text-red-500 dark:text-red-400' 
-                          : cashRunwayData.runwayMonths < 6 
-                            ? 'text-yellow-600 dark:text-yellow-400'
-                            : 'text-green-600 dark:text-green-400'
-                    }`}>
-                      {cashRunwayData.runwayDays && cashRunwayData.runwayDays < 30 
-                        ? `${cashRunwayData.runwayDays} days` 
-                        : `${Math.floor(cashRunwayData.runwayMonths)} months`
-                      }
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      <span className={`flex items-center ${
-                        (cashRunwayData.runwayDays && cashRunwayData.runwayDays < 7) || cashRunwayData.runwayMonths < 0.25
-                          ? 'text-red-600 font-medium' 
-                          : cashRunwayData.runwayMonths < 6 
-                            ? 'text-yellow-600' 
-                            : 'text-gray-500'
-                      }`}>
-                        {(cashRunwayData.runwayDays && cashRunwayData.runwayDays < 7) || cashRunwayData.runwayMonths < 0.25 ? (
-                          <AlertTriangle className="h-3 w-3 mr-1 animate-pulse" />
-                        ) : cashRunwayData.runwayMonths < 6 ? (
-                          <AlertTriangle className="h-3 w-3 mr-1" />
-                        ) : (
-                          <TrendingUp className="h-3 w-3 mr-1" />
-                        )}
-                        {cashRunwayData.runwayDays && cashRunwayData.runwayDays < 30 
-                          ? 'Critical - immediate action needed'
-                          : 'Current burn rate'
-                        }
-                      </span>
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
             </div>
 
-            {/* Charts Section */}
+            {/* Charts Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Revenue Chart Placeholder */}
+              {/* Revenue Chart */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.5 }}
+                transition={{ duration: 0.4, delay: 0.6 }}
               >
-                <Card className="border-amber-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
-                  <CardHeader>
-                    <CardTitle className="text-gray-900 dark:text-white">Revenue Trend</CardTitle>
-                    <CardDescription>Monthly revenue from Stripe & Khalti</CardDescription>
+                <Card className="border-0 shadow-sm bg-white dark:bg-gray-800">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white">
+                      Revenue Trend
+                    </CardTitle>
+                    <CardDescription>
+                      Monthly performance across payment gateways
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="h-[250px] p-4">
-                      {/* Simple Revenue Chart using CSS bars */}
-                      <div className="h-full flex items-end justify-between gap-2">
+                    <div className="h-72 p-4">
+                      <div className="h-full flex items-end justify-between gap-3">
                         {mockFinancialData.revenueChart.map((data, index) => {
                           const maxRevenue = Math.max(...mockFinancialData.revenueChart.map(d => d.revenue))
-                          const height = (data.revenue / maxRevenue) * 100
                           const isCurrentMonth = index === mockFinancialData.revenueChart.length - 1
                           
                           return (
-                            <div key={data.month} className="flex-1 flex flex-col items-center">
-                              <div className="w-full flex flex-col items-center gap-1 mb-2">
-                                {/* Stripe Bar */}
+                            <div key={data.month} className="flex-1 flex flex-col items-center group">
+                              <div className="w-full flex flex-col items-center gap-0.5 mb-3">
                                 <div 
-                                  className={`w-full ${isCurrentMonth ? 'bg-blue-500' : 'bg-blue-400'} rounded-t-sm transition-all duration-300 hover:bg-blue-600`}
-                                  style={{ height: `${(data.stripe / maxRevenue) * 180}px` }}
-                                  title={`Stripe: ${formatCurrency(data.stripe)}`}
+                                  className={`w-full rounded-t-lg transition-all duration-500 hover:opacity-80 ${
+                                    isCurrentMonth ? 'bg-blue-500 shadow-lg' : 'bg-blue-400'
+                                  }`}
+                                  style={{ height: `${(data.stripe / maxRevenue) * 160}px`, minHeight: '8px' }}
                                 />
-                                {/* Khalti Bar */}
                                 <div 
-                                  className={`w-full ${isCurrentMonth ? 'bg-purple-500' : 'bg-purple-400'} transition-all duration-300 hover:bg-purple-600`}
-                                  style={{ height: `${(data.khalti / maxRevenue) * 180}px` }}
-                                  title={`Khalti: ${formatCurrency(data.khalti)}`}
+                                  className={`w-full rounded-b-lg transition-all duration-500 hover:opacity-80 ${
+                                    isCurrentMonth ? 'bg-purple-500 shadow-lg' : 'bg-purple-400'
+                                  }`}
+                                  style={{ height: `${(data.khalti / maxRevenue) * 160}px`, minHeight: '8px' }}
                                 />
                               </div>
                               <div className="text-center">
-                                <p className="text-xs font-medium text-gray-900 dark:text-white">{formatCurrency(data.revenue)}</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">{data.month.split(' ')[0]}</p>
+                                <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                                  {formatCurrency(data.revenue)}
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                  {data.month.split(' ')[0]}
+                                </p>
                               </div>
                             </div>
                           )
                         })}
                       </div>
-                      {/* Legend */}
-                      <div className="flex justify-center gap-4 mt-4 pt-2 border-t border-gray-200 dark:border-gray-700">
+                      
+                      <div className="flex justify-center gap-6 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                         <div className="flex items-center gap-2">
                           <div className="w-3 h-3 bg-blue-500 rounded-sm" />
-                          <span className="text-xs text-gray-600 dark:text-gray-400">Stripe</span>
+                          <span className="text-sm text-gray-600 dark:text-gray-400">Stripe</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="w-3 h-3 bg-purple-500 rounded-sm" />
-                          <span className="text-xs text-gray-600 dark:text-gray-400">Khalti</span>
+                          <span className="text-sm text-gray-600 dark:text-gray-400">Khalti</span>
                         </div>
                       </div>
                     </div>
@@ -1230,78 +1130,68 @@ export function FinancesContent({ organizationName, organizationId, productProfi
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.6 }}
+                transition={{ duration: 0.4, delay: 0.7 }}
               >
-                <Card className="border-amber-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
-                  <CardHeader>
-                    <CardTitle className="text-gray-900 dark:text-white">Cash Runway Projection</CardTitle>
-                    <CardDescription>Current runway: {Math.floor(cashRunwayData.runwayMonths)} months remaining</CardDescription>
+                <Card className="border-0 shadow-sm bg-white dark:bg-gray-800">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white">
+                      Cash Runway
+                    </CardTitle>
+                    <CardDescription>
+                      Projected cash depletion timeline
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="h-[250px] p-4">
-                      {/* Cash Runway Projection Chart */}
-                      <div className="h-full">
-                        {/* Chart Area */}
-                        <div className="h-[180px] relative border-l-2 border-b-2 border-gray-300 dark:border-gray-600">
-                          {/* Y-axis labels */}
-                          <div className="absolute -left-12 top-0 text-xs text-gray-500 dark:text-gray-400">$1.2K</div>
-                          <div className="absolute -left-8 top-1/2 text-xs text-gray-500 dark:text-gray-400">$600</div>
-                          <div className="absolute -left-6 bottom-0 text-xs text-gray-500 dark:text-gray-400">$0</div>
+                    <div className="h-72 p-4">
+                      <div className="h-48 relative">
+                        <svg className="w-full h-full" viewBox="0 0 300 180">
+                          <defs>
+                            <linearGradient id="runwayGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                              <stop offset="0%" style={{stopColor:'#F59E0B', stopOpacity:0.8}} />
+                              <stop offset="70%" style={{stopColor:'#EF4444', stopOpacity:0.9}} />
+                              <stop offset="100%" style={{stopColor:'#DC2626', stopOpacity:1}} />
+                            </linearGradient>
+                            <linearGradient id="runwayFill" x1="0%" y1="0%" x2="0%" y2="100%">
+                              <stop offset="0%" style={{stopColor:'#F59E0B', stopOpacity:0.1}} />
+                              <stop offset="100%" style={{stopColor:'#EF4444', stopOpacity:0.05}} />
+                            </linearGradient>
+                          </defs>
                           
-                          {/* Projection line */}
-                          <svg className="w-full h-full" viewBox="0 0 300 180">
-                            <defs>
-                              <linearGradient id="cashGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="0%" style={{stopColor:'#22C55E', stopOpacity:0.8}} />
-                                <stop offset="70%" style={{stopColor:'#EF4444', stopOpacity:0.8}} />
-                                <stop offset="100%" style={{stopColor:'#DC2626', stopOpacity:1}} />
-                              </linearGradient>
-                            </defs>
-                            
-                            {/* Cash depletion line */}
-                            <path
-                              d="M 0,40 Q 50,45 100,80 Q 150,120 200,140 Q 250,165 300,175"
-                              stroke="url(#cashGradient)"
-                              strokeWidth="3"
-                              fill="none"
-                              strokeDasharray="0"
-                            />
-                            
-                            {/* Current position marker */}
-                            <circle cx="280" cy="165" r="4" fill="#DC2626" />
-                            <text x="270" y="155" fontSize="10" fill="#DC2626" className="font-medium">Today</text>
-                            
-                            {/* Depletion point */}
-                            <circle cx="300" cy="175" r="4" fill="#991B1B" stroke="#FFF" strokeWidth="2" />
-                            <text x="240" y="190" fontSize="9" fill="#991B1B" className="font-medium">Depletion: {formatDate(cashRunwayData.projectedCashDepletion)}</text>
-                          </svg>
+                          <path
+                            d="M 0,40 Q 50,45 100,80 Q 150,120 200,140 Q 250,165 300,175"
+                            stroke="url(#runwayGradient)"
+                            strokeWidth="3"
+                            fill="none"
+                          />
                           
-                          {/* Warning zone overlay */}
-                          <div className="absolute right-0 top-0 w-1/4 h-full bg-red-100 dark:bg-red-950/20 opacity-50 rounded-r" />
+                          <path
+                            d="M 0,40 Q 50,45 100,80 Q 150,120 200,140 Q 250,165 300,175 L 300,180 L 0,180 Z"
+                            fill="url(#runwayFill)"
+                          />
+                          
+                          <circle cx="290" cy="170" r="5" fill="#DC2626" className="animate-pulse" />
+                          <circle cx="20" cy="45" r="4" fill="#F59E0B" />
+                        </svg>
+                      </div>
+                      
+                      <div className="grid grid-cols-3 gap-4 mt-6">
+                        <div className="text-center p-3 bg-amber-50 dark:bg-amber-950/20 rounded-xl">
+                          <div className="text-lg font-bold text-amber-600 dark:text-amber-400">
+                            {formatCurrency(cashRunwayData.currentCash)}
+                          </div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400">Current Cash</div>
                         </div>
-                        
-                        {/* Time axis */}
-                        <div className="flex justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
-                          <span>Today</span>
-                          <span>Day 2</span>
-                          <span>Day 3</span>
-                          <span className="text-red-600 dark:text-red-400 font-medium">Day 4 (Empty)</span>
+                        <div className="text-center p-3 bg-red-50 dark:bg-red-950/20 rounded-xl">
+                          <div className="text-lg font-bold text-red-600 dark:text-red-400">
+                            ${(cashRunwayData.netDailyBurn || 0).toFixed(0)}/day
+                          </div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400">Net Burn</div>
                         </div>
-                        
-                        {/* Key metrics */}
-                        <div className="flex justify-between mt-4 text-xs">
-                          <div className="text-center">
-                            <div className="text-green-600 dark:text-green-400 font-medium">${cashRunwayData.currentCash.toFixed(0)}</div>
-                            <div className="text-gray-500 dark:text-gray-400">Current Cash</div>
+                        <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                          <div className="text-lg font-bold text-gray-900 dark:text-white">
+                            {cashRunwayData.runwayDays} days
                           </div>
-                          <div className="text-center">
-                            <div className="text-red-600 dark:text-red-400 font-medium">${(cashRunwayData.netDailyBurn || 0).toFixed(0)}/day</div>
-                            <div className="text-gray-500 dark:text-gray-400">Net Burn</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-red-700 dark:text-red-300 font-bold">{cashRunwayData.runwayDays} days</div>
-                            <div className="text-gray-500 dark:text-gray-400">Remaining</div>
-                          </div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400">Remaining</div>
                         </div>
                       </div>
                     </div>
@@ -1310,41 +1200,55 @@ export function FinancesContent({ organizationName, organizationId, productProfi
               </motion.div>
             </div>
 
+            {/* Bottom Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Recent Transactions */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.5 }}
+                transition={{ duration: 0.4, delay: 0.8 }}
               >
-                <Card className="border-amber-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
-                  <CardHeader>
-                    <CardTitle className="text-gray-900 dark:text-white">Recent Transactions</CardTitle>
-                    <CardDescription>Latest customer payments and subscriptions</CardDescription>
+                <Card className="border-0 shadow-sm bg-white dark:bg-gray-800">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white">
+                      Recent Activity
+                    </CardTitle>
+                    <CardDescription>
+                      Latest transactions and payments
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                       {recentTransactions.length > 0 ? recentTransactions.map((transaction) => (
-                        <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg border-amber-200 dark:border-gray-700 bg-amber-50 dark:bg-gray-800">
+                        <div key={transaction.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                           <div className="flex items-center gap-3">
                             <div className={`w-2 h-2 rounded-full ${
                               transaction.status === 'completed' ? 'bg-green-500' : 
-                              transaction.status === 'failed' ? 'bg-red-500' : 'bg-yellow-500'
+                              transaction.status === 'failed' ? 'bg-red-500' : 'bg-amber-500'
                             }`} />
                             <div>
-                              <p className="font-medium text-sm text-gray-900 dark:text-white">{transaction.customer}</p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">{transaction.plan}</p>
+                              <p className="font-medium text-gray-900 dark:text-white">
+                                {transaction.customer}
+                              </p>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">
+                                {transaction.plan}
+                              </p>
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="font-medium text-gray-900 dark:text-white">{formatCurrency(transaction.amount)}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">{formatDate(transaction.date)}</p>
+                            <p className="font-semibold text-gray-900 dark:text-white">
+                              {formatCurrency(transaction.amount)}
+                            </p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                              {formatDate(transaction.date)}
+                            </p>
                           </div>
                         </div>
                       )) : (
-                        <div className="text-center py-8">
-                          <p className="text-gray-500 dark:text-gray-400">No transactions available yet</p>
-                          <p className="text-sm text-gray-400 dark:text-gray-500">Upload CSV data or connect payment gateways</p>
+                        <div className="text-center py-12">
+                          <Activity className="h-12 w-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                          <p className="text-gray-500 dark:text-gray-400 font-medium">No transactions yet</p>
+                          <p className="text-sm text-gray-400 dark:text-gray-500">Connect your payment providers to see activity</p>
                         </div>
                       )}
                     </div>
@@ -1356,114 +1260,77 @@ export function FinancesContent({ organizationName, organizationId, productProfi
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.6 }}
+                transition={{ duration: 0.4, delay: 0.9 }}
               >
-                <Card className="border-amber-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
-                  <CardHeader>
-                    <CardTitle className="text-gray-900 dark:text-white">Payment Methods</CardTitle>
-                    <CardDescription>Distribution of payment methods used</CardDescription>
+                <Card className="border-0 shadow-sm bg-white dark:bg-gray-800">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white">
+                      Payment Distribution
+                    </CardTitle>
+                    <CardDescription>
+                      Revenue breakdown by payment method
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="h-[200px] p-4">
-                      {/* Payment Methods Bar Chart */}
+                    <div className="h-48">
                       {paymentMethods.length > 0 ? (
-                        <div className="h-full flex flex-col">
-                          <div className="flex-1 flex items-end justify-center gap-8">
-                            {paymentMethods.map((method, index) => {
-                              const maxValue = Math.max(...paymentMethods.map(m => m.value))
-                              const height = (method.value / maxValue) * 120
-                              
-                              return (
-                                <div key={index} className="flex flex-col items-center">
-                                  <div className="mb-2">
-                                    <div className="text-sm font-medium text-gray-900 dark:text-white">
-                                      {method.value}%
-                                    </div>
-                                  </div>
-                                  <div 
-                                    className="w-16 rounded-t transition-all duration-300 hover:opacity-80"
-                                    style={{ 
-                                      height: `${height}px`,
-                                      backgroundColor: method.color,
-                                      minHeight: '20px'
-                                    }}
-                                  />
-                                  <div className="mt-2 text-center">
-                                    <div className="text-sm font-medium text-gray-900 dark:text-white">
-                                      {method.name}
-                                    </div>
-                                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                                      {method.name === 'Stripe' ? '$8.5K' : method.name === 'Khalti' ? '$4.0K' : '$0.5K'}
-                                    </div>
+                        <div className="h-full flex items-end justify-center gap-12">
+                          {paymentMethods.map((method, index) => {
+                            const maxValue = Math.max(...paymentMethods.map(m => m.value))
+                            const height = (method.value / maxValue) * 120
+                            
+                            return (
+                              <div key={index} className="flex flex-col items-center group">
+                                <div className="mb-3">
+                                  <div className="text-lg font-bold text-gray-900 dark:text-white">
+                                    {method.value}%
                                   </div>
                                 </div>
-                              )
-                            })}
-                          </div>
+                                <div 
+                                  className="w-16 rounded-t-xl transition-all duration-300 group-hover:opacity-80 shadow-sm"
+                                  style={{ 
+                                    height: `${height}px`,
+                                    backgroundColor: method.color,
+                                    minHeight: '24px'
+                                  }}
+                                />
+                                <div className="mt-3 text-center">
+                                  <div className="font-semibold text-gray-900 dark:text-white">
+                                    {method.name}
+                                  </div>
+                                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                                    {method.name === 'Stripe' ? '$8.5K' : '$4.0K'}
+                                  </div>
+                                </div>
+                              </div>
+                            )
+                          })}
                         </div>
                       ) : (
-                        // Default realistic payment split when no data
-                        <div className="h-full flex flex-col">
-                          <div className="flex-1 flex items-end justify-center gap-8">
-                            <div className="flex flex-col items-center">
-                              <div className="mb-2">
-                                <div className="text-sm font-medium text-gray-900 dark:text-white">68%</div>
-                              </div>
-                              <div 
-                                className="w-16 bg-blue-500 rounded-t transition-all duration-300 hover:bg-blue-600"
-                                style={{ height: '120px' }}
-                              />
-                              <div className="mt-2 text-center">
-                                <div className="text-sm font-medium text-gray-900 dark:text-white">Stripe</div>
-                                <div className="text-xs text-gray-500 dark:text-gray-400">$8.5K</div>
-                              </div>
+                        <div className="h-full flex items-end justify-center gap-12">
+                          <div className="flex flex-col items-center">
+                            <div className="mb-3">
+                              <div className="text-lg font-bold text-gray-900 dark:text-white">68%</div>
                             </div>
-                            <div className="flex flex-col items-center">
-                              <div className="mb-2">
-                                <div className="text-sm font-medium text-gray-900 dark:text-white">32%</div>
-                              </div>
-                              <div 
-                                className="w-16 bg-purple-500 rounded-t transition-all duration-300 hover:bg-purple-600"
-                                style={{ height: '56px' }}
-                              />
-                              <div className="mt-2 text-center">
-                                <div className="text-sm font-medium text-gray-900 dark:text-white">Khalti</div>
-                                <div className="text-xs text-gray-500 dark:text-gray-400">$4.0K</div>
-                              </div>
+                            <div className="w-16 h-32 bg-blue-500 rounded-t-xl shadow-sm" />
+                            <div className="mt-3 text-center">
+                              <div className="font-semibold text-gray-900 dark:text-white">Stripe</div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">$8.5K</div>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-center">
+                            <div className="mb-3">
+                              <div className="text-lg font-bold text-gray-900 dark:text-white">32%</div>
+                            </div>
+                            <div className="w-16 h-20 bg-purple-500 rounded-t-xl shadow-sm" />
+                            <div className="mt-3 text-center">
+                              <div className="font-semibold text-gray-900 dark:text-white">Khalti</div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">$4.0K</div>
                             </div>
                           </div>
                         </div>
                       )}
                     </div>
-                    <div className="flex justify-center gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                      {paymentMethods.length > 0 ? paymentMethods.map((method, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <div 
-                            className="w-3 h-3 rounded-sm" 
-                            style={{ backgroundColor: method.color }}
-                          />
-                          <span className="text-sm text-gray-900 dark:text-white">{method.name} ({method.value}%)</span>
-                        </div>
-                      )) : (
-                        <div className="flex gap-4">
-                          <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 bg-blue-500 rounded-sm" />
-                            <span className="text-sm text-gray-900 dark:text-white">Stripe (68%)</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 bg-purple-500 rounded-sm" />
-                            <span className="text-sm text-gray-900 dark:text-white">Khalti (32%)</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    {paymentMethods.length === 0 && (
-                      <div className="text-center mt-2">
-                        <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
-                          No payment method data available
-                        </p>
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
               </motion.div>
@@ -1471,88 +1338,94 @@ export function FinancesContent({ organizationName, organizationId, productProfi
           </div>
         )}
         
-        {/* CSV Upload Modal */}
+        {/* Upload Modal - Redesigned */}
         <AnimatePresence>
           {showUploadModal && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+              className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-50 p-4"
               onClick={() => setShowUploadModal(false)}
             >
               <motion.div
                 initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.95, opacity: 0 }}
-                className="bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+                className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-gray-700"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="p-6">
-                  <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Upload Financial Data</h2>
+                  <div className="text-center mb-6">
+                    <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/40 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <Upload className="h-8 w-8 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+                      Import Financial Data
+                    </h2>
+                    <p className="text-gray-500 dark:text-gray-400">
+                      Upload CSV files to analyze your financial performance
+                    </p>
+                  </div>
                   
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     <div>
-                      <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                        Select Data Type
+                      <label className="block text-sm font-medium mb-3 text-gray-700 dark:text-gray-300">
+                        Data Type
                       </label>
                       <select
                         value={uploadType}
                         onChange={(e) => setUploadType(e.target.value as 'stripe' | 'khalti' | 'expenses')}
-                        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                        className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                       >
                         <option value="stripe">Stripe Revenue Data</option>
                         <option value="khalti">Khalti Revenue Data</option>
-                        <option value="expenses">Expense Data</option>
+                        <option value="expenses">Expense Records</option>
                       </select>
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                      <label className="block text-sm font-medium mb-3 text-gray-700 dark:text-gray-300">
                         CSV File
                       </label>
-                      <input
-                        type="file"
-                        accept=".csv"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0]
-                          if (file) {
-                            handleCSVUpload(file, uploadType)
-                          }
-                        }}
-                        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white file:mr-4 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-sm file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100"
-                      />
+                      <div className="relative">
+                        <input
+                          type="file"
+                          accept=".csv"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (file) {
+                              handleCSVUpload(file, uploadType)
+                            }
+                          }}
+                          className="w-full p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white hover:border-amber-400 dark:hover:border-amber-500 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100"
+                        />
+                      </div>
                     </div>
                     
-                    <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-md">
-                      <h4 className="text-sm font-medium mb-2 text-gray-900 dark:text-white">Expected CSV Format:</h4>
-                      <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                    <div className="bg-amber-50 dark:bg-amber-950/20 p-4 rounded-xl border border-amber-200 dark:border-amber-800">
+                      <h4 className="text-sm font-semibold mb-2 text-amber-900 dark:text-amber-200">
+                        Expected Format:
+                      </h4>
+                      <div className="text-sm text-amber-800 dark:text-amber-300 space-y-1">
                         {uploadType === 'stripe' && (
-                          <div>
-                            <p><strong>Stripe:</strong> date, amount, description, customer_email</p>
-                            <p>or: created_at, gross, description, customer_email</p>
-                          </div>
+                          <p><strong>Headers:</strong> date, amount, description, customer_email</p>
                         )}
                         {uploadType === 'khalti' && (
-                          <div>
-                            <p><strong>Khalti:</strong> date, amount, description, customer_email</p>
-                            <p>or: created_at, gross, description, customer_email</p>
-                          </div>
+                          <p><strong>Headers:</strong> date, amount, description, customer_email</p>
                         )}
                         {uploadType === 'expenses' && (
-                          <div>
-                            <p><strong>Expenses:</strong> date, amount, description, category</p>
-                            <p>Examples: office rent, marketing, software subscriptions</p>
-                          </div>
+                          <p><strong>Headers:</strong> date, amount, description, category</p>
                         )}
                       </div>
                     </div>
                   </div>
                   
-                  <div className="flex justify-end gap-3 mt-6">
+                  <div className="flex justify-end gap-3 mt-8">
                     <Button
                       variant="outline"
                       onClick={() => setShowUploadModal(false)}
+                      className="px-6 py-2 border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
                     >
                       Cancel
                     </Button>
