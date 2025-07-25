@@ -9,7 +9,16 @@ const prisma = new PrismaClient()
 
 const onboardingSchema = z.object({
   companyName: z.string().min(1, 'Company name is required').max(100),
-  website: z.string().url('Valid website URL is required'),
+  website: z.string().optional().refine((val) => {
+    if (!val || val.trim() === '') return true
+    try {
+      const url = val.startsWith('http') ? val : `https://${val}`
+      new URL(url)
+      return true
+    } catch {
+      return false
+    }
+  }, 'Please enter a valid website URL'),
   companySize: z.string().optional(),
   industry: z.string().optional(),
   invitedEmails: z.array(z.string().email()).optional().default([]),
@@ -114,7 +123,6 @@ export async function POST(request: NextRequest) {
         }
       })
 
-      // create organization with unique slug
       const baseSlug = companyName.toLowerCase().replace(/[^a-z0-9]/g, '-')
       const randomSuffix = Math.random().toString(36).substr(2, 9)
       const slug = `${baseSlug}-${randomSuffix}`
