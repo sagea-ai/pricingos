@@ -39,7 +39,9 @@ model User {
   workspaceActivities       WorkspaceActivity[]        @relation("WorkspaceActivityAuthor")
   workspaceActivityMentions WorkspaceActivityMention[] @relation("WorkspaceActivityMentions")
   notifications             UserNotification[]         @relation("UserNotifications")
-  productProfile            ProductProfile?
+  productProfiles           ProductProfile[]
+  activeProductProfileId    String?
+  activeProductProfile      ProductProfile? @relation("ActiveProductProfile", fields: [activeProductProfileId], references: [id])
 
   @@map("users")
 }
@@ -57,12 +59,13 @@ model ProductProfile {
   monthlyRevenue      Float?
   totalUsers          Int?                @default(0)
   paymentIntegrations String[]            @default([])
-  userId              String              @unique
+  userId              String
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @default(now())
   user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   competitors         ProductCompetitor[]
   PricingAnalysis     PricingAnalysis[]
+  activeForUsers      User[]              @relation("ActiveProductProfile")
 
   @@map("product_profiles")
 }

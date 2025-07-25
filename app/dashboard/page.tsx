@@ -18,12 +18,13 @@ export default async function HomePage() {
         id: true,
         firstName: true,
         lastName: true,
-        productProfile: {
+        productProfiles: {
           select: {
             id: true,
             productName: true
           }
         },
+        activeProductProfileId: true,
         organizationMemberships: {
           include: {
             organization: {
@@ -43,8 +44,8 @@ export default async function HomePage() {
       redirect("/onboarding");
     }
 
-    // If user hasn't completed product profile, redirect to product profile
-    if (!user.productProfile) {
+    // If user hasn't created any product profiles, redirect to product profile
+    if (!user.productProfiles || user.productProfiles.length === 0) {
       redirect("/product-profile");
     }
 

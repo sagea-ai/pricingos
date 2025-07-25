@@ -22,33 +22,24 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get user's organization
-    const organizationMember = await prisma.organizationMember.findFirst({
-      where: { user: { clerkId: userId } },
-      include: { organization: true }
+    // Get user with their product profiles
+    const user = await prisma.user.findUnique({
+      where: { clerkId: userId },
+      include: {
+        productProfiles: {
+          orderBy: { updatedAt: 'desc' }
+        },
+        activeProductProfile: true
+      }
     })
 
-    if (!organizationMember) {
-      return NextResponse.json({ error: 'No organization found' }, { status: 404 })
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
-
-    // Get all product profiles for the organization users
-    const productProfiles = await prisma.productProfile.findMany({
-      where: { 
-        user: {
-          organizationMemberships: {
-            some: {
-              organizationId: organizationMember.organizationId
-            }
-          }
-        }
-      },
-      orderBy: { updatedAt: 'desc' }
-    })
 
     return NextResponse.json({ 
       success: true,
-      products: productProfiles.map(profile => ({
+      products: user.productProfiles.map(profile => ({
         id: profile.id,
         productName: profile.productName,
         coreValue: profile.coreValue,
@@ -57,8 +48,10 @@ export async function GET(request: NextRequest) {
         currentPricingModel: profile.currentPricingModel,
         currentPrice: profile.currentPrice,
         createdAt: profile.createdAt.toISOString(),
-        updatedAt: profile.updatedAt.toISOString()
-      }))
+        updatedAt: profile.updatedAt.toISOString(),
+        isActive: user.activeProductProfileId === profile.id
+      })),
+      activeProductId: user.activeProductProfileId
     })
   } catch (error) {
     console.error('Products fetch error:', error)
@@ -110,29 +103,9 @@ export async function POST(request: NextRequest) {
         }
       })
 
-      // Get user's organization
-      const organizationMember = await tx.organizationMember.findFirst({
-        where: { userId: user.id },
-        include: { organization: true }
-      })
-
-      if (!organizationMember) {
-        throw new Error('No organization found for user')
-      }
-
-      // Create or update product profile (user can only have one)
-      const productProfile = await tx.productProfile.upsert({
-        where: { userId: user.id },
-        update: {
-          productName,
-          coreValue,
-          features,
-          market,
-          currentPricingModel,
-          currentPrice,
-          updatedAt: new Date()
-        },
-        create: {
+      // Create new product profile
+      const productProfile = await tx.productProfile.create({
+        data: {
           productName,
           coreValue,
           features,
@@ -142,6 +115,14 @@ export async function POST(request: NextRequest) {
           userId: user.id
         }
       })
+
+      // Set as active product if user doesn't have one
+      if (!user.activeProductProfileId) {
+        await tx.user.update({
+          where: { id: user.id },
+          data: { activeProductProfileId: productProfile.id }
+        })
+      }
 
       // Create activity log
       await tx.activity.create({

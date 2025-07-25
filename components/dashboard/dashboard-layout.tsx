@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { BarChart3, Calendar, AlertTriangle, TrendingDown, ArrowRight, MessageSquare, TrendingUp, DollarSign, Shield, Target, Activity, Zap, PieChart, TestTube, Users, Clock, Lightbulb, ArrowUp, ArrowDown, Sparkles } from "lucide-react"
+import { BarChart3, Calendar, AlertTriangle, TrendingDown, ArrowRight, MessageSquare, TrendingUp, DollarSign, Shield, Target, Activity, Zap, PieChart, TestTube, Users, Clock, Lightbulb, ArrowUp, ArrowDown, Sparkles, Package, Plus } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { TrialProvider } from "../trial/trial-provider"
 import { TrialBannerWrapper } from "../trial/trial-banner-wrapper"
 import { useState, useEffect } from "react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface PricingAnalysis {
   feature_to_value_mapping: {
@@ -41,6 +42,7 @@ interface PricingAnalysis {
 }
 
 interface ProductInfo {
+  id: string
   name: string
   core_value: string
   features: string[]
@@ -84,6 +86,25 @@ export function DashboardLayout({
   const [pricingAnalysis, setPricingAnalysis] = useState<PricingAnalysis | null>(null)
   const [productInfo, setProductInfo] = useState<ProductInfo | null>(null)
   const [analysisLoading, setAnalysisLoading] = useState(true)
+  const [products, setProducts] = useState<any[]>([])
+  const [activeProductId, setActiveProductId] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('/api/products')
+        if (response.ok) {
+          const result = await response.json()
+          setProducts(result.products || [])
+          setActiveProductId(result.activeProductId)
+        }
+      } catch (error) {
+        console.error('Failed to fetch products:', error)
+      }
+    }
+
+    fetchProducts()
+  }, [])
 
   useEffect(() => {
     const fetchPricingAnalysis = async () => {
@@ -101,8 +122,38 @@ export function DashboardLayout({
       }
     }
 
-    fetchPricingAnalysis()
-  }, [])
+    if (activeProductId) {
+      fetchPricingAnalysis()
+    } else {
+      setAnalysisLoading(false)
+    }
+  }, [activeProductId])
+
+  const handleProductChange = async (productId: string) => {
+    try {
+      const response = await fetch('/api/products/set-active', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId })
+      })
+
+      if (response.ok) {
+        setActiveProductId(productId)
+        setAnalysisLoading(true)
+        // Refresh analysis for new product
+        const analysisResponse = await fetch('/api/dashboard/pricing-analysis')
+        if (analysisResponse.ok) {
+          const result = await analysisResponse.json()
+          setPricingAnalysis(result.data)
+          setProductInfo(result.productInfo)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to switch product:', error)
+    } finally {
+      setAnalysisLoading(false)
+    }
+  }
 
   const mockStats = {
     monthlyRevenue: productInfo?.monthly_revenue || 12450,
@@ -126,14 +177,62 @@ export function DashboardLayout({
             <h1 className="text-4xl font-light text-gray-900 dark:text-white mb-2">
               {greeting}
             </h1>
+            
+            {/* Product Selector */}
+            {products.length > 0 && (
+              <div className="flex items-center gap-4 mt-4">
+                <span className="text-lg text-gray-500 dark:text-gray-400">Analyzing:</span>
+                <Select value={activeProductId || undefined} onValueChange={handleProductChange}>
+                  <SelectTrigger className="w-64">
+                    <SelectValue placeholder="Select a product..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {products.map((product) => (
+                      <SelectItem key={product.id} value={product.id}>
+                        <div className="flex items-center gap-2">
+                          <span className="text-amber-600 font-medium">{product.productName}</span>
+                          {product.isActive && <Badge variant="secondary" className="text-xs">Active</Badge>}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Link href="/product">
+                  <Button variant="outline" size="sm">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Product
+                  </Button>
+                </Link>
+              </div>
+            )}
+
             {productInfo && (
-              <p className="text-lg text-gray-500 dark:text-gray-400">
+              <p className="text-lg text-gray-500 dark:text-gray-400 mt-2">
                 Here's how <span className="text-amber-600 font-medium">{productInfo.name}</span> is performing
               </p>
             )}
           </div>
 
-          {analysisLoading ? (
+          {/* Show message if no products */}
+          {products.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/30 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                <Package className="w-10 h-10 text-amber-600 dark:text-amber-400" />
+              </div>
+              <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-3">
+                Create Your First Product
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
+                Start by defining your product to unlock AI-powered pricing insights and analytics
+              </p>
+              <Link href="/product-profile">
+                <Button className="bg-amber-500 hover:bg-amber-600 text-white shadow-lg">
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Create Product
+                </Button>
+              </Link>
+            </div>
+          ) : analysisLoading ? (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
               {[...Array(6)].map((_, i) => (
                 <Card key={i} className="animate-pulse border-gray-100 dark:border-gray-800">

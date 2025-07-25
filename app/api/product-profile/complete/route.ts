@@ -53,19 +53,9 @@ export async function POST(request: NextRequest) {
         }
       })
 
-      // Create or update product profile
-      const productProfile = await tx.productProfile.upsert({
-        where: { userId: user.id },
-        update: {
-          productName,
-          coreValue,
-          features,
-          market,
-          currentPricingModel,
-          currentPrice,
-          updatedAt: new Date()
-        },
-        create: {
+      // Create new product profile (allow multiple)
+      const productProfile = await tx.productProfile.create({
+        data: {
           userId: user.id,
           productName,
           coreValue,
@@ -75,6 +65,14 @@ export async function POST(request: NextRequest) {
           currentPrice
         }
       })
+
+      // Set as active product if user doesn't have one
+      if (!user.activeProductProfileId) {
+        await tx.user.update({
+          where: { id: user.id },
+          data: { activeProductProfileId: productProfile.id }
+        })
+      }
 
       // Create activity log
       await tx.activity.create({
