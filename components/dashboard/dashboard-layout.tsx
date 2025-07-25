@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { BarChart3, Calendar, AlertTriangle, TrendingDown, ArrowRight, MessageSquare, TrendingUp, DollarSign, Shield, Target, Activity, Zap, PieChart, Sparkles, TestTube, Users, Clock, Lightbulb, ArrowUp, ArrowDown } from "lucide-react"
+import { BarChart3, Calendar, AlertTriangle, TrendingDown, ArrowRight, MessageSquare, TrendingUp, DollarSign, Shield, Target, Activity, Zap, PieChart, TestTube, Users, Clock, Lightbulb, ArrowUp, ArrowDown, Sparkles } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 import { TrialProvider } from "../trial/trial-provider"
 import { TrialBannerWrapper } from "../trial/trial-banner-wrapper"
 import { useState, useEffect } from "react"
@@ -147,13 +148,17 @@ export function DashboardLayout({
             <>
               {/* SAGE AI Recommendation - Hero Section */}
               <div className="mb-12">
-                <Card className="bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:from-amber-950/20 dark:via-orange-950/10 dark:to-yellow-950/20 border-amber-200 dark:border-amber-800/50 relative overflow-hidden">
+                <Card className="bg-gradient-to-br rounded-3xl from-amber-400 via-orange-400 to-orange-500 dark:from-amber-950/20 dark:via-orange-950/10 dark:to-yellow-950/20 border-amber-200 dark:border-amber-800/50 relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-100/20 to-transparent animate-pulse"></div>
-                  <CardContent className="pt-8 pb-8 relative">
+                  <CardContent className="pt-12 pb-12 relative">
                     <div className="flex items-start gap-6">
-                      <div className="w-16 h-16 bg-amber-400 rounded-2xl flex items-center justify-center shadow-lg">
-                        <Sparkles className="w-8 h-8 text-white" />
-                      </div>
+                        <Image 
+                          src="/logo.png" 
+                          alt="SAGE Logo" 
+                          width={100} 
+                          height={100}
+                          className="w-22 h-22"
+                        />
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-3">
                           <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
