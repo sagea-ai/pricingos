@@ -122,7 +122,7 @@ export function SessionNavBar({
   return (
     <motion.div
       className={cn(
-        "sidebar fixed left-0 z-40 h-full shrink-0 border-r bg-sky-50  dark:bg-sky-400 dark:text-sky-900",
+        "sidebar fixed left-0 z-40 h-full shrink-0 border-r bg-amber-50  dark:bg-amber-400 dark:text-amber-900",
       )}
       initial={isCollapsed ? "closed" : "open"}
       animate={isCollapsed ? "closed" : "open"}
@@ -163,8 +163,8 @@ export function SessionNavBar({
                     size="sm"
                     className="flex w-full items-center justify-start gap-3 px-0 h-8"
                   >
-                    <Avatar className="h-6 w-6 rounded-md bg-sky-200">
-                      <AvatarFallback className="rounded-md text-xs bg-sky-200 text-sky-800">
+                    <Avatar className="h-6 w-6 rounded-md bg-amber-200">
+                      <AvatarFallback className="rounded-md text-xs bg-amber-200 text-amber-800">
                         {currentOrganization?.name?.[0]?.toUpperCase() || 'O'}
                       </AvatarFallback>
                     </Avatar>
@@ -190,8 +190,8 @@ export function SessionNavBar({
                       onClick={() => onOrganizationChange?.(org.id)}
                       className="flex items-center gap-2"
                     >
-                      <Avatar className="h-6 w-6 rounded-md bg-sky-200">
-                        <AvatarFallback className="rounded-md text-xs bg-sky-200 text-sky-800">
+                      <Avatar className="h-6 w-6 rounded-md bg-amber-200">
+                        <AvatarFallback className="rounded-md text-xs bg-amber-200 text-amber-800">
                           {org.name[0].toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
@@ -245,8 +245,8 @@ export function SessionNavBar({
                     <Link
                       href="/dashboard"
                       className={cn(
-                        "flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm font-medium transition-colors hover:bg-sky-50 hover:text-sky-700",
-                        pathname?.includes("dashboard") && "bg-sky-100 text-sky-700",
+                        "flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm font-medium transition-colors hover:bg-amber-50 hover:text-amber-700",
+                        pathname?.includes("dashboard") && "bg-amber-100 text-amber-700",
                       )}
                     >
                       <LayoutDashboard className="h-4 w-4 shrink-0" />
@@ -268,8 +268,8 @@ export function SessionNavBar({
                     <Link
                       href="/simulate"
                       className={cn(
-                        "flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm font-medium transition-colors hover:bg-sky-50 hover:text-sky-700",
-                        pathname?.includes("simulate") && "bg-sky-100 text-sky-700",
+                        "flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm font-medium transition-colors hover:bg-amber-50 hover:text-amber-700",
+                        pathname?.includes("simulate") && "bg-amber-100 text-amber-700",
                       )}
                     >
                       <SiReasonstudios className="h-4 w-4 shrink-0" />
@@ -280,8 +280,8 @@ export function SessionNavBar({
                     <Link
                       href="/deepresearch"
                       className={cn(
-                        "flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm font-medium transition-colors hover:bg-sky-50 hover:text-sky-700",
-                        pathname?.includes("deepresearch") && "bg-sky-100 text-sky-700",
+                        "flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm font-medium transition-colors hover:bg-amber-50 hover:text-amber-700",
+                        pathname?.includes("deepresearch") && "bg-amber-100 text-amber-700",
                       )}
                     >
                       <BsGlobeAmericas className="h-4 w-4 shrink-0" />
@@ -292,8 +292,8 @@ export function SessionNavBar({
                     <Link
                       href="/workspaces"
                       className={cn(
-                        "flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm font-medium transition-colors hover:bg-sky-50 hover:text-sky-700",
-                        pathname?.includes("workspaces") && "bg-sky-100 text-sky-700",
+                        "flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm font-medium transition-colors hover:bg-amber-50 hover:text-amber-700",
+                        pathname?.includes("workspaces") && "bg-amber-100 text-amber-700",
                       )}
                     >
                       <BsStack className="h-4 w-4 shrink-0" />
@@ -317,8 +317,8 @@ export function SessionNavBar({
                     <Link
                       href="/billing"
                       className={cn(
-                        "flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm font-medium transition-colors hover:bg-sky-50 hover:text-sky-700",
-                        pathname?.includes("billing") && "bg-sky-100 text-sky-700",
+                        "flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm font-medium transition-colors hover:bg-amber-50 hover:text-amber-700",
+                        pathname?.includes("billing") && "bg-amber-100 text-amber-700",
                       )}
                     >
                       <BsCreditCard2FrontFill className="h-4 w-4 shrink-0" />
@@ -330,8 +330,8 @@ export function SessionNavBar({
                     <Link
                       href="/refer"
                       className={cn(
-                        "flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm font-medium transition-colors hover:bg-sky-50 hover:text-sky-700",
-                        pathname?.includes("refer") && "bg-sky-100 text-sky-700",
+                        "flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm font-medium transition-colors hover:bg-amber-50 hover:text-amber-700",
+                        pathname?.includes("refer") && "bg-amber-100 text-amber-700",
                       )}
                     >
                       <BiSolidGift className="h-4 w-4 shrink-0" />
@@ -354,8 +354,8 @@ export function SessionNavBar({
                     <Link
                       href="/profile"
                       className={cn(
-                        "flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm font-medium transition-colors hover:bg-sky-50 hover:text-sky-700",
-                        pathname === "/profile" && "bg-sky-100 text-sky-700",
+                        "flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm font-medium transition-colors hover:bg-amber-50 hover:text-amber-700",
+                        pathname === "/profile" && "bg-amber-100 text-amber-700",
                       )}
                     >
                       <UserCircle className="h-4 w-4 shrink-0" />
@@ -367,8 +367,8 @@ export function SessionNavBar({
                     <Link
                       href="/organization"
                       className={cn(
-                        "flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm font-medium transition-colors hover:bg-sky-50 hover:text-sky-700",
-                        pathname?.includes("organization") && "bg-sky-100 text-sky-700",
+                        "flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm font-medium transition-colors hover:bg-amber-50 hover:text-amber-700",
+                        pathname?.includes("organization") && "bg-amber-100 text-amber-700",
                       )}
                     >
                       <UserCog className="h-4 w-4 shrink-0" />
@@ -383,7 +383,7 @@ export function SessionNavBar({
 
               {/* Bottom Section */}
               <div className="mt-4 space-y-1 border-t pt-4">
-                <div className="flex h-9 w-full items-center gap-3 rounded-lg px-2 transition-colors hover:bg-sky-50 hover:text-sky-700">
+                <div className="flex h-9 w-full items-center gap-3 rounded-lg px-2 transition-colors hover:bg-amber-50 hover:text-amber-700">
                   <UserButton
                     appearance={{
                       elements: {

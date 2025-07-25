@@ -15,7 +15,7 @@ export function TrialBanner({ daysRemaining, onUpgrade }: TrialBannerProps) {
   if (!isVisible) return null
 
   return (
-    <div className="bg-sky-700/70 backdrop-blur-2xl text-white">
+    <div className="bg-amber-700/70 backdrop-blur-2xl text-white">
       <div className="flex flex-row items-center justify-center px-4 py-2 gap-4 text-center">
         <div>
           <span>{daysRemaining} days left in your free trial!</span>
@@ -25,7 +25,7 @@ export function TrialBanner({ daysRemaining, onUpgrade }: TrialBannerProps) {
           <Button
             onClick={onUpgrade}
             size="sm"
-            className="bg-sky-600 hover:border-sky-800 hover:bg-sky-600 border-sky-700/70 hover:border-2 text-white font-medium uppercase text-xs"
+            className="bg-amber-600 hover:border-amber-800 hover:bg-amber-600 border-amber-700/70 hover:border-2 text-white font-medium uppercase text-xs"
           >
             <BiCreditCardAlt className='w-5 h-5 mr-1' />
             Add Payment Method

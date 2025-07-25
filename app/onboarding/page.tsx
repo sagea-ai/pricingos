@@ -65,7 +65,7 @@ function OnboardingContent() {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600 mx-auto mb-4"></div>
           <p className="text-gray-500 dark:text-gray-400">Loading...</p>
         </div>
       </div>
@@ -214,7 +214,7 @@ function OnboardingContent() {
           <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 shadow-sm">
             <CardHeader className="pb-6 border-b border-gray-100 dark:border-gray-800">
               <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <Building2 className="h-5 w-5 text-sky-600" />
+                <Building2 className="h-5 w-5 text-amber-600" />
                 Organization Setup
               </CardTitle>
             </CardHeader>
@@ -224,7 +224,7 @@ function OnboardingContent() {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="companyName" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-sky-500" />
+                    <Building2 className="h-4 w-4 text-amber-500" />
                     Company name *
                   </Label>
                   <Input
@@ -233,7 +233,7 @@ function OnboardingContent() {
                     value={formData.companyName}
                     onChange={(e) => handleInputChange('companyName', e.target.value)}
                     disabled={isSubmitting}
-                    className="h-12 border-gray-200 dark:border-gray-700 focus:border-sky-500 focus:ring-sky-500 rounded-lg"
+                    className="h-12 border-gray-200 dark:border-gray-700 focus:border-amber-500 focus:ring-amber-500 rounded-lg"
                   />
                   {errors.companyName && (
                     <p className="text-sm text-red-500">{errors.companyName}</p>
@@ -243,7 +243,7 @@ function OnboardingContent() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="website" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                      <Globe className="h-4 w-4 text-sky-500" />
+                      <Globe className="h-4 w-4 text-amber-500" />
                       Website (optional)
                     </Label>
                     <Input
@@ -253,7 +253,7 @@ function OnboardingContent() {
                       value={formData.website}
                       onChange={(e) => handleInputChange('website', e.target.value)}
                       disabled={isSubmitting}
-                      className="h-12 border-gray-200 dark:border-gray-700 focus:border-sky-500 focus:ring-sky-500 rounded-lg"
+                      className="h-12 border-gray-200 dark:border-gray-700 focus:border-amber-500 focus:ring-amber-500 rounded-lg"
                     />
                     {errors.website && (
                       <p className="text-sm text-red-500">{errors.website}</p>
@@ -262,14 +262,14 @@ function OnboardingContent() {
 
                   <div className="space-y-2">
                     <Label htmlFor="companySize" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                      <Users className="h-4 w-4 text-sky-500" />
+                      <Users className="h-4 w-4 text-amber-500" />
                       Company size (optional)
                     </Label>
                     <Select 
                       onValueChange={(value) => setFormData(prev => ({ ...prev, companySize: value }))}
                       disabled={isSubmitting}
                     >
-                      <SelectTrigger className="h-12 border-gray-200 dark:border-gray-700 focus:border-sky-500 focus:ring-sky-500 rounded-lg">
+                      <SelectTrigger className="h-12 border-gray-200 dark:border-gray-700 focus:border-amber-500 focus:ring-amber-500 rounded-lg">
                         <SelectValue placeholder="Select size" />
                       </SelectTrigger>
                       <SelectContent>
@@ -293,7 +293,7 @@ function OnboardingContent() {
                       onValueChange={(value) => setFormData(prev => ({ ...prev, industry: value }))}
                       disabled={isSubmitting}
                     >
-                      <SelectTrigger className="h-12 border-gray-200 dark:border-gray-700 focus:border-sky-500 focus:ring-sky-500 rounded-lg">
+                      <SelectTrigger className="h-12 border-gray-200 dark:border-gray-700 focus:border-amber-500 focus:ring-amber-500 rounded-lg">
                         <SelectValue placeholder="Select industry" />
                       </SelectTrigger>
                       <SelectContent>
@@ -318,7 +318,7 @@ function OnboardingContent() {
                       value={formData.referralCode}
                       onChange={(e) => setFormData(prev => ({ ...prev, referralCode: e.target.value.toUpperCase() }))}
                       disabled={isSubmitting}
-                      className="h-12 border-gray-200 dark:border-gray-700 focus:border-sky-500 focus:ring-sky-500 rounded-lg"
+                      className="h-12 border-gray-200 dark:border-gray-700 focus:border-amber-500 focus:ring-amber-500 rounded-lg"
                     />
                     {formData.referralCode && (
                       <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
@@ -334,7 +334,7 @@ function OnboardingContent() {
               <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
                 <div>
                   <Label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2 mb-3">
-                    <Mail className="h-4 w-4 text-sky-500" />
+                    <Mail className="h-4 w-4 text-amber-500" />
                     Invite team members (optional)
                   </Label>
                   <div className="flex gap-3">
@@ -346,14 +346,14 @@ function OnboardingContent() {
                       onChange={(e) => setFormData(prev => ({ ...prev, currentEmail: e.target.value }))}
                       onKeyPress={(e) => e.key === 'Enter' && addEmail()}
                       disabled={isSubmitting}
-                      className="h-12 border-gray-200 dark:border-gray-700 focus:border-sky-500 focus:ring-sky-500 rounded-lg"
+                      className="h-12 border-gray-200 dark:border-gray-700 focus:border-amber-500 focus:ring-amber-500 rounded-lg"
                     />
                     <Button
                       type="button"
                       variant="outline"
                       onClick={addEmail}
                       disabled={!formData.currentEmail || !formData.currentEmail.includes('@') || isSubmitting}
-                      className="h-12 px-6 border-gray-200 dark:border-gray-700 hover:bg-sky-50 hover:border-sky-300 rounded-lg"
+                      className="h-12 px-6 border-gray-200 dark:border-gray-700 hover:bg-amber-50 hover:border-amber-300 rounded-lg"
                     >
                       Add
                     </Button>
@@ -367,7 +367,7 @@ function OnboardingContent() {
                         <Badge 
                           key={index} 
                           variant="secondary" 
-                          className="px-3 py-1 bg-sky-50 text-sky-700 border border-sky-200 dark:bg-sky-900/20 dark:text-sky-300 dark:border-sky-800"
+                          className="px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800"
                         >
                           {email}
                           <button
@@ -390,7 +390,7 @@ function OnboardingContent() {
                 <Button
                   onClick={handleComplete}
                   disabled={!isValid || isSubmitting}
-                  className="w-full h-12 bg-sky-600 hover:bg-sky-700 text-white rounded-lg font-medium tracking-wide transition-all duration-200 ease-out hover:shadow-lg hover:shadow-sky-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full h-12 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-medium tracking-wide transition-all duration-200 ease-out hover:shadow-lg hover:shadow-amber-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? (
                     <>
@@ -425,7 +425,7 @@ function OnboardingFallback() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-600 mx-auto mb-4"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600 mx-auto mb-4"></div>
         <p className="text-gray-500 dark:text-gray-400">Loading onboarding...</p>
       </div>
     </div>
