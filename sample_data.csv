@@ -1,0 +1,66 @@
+date,amount,description,category,type,gateway
+2025-07-01,299.00,Pro Plan Monthly Subscription,Subscription,revenue,stripe
+2025-07-01,99.00,Basic Plan Monthly Payment,Subscription,revenue,stripe
+2025-07-01,149.00,Monthly Subscription Payment,Subscription,revenue,khalti
+2025-07-02,499.00,Enterprise Annual Plan,Subscription,revenue,stripe
+2025-07-02,199.00,Premium Add-on Purchase,Add-on,revenue,stripe
+2025-07-02,299.00,Team Plan Upgrade,Subscription,revenue,stripe
+2025-07-03,99.00,Digital Payment Basic,Subscription,revenue,khalti
+2025-07-03,399.00,Custom Integration Service,Service,revenue,stripe
+2025-07-04,299.00,Pro Plan Annual Renewal,Subscription,revenue,stripe
+2025-07-04,149.00,Mobile Payment Plan,Subscription,revenue,khalti
+2025-07-05,499.00,Enterprise Multi-year Deal,Subscription,revenue,stripe
+2025-07-05,199.00,Advanced Features Package,Add-on,revenue,stripe
+2025-07-06,299.00,API Usage Plan,Service,revenue,stripe
+2025-07-06,99.00,Standard Monthly Plan,Subscription,revenue,khalti
+2025-07-07,399.00,Team Plan Expansion,Subscription,revenue,stripe
+2025-07-07,249.00,Professional Services,Service,revenue,stripe
+2025-07-08,149.00,QR Payment Service,Subscription,revenue,khalti
+2025-07-09,299.00,Pro Plan Renewal,Subscription,revenue,stripe
+2025-07-09,199.00,Enterprise License,License,revenue,stripe
+2025-07-10,99.00,Basic Monthly Plan,Subscription,revenue,khalti
+2025-07-11,599.00,Multi-site Enterprise License,License,revenue,stripe
+2025-07-11,199.00,Premium Features Bundle,Add-on,revenue,stripe
+2025-07-12,149.00,Mobile Payment Basic,Subscription,revenue,khalti
+2025-07-13,399.00,Custom Solution Development,Service,revenue,stripe
+2025-07-13,249.00,Professional Support Annual,Service,revenue,stripe
+2025-07-14,149.00,QR Code Payment Service,Service,revenue,khalti
+2025-07-15,299.00,Pro Monthly Subscription,Subscription,revenue,stripe
+2025-07-16,199.00,Team License Expansion,Subscription,revenue,stripe
+2025-07-17,99.00,Digital Payment Service,Service,revenue,khalti
+2025-07-18,799.00,Enterprise Multi-site License,License,revenue,stripe
+2025-07-19,249.00,Premium Features Package,Add-on,revenue,stripe
+2025-07-20,149.00,Standard Plan Renewal,Subscription,revenue,khalti
+2025-07-21,499.00,Custom Integration Project,Service,revenue,stripe
+2025-07-22,299.00,API Enterprise Package,Service,revenue,stripe
+2025-07-23,99.00,Basic Plan Monthly,Subscription,revenue,khalti
+2025-07-24,399.00,Pro Annual Plan,Subscription,revenue,stripe
+2025-07-25,249.00,Team License Expansion,Subscription,revenue,stripe
+2025-07-01,1200.00,Office Rent July,Office Rent,expense,
+2025-07-01,850.00,AWS Cloud Infrastructure,Infrastructure,expense,
+2025-07-01,2800.00,Employee Salaries,Payroll,expense,
+2025-07-02,400.00,Google Ads Campaign,Marketing,expense,
+2025-07-02,550.00,Software Licenses,Software,expense,
+2025-07-03,650.00,Legal Consultation,Professional Services,expense,
+2025-07-04,900.00,Cloud Hosting Services,Infrastructure,expense,
+2025-07-05,600.00,Facebook Marketing,Marketing,expense,
+2025-07-06,450.00,Development Tools,Software,expense,
+2025-07-07,700.00,Accounting Services,Professional Services,expense,
+2025-07-08,950.00,Server Infrastructure,Infrastructure,expense,
+2025-07-09,350.00,Content Marketing,Marketing,expense,
+2025-07-10,500.00,Design Software,Software,expense,
+2025-07-11,300.00,Office Supplies,Supplies,expense,
+2025-07-12,950.00,Cloud Services,Infrastructure,expense,
+2025-07-13,600.00,LinkedIn Advertising,Marketing,expense,
+2025-07-14,550.00,Software Subscriptions,Software,expense,
+2025-07-15,400.00,Office Equipment,Equipment,expense,
+2025-07-16,1000.00,Infrastructure Upgrade,Infrastructure,expense,
+2025-07-17,450.00,SEO Services,Marketing,expense,
+2025-07-18,600.00,Team Training,Professional Development,expense,
+2025-07-19,350.00,Office Maintenance,Maintenance,expense,
+2025-07-20,800.00,Marketing Campaign,Marketing,expense,
+2025-07-21,500.00,Software Tools,Software,expense,
+2025-07-22,450.00,Professional Services,Consulting,expense,
+2025-07-23,750.00,Cloud Infrastructure,Infrastructure,expense,
+2025-07-24,400.00,Marketing Ads,Marketing,expense,
+2025-07-25,300.00,Utilities,Utilities,expense,
