@@ -45,19 +45,78 @@ model User {
 }
 
 model ProductProfile {
-  id                  String   @id @default(cuid())
+  id                  String              @id @default(cuid())
   productName         String
-  coreValue           String   @db.Text
-  features            String[] @default([])
+  coreValue           String              @db.Text
+  features            String[]            @default([])
   market              String?
   currentPricingModel String?
   currentPrice        String?
-  userId              String   @unique
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @default(now())
-  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userType            String?             @default("Self-serve")
+  churnRate           Float?
+  monthlyRevenue      Float?
+  totalUsers          Int?                @default(0)
+  paymentIntegrations String[]            @default([])
+  userId              String              @unique
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @default(now())
+  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  competitors         ProductCompetitor[]
+  PricingAnalysis     PricingAnalysis[]
 
   @@map("product_profiles")
+}
+
+model Competitor {
+  id                 String              @id @default(cuid())
+  name               String
+  website            String?
+  description        String?
+  pricingModel       String?
+  startingPrice      String?
+  features           String[]            @default([])
+  market             String?
+  fundingStage       String?
+  targetSize         String?
+  location           String?
+  isActive           Boolean             @default(true)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @default(now())
+  productComparisons ProductCompetitor[]
+
+  @@map("competitors")
+}
+
+model ProductCompetitor {
+  id                 String         @id @default(cuid())
+  productProfileId   String
+  competitorId       String
+  isDirectCompetitor Boolean        @default(true)
+  similarityScore    Float?
+  notes              String?
+  createdAt          DateTime       @default(now())
+  productProfile     ProductProfile @relation(fields: [productProfileId], references: [id], onDelete: Cascade)
+  competitor         Competitor     @relation(fields: [competitorId], references: [id], onDelete: Cascade)
+
+  @@unique([productProfileId, competitorId])
+  @@map("product_competitors")
+}
+
+model PricingAnalysis {
+  id               String         @id @default(cuid())
+  productProfileId String
+  analysisType     String
+  recommendations  Json
+  insights         Json
+  marketPosition   Json?
+  competitorMatrix Json?
+  abTestScenarios  Json?
+  confidenceScore  Float?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @default(now())
+  productProfile   ProductProfile @relation(fields: [productProfileId], references: [id], onDelete: Cascade)
+
+  @@map("pricing_analyses")
 }
 
 model Organization {

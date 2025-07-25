@@ -18,6 +18,12 @@ export default async function HomePage() {
         id: true,
         firstName: true,
         lastName: true,
+        productProfile: {
+          select: {
+            id: true,
+            productName: true
+          }
+        },
         organizationMemberships: {
           include: {
             organization: {
@@ -35,6 +41,11 @@ export default async function HomePage() {
     // If user doesn't exist or hasn't completed onboarding, redirect to onboarding
     if (!user || !user.hasCompletedOnboarding) {
       redirect("/onboarding");
+    }
+
+    // If user hasn't completed product profile, redirect to product profile
+    if (!user.productProfile) {
+      redirect("/product-profile");
     }
 
     const organizations = user.organizationMemberships.map(membership => membership.organization);
