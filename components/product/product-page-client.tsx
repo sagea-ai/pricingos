@@ -388,19 +388,21 @@ export function ProductPageClient({ organizations, currentOrganization: initialO
             
             {/* Header Section */}
             <motion.div 
-              className="mb-16"
+              className="mb-2"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <div className="text-center mb-12">
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-amber-400 to-amber-600 rounded-3xl mb-6 shadow-lg shadow-amber-200 dark:shadow-amber-900/50">
-                  <Package className="h-10 w-10 text-white" />
+              <div className="text-left mb-8">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl shadow-lg shadow-amber-200 dark:shadow-amber-900/50">
+                    <Package className="h-6 w-6 text-white" />
+                  </div>
+                  <h1 className="text-3xl font-ultralight text-gray-900 dark:text-white tracking-tight">
+                    Product <span className="bg-gradient-to-r from-amber-500 to-amber-600 bg-clip-text text-transparent font-light">Builder</span>
+                  </h1>
                 </div>
-                <h1 className="text-5xl font-ultralight text-gray-900 dark:text-white tracking-tight mb-4">
-                  Product <span className="bg-gradient-to-r from-amber-500 to-amber-600 bg-clip-text text-transparent font-light">Builder</span>
-                </h1>
-                <p className="text-xl text-gray-500 dark:text-gray-400 font-light max-w-2xl mx-auto leading-relaxed">
+                <p className="text-lg text-gray-500 dark:text-gray-400 font-light max-w-3xl leading-relaxed">
                   Design, iterate, and perfect your product portfolio with elegant simplicity
                 </p>
               </div>
@@ -450,7 +452,7 @@ export function ProductPageClient({ organizations, currentOrganization: initialO
                   onClick={startCreating}
                   disabled={showCreateForm}
                   size="lg"
-                  className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-8 py-4 rounded-2xl shadow-lg shadow-amber-200 dark:shadow-amber-900/50 transition-all duration-300 hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:scale-100"
+                  className="bg-black  hover:bg-amber-500 hover:text-black text-white px-8 py-4 rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl disabled:opacity-50 disabled:scale-100"
                 >
                   <Plus className="h-5 w-5 mr-3" />
                   <span className="font-medium">Create Product</span>
