@@ -35,6 +35,7 @@ import { Separator } from "@/components/ui/separator";
 import { UserButton } from "@clerk/nextjs";
 import Image from "next/image";
 import { SiElasticstack, SiReasonstudios } from "react-icons/si";
+import { FaEuroSign } from "react-icons/fa";
 
 const useSubscription = () => {
   return {
@@ -278,15 +279,15 @@ export function SessionNavBar({
                       </motion.span>
                     </Link>
                     <Link
-                      href="/simulate"
+                      href="/finances"
                       className={cn(
                         "flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm font-medium transition-colors hover:bg-amber-50 hover:text-amber-700",
-                        pathname?.includes("simulate") && "bg-amber-100 text-amber-700",
+                        pathname?.includes("finances") && "bg-amber-100 text-amber-700",
                       )}
                     >
-                      <BsGlobeAmericas className="h-4 w-4 shrink-0" />
+                      <FaEuroSign className="h-4 w-4 shrink-0" />
                       <motion.span variants={variants} className="truncate">
-                        {!isCollapsed && "Simulate"}
+                        {!isCollapsed && "Finances"}
                       </motion.span>
                     </Link>
                     <Link
