@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     const user = await db.user.findUnique({
       where: { clerkId: userId },
       include: {
-        productProfile: {
+        activeProductProfile: {
           include: {
             competitors: {
               include: {
@@ -29,11 +29,11 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    if (!user?.productProfile) {
-      return NextResponse.json({ error: 'No product profile found' }, { status: 404 })
+    if (!user?.activeProductProfile) {
+      return NextResponse.json({ error: 'No active product profile found' }, { status: 404 })
     }
 
-    const productProfile = user.productProfile
+    const productProfile = user.activeProductProfile
     
     // Prepare data for LLM analysis
     const analysisData = {

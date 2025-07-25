@@ -6,7 +6,7 @@ import { z } from 'zod'
 
 const prisma = new PrismaClient()
 
-const productProfileSchema = z.object({
+const productSchema = z.object({
   productName: z.string().min(1, 'Product name is required').max(100),
   coreValue: z.string().min(10, 'Core value description must be at least 10 characters').max(500),
   features: z.array(z.string()).min(1, 'At least one feature is required').max(10),
@@ -14,6 +14,58 @@ const productProfileSchema = z.object({
   currentPricingModel: z.string().optional(),
   currentPrice: z.string().optional()
 })
+
+export async function GET(request: NextRequest) {
+  try {
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Get user with their product profiles
+    const user = await prisma.user.findUnique({
+      where: { clerkId: userId },
+      include: {
+        productProfiles: {
+          orderBy: { updatedAt: 'desc' }
+        },
+        activeProductProfile: true
+      }
+    })
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({ 
+      success: true,
+      products: user.productProfiles.map(profile => ({
+        id: profile.id,
+        productName: profile.productName,
+        coreValue: profile.coreValue,
+        features: profile.features,
+        market: profile.market,
+        currentPricingModel: profile.currentPricingModel,
+        currentPrice: profile.currentPrice,
+        createdAt: profile.createdAt.toISOString(),
+        updatedAt: profile.updatedAt.toISOString(),
+        isActive: user.activeProductProfileId === profile.id
+      })),
+      activeProductId: user.activeProductProfileId
+    })
+  } catch (error) {
+    console.error('Products fetch error:', error)
+    return NextResponse.json(
+      { 
+        error: 'Failed to fetch products', 
+        details: error instanceof Error ? error.message : 'Unknown error' 
+      },
+      { status: 500 }
+    )
+  } finally {
+    await prisma.$disconnect()
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,7 +75,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const validationResult = productProfileSchema.safeParse(body)
+    const validationResult = productSchema.safeParse(body)
     
     if (!validationResult.success) {
       return NextResponse.json({ 
@@ -35,15 +87,13 @@ export async function POST(request: NextRequest) {
     const { productName, coreValue, features, market, currentPricingModel, currentPrice } = validationResult.data
     const clerkUser = await currentUser()
 
-    console.log('Product profile data received:', { productName, coreValue, features, market, currentPricingModel, currentPrice })
+    console.log('Creating product profile:', { productName, coreValue, features, market, currentPricingModel, currentPrice })
 
     const result = await prisma.$transaction(async (tx) => {
-      // Upsert user to ensure they exist
+      // Ensure user exists
       const user = await tx.user.upsert({
         where: { clerkId: userId },
-        update: {
-          updatedAt: new Date()
-        },
+        update: { updatedAt: new Date() },
         create: {
           clerkId: userId,
           email: clerkUser?.emailAddresses?.[0]?.emailAddress || '',
@@ -53,16 +103,16 @@ export async function POST(request: NextRequest) {
         }
       })
 
-      // Create new product profile (allow multiple)
+      // Create new product profile
       const productProfile = await tx.productProfile.create({
         data: {
-          userId: user.id,
           productName,
           coreValue,
           features,
           market,
           currentPricingModel,
-          currentPrice
+          currentPrice,
+          userId: user.id
         }
       })
 
@@ -78,10 +128,11 @@ export async function POST(request: NextRequest) {
       await tx.activity.create({
         data: {
           type: 'PRODUCT_PROFILE_CREATED',
-          title: 'Product profile defined',
-          description: `Defined vessel "${productName}" with ${features.length} special abilities`,
+          title: 'Product profile created',
+          description: `Created product profile "${productName}" with ${features.length} features`,
           userId: user.id,
           metadata: {
+            productProfileId: productProfile.id,
             productName,
             coreValue,
             featuresCount: features.length,
@@ -97,20 +148,27 @@ export async function POST(request: NextRequest) {
       timeout: 10000
     })
 
-    console.log('Product profile completed successfully:', { productProfileId: result.productProfile.id })
+    console.log('Product profile created successfully:', { productProfileId: result.productProfile.id })
 
     return NextResponse.json({ 
       success: true,
-      productProfile: {
+      product: {
         id: result.productProfile.id,
-        productName: result.productProfile.productName
+        productName: result.productProfile.productName,
+        coreValue: result.productProfile.coreValue,
+        features: result.productProfile.features,
+        market: result.productProfile.market,
+        currentPricingModel: result.productProfile.currentPricingModel,
+        currentPrice: result.productProfile.currentPrice,
+        createdAt: result.productProfile.createdAt.toISOString(),
+        updatedAt: result.productProfile.updatedAt.toISOString()
       }
     })
   } catch (error) {
-    console.error('Product profile completion error:', error)
+    console.error('Product profile creation error:', error)
     return NextResponse.json(
       { 
-        error: 'Failed to complete product profile', 
+        error: 'Failed to create product profile', 
         details: error instanceof Error ? error.message : 'Unknown error' 
       },
       { status: 500 }

@@ -32,6 +32,7 @@ import { UserButton } from "@clerk/nextjs";
 import Image from "next/image";
 import { SiReasonstudios } from "react-icons/si";
 import { FaEuroSign } from "react-icons/fa";
+import { AiFillProduct } from "react-icons/ai";
 
 const useSubscription = () => {
   return {
@@ -140,7 +141,7 @@ export function SessionNavBar({
                   alt="PricingOS"
                   width={42}
                   height={42}
-                  className="h-8 w-8 rounded-md">
+                  className="h-9 w-9 rounded-md">
                 </Image>
                 <motion.span
                   variants={variants}
@@ -261,7 +262,21 @@ export function SessionNavBar({
                         {!isCollapsed && "Core"}
                       </motion.span>
                     </div>
-                    
+
+                    <Link
+                      href="/product"
+                      className={cn(
+                        "flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm font-medium transition-colors hover:bg-amber-50 hover:text-amber-700",
+                        pathname?.includes("product") && "bg-amber-100 text-amber-700",
+                      )}
+                    >
+                      <AiFillProduct className="h-4 w-4 shrink-0" />
+                      <motion.span variants={variants} className="truncate">
+                        {!isCollapsed && "Product Builder"}
+                      </motion.span>
+                    </Link>
+
+
                     <Link
                       href="/testing"
                       className={cn(
@@ -271,7 +286,7 @@ export function SessionNavBar({
                     >
                       <SiReasonstudios className="h-4 w-4 shrink-0" />
                       <motion.span variants={variants} className="truncate">
-                        {!isCollapsed && "A/B Testing"}
+                        {!isCollapsed && "Pricing Simulator"}
                       </motion.span>
                     </Link>
                     <Link

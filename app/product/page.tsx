@@ -1,9 +1,9 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { DashboardClientWrapper } from "@/components/dashboard/dashboard-client-wrapper";
+import { ProductPageClient } from "@/components/product/product-page-client";
 
-export default async function HomePage() {
+export default async function ProductPage() {
   const { userId } = await auth();
 
   if (!userId) {
@@ -18,13 +18,12 @@ export default async function HomePage() {
         id: true,
         firstName: true,
         lastName: true,
-        productProfiles: {
+        productProfile: {
           select: {
             id: true,
             productName: true
           }
         },
-        activeProductProfileId: true,
         organizationMemberships: {
           include: {
             organization: {
@@ -44,8 +43,8 @@ export default async function HomePage() {
       redirect("/onboarding");
     }
 
-    // If user hasn't created any product profiles, redirect to product profile
-    if (!user.productProfiles || user.productProfiles.length === 0) {
+    // If user hasn't completed product profile, redirect to product profile
+    if (!user.productProfile) {
       redirect("/product-profile");
     }
 
@@ -59,13 +58,13 @@ export default async function HomePage() {
     const currentOrganization = organizations[0];
 
     return (
-      <DashboardClientWrapper 
+      <ProductPageClient 
         organizations={organizations}
         currentOrganization={currentOrganization}
       />
     );
   } catch (error) {
-    console.error('Dashboard error:', error);
+    console.error('Product page error:', error);
     redirect("/onboarding");
   }
 }
