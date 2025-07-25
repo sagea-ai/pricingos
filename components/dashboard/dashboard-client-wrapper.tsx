@@ -21,7 +21,6 @@ export function DashboardClientWrapper({
   currentOrganization: initialOrganization,
 }: DashboardClientWrapperProps) {
   const [currentOrganization, setCurrentOrganization] = useState(initialOrganization);
-  const [isLoading, setIsLoading] = useState(false);
   const { user } = useUser();
 
   const handleOrganizationChange = (orgId: string) => {
@@ -42,7 +41,6 @@ export function DashboardClientWrapper({
         organizationName={currentOrganization.name}
         organizationId={currentOrganization.id}
         userName={user?.firstName}
-        isLoading={isLoading}
       />
     </AppLayout>
   );
