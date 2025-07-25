@@ -1,5 +1,5 @@
 {
-  "name": "pricingos-web",
+  "name": "pricingos",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -13,7 +13,7 @@
     "db:studio": "prisma studio"
   },
   "dependencies": {
-    "@clerk/nextjs": "^6.26.0",
+    "@clerk/nextjs": "^6.21.0",
     "@daytonaio/sdk": "^0.21.1",
     "@google/generative-ai": "^0.24.1",
     "@octokit/auth-app": "^8.0.1",

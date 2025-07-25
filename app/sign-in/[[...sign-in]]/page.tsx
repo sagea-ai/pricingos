@@ -8,8 +8,8 @@ export default function Page() {
         <div className="text-center mb-12">
           <div className="flex justify-center items-center mb-8">
             <Image
-              src="/logo.png"
-              alt="PricingOS"
+              src="/logohq.png"
+              alt="PriingOS"
               width={64}
               height={64}
               className="rounded-2xl"

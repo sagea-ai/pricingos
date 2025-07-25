@@ -236,26 +236,26 @@ export async function POST(request: NextRequest) {
           })
 
           if (invitation) {
-            const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.reasonet.sagea.space'}/accept-invite?token=${invitation.token}&org=${result.organization.id}`
+            const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://pricing.sagea.space'}/accept-invite?token=${invitation.token}&org=${result.organization.id}`
             
             await resend.emails.send({
-              from: 'Reasonet <noreply@basabjha.com.np>',
+              from: 'PricingOS <noreply@basabjha.com.np>',
               to: email,
-              subject: `You're invited to join ${result.organization.name} on Reasonet`,
+              subject: `You're invited to join ${result.organization.name} on PricingOS`,
               html: `
                 <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                   <div style="text-align: center; margin-bottom: 30px;">
-                    <h1 style="color: #0ea5e9; margin: 0;">Reasonet</h1>
+                    <h1 style="color: #0ea5e9; margin: 0;">PricingOS</h1>
                   </div>
                   
                   <h2 style="color: #1f2937; margin-bottom: 20px;">You're invited to join ${result.organization.name}</h2>
                   
                   <p style="color: #4b5563; line-height: 1.6; margin-bottom: 20px;">
-                    Hi there! You've been invited to collaborate with the team at <strong>${result.organization.name}</strong> on Reasonet.
+                    Hi there! You've been invited to collaborate with the team at <strong>${result.organization.name}</strong> on PricingOS.
                   </p>
                   
                   <p style="color: #4b5563; line-height: 1.6; margin-bottom: 30px;">
-                    Reasonet helps teams catch bugs and improve code quality through intelligent analysis and AI-powered insights.
+                    PricingOS helps teams catch bugs and improve code quality through intelligent analysis and AI-powered insights.
                   </p>
                   
                   <div style="text-align: center; margin: 30px 0;">
@@ -272,7 +272,7 @@ export async function POST(request: NextRequest) {
                   <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;" />
                   
                   <p style="color: #9ca3af; font-size: 12px; text-align: center;">
-                    © ${new Date().getFullYear()} Reasonet. All rights reserved.
+                    © ${new Date().getFullYear()} PricingOS. All rights reserved.
                   </p>
                 </div>
               `
@@ -287,15 +287,15 @@ export async function POST(request: NextRequest) {
     // Send welcome email to user
     try {
       await resend.emails.send({
-        from: 'Reasonet <noreply@basabjha.com.np>',
+        from: 'PricingOS <noreply@basabjha.com.np>',
         to: result.user.email,
-        subject: 'Welcome to Reasonet!',
+        subject: 'Welcome to PricingOS!',
         html: `
           <p>Hi ${result.user.firstName || ''},</p>
-          <p>Howdy, Partner! <br> Welcome to Reasonet! Your organization <b>${result.organization.name}</b> has been created.</p>
+          <p>Howdy, Partner! <br> Welcome to PricingOS! Your organization <b>${result.organization.name}</b> has been created.</p>
           <p>Get started by connecting your repositories and running your first analysis.</p>
           <p> we're glad to have you onboard, Partner!</p>
-          <p>—ciao, The Reasonet Team</p>
+          <p>—ciao, The PricingOS Team</p>
         `
       })
     } catch (err) {
