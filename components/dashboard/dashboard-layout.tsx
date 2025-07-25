@@ -1,68 +1,61 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { BarChart3, Calendar, AlertTriangle, TrendingDown, ArrowRight, MessageSquare, TrendingUp, DollarSign, Shield, Target, Activity, Zap, PieChart } from "lucide-react"
+import { BarChart3, Calendar, AlertTriangle, TrendingDown, ArrowRight, MessageSquare, TrendingUp, DollarSign, Shield, Target, Activity, Zap, PieChart, TestTube, Users, Clock, Lightbulb, ArrowUp, ArrowDown, Sparkles } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 import { TrialProvider } from "../trial/trial-provider"
 import { TrialBannerWrapper } from "../trial/trial-banner-wrapper"
-import { Line } from "react-chartjs-2"
-import { useState } from "react"
-import { TimeRangeOption } from "@/types/types"
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler,
-} from 'chart.js'
+import { useState, useEffect } from "react"
 
-// Register Chart.js components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-)
-
-interface Organization {
-  id: string;
-  name: string;
-  slug: string;
+interface PricingAnalysis {
+  feature_to_value_mapping: {
+    insight: string
+    highlighted_features: string[]
+    value_gap: string
+  }
+  pricing_model_fit: {
+    current_model: string
+    recommended_model: string
+    rationale: string
+  }
+  competitor_analysis: {
+    matrix: Array<{
+      name: string
+      price: string
+      features: string[]
+    }>
+    insight: string
+  }
+  ab_test_scenarios: Array<{
+    scenario: string
+    expected_impact: string
+    assumptions: string[]
+  }>
+  sage_recommendation: {
+    model: string
+    segments: string[]
+    price_points: string[]
+    reasoning_chain: string[]
+  }
 }
 
-interface WeeklyActivity {
-  commits: number[];
-  prs: number[];
-  comments: number[];
-  days: string[];
-}
-
-interface AnalyticsData {
-  avgTimeToMerge: number;
-  avgPrSize: number;
-  commentsPerPr: number;
-  weeklyActivity: WeeklyActivity;
-  repositoriesCount: number;
-  timeToMergeTrend: number;
+interface ProductInfo {
+  name: string
+  core_value: string
+  features: string[]
+  current_pricing_model: string
+  current_price: string
+  market: string
+  monthly_revenue: number
+  total_users: number
 }
 
 interface DashboardLayoutProps {
-  organizationName?: string;
-  organizationId?: string;
-  hasConnectedRepositories?: boolean;
-  repositoriesCount?: number;
-  isLoading?: boolean;
-  analyticsData?: AnalyticsData;
-  userName?: string;
+  organizationName?: string
+  organizationId?: string
+  userName?: string
+  isLoading?: boolean
 }
 
 // Time-based greeting function
@@ -87,424 +80,443 @@ export function DashboardLayout({
   userName,
   isLoading = false,
 }: DashboardLayoutProps) {
-  const greeting = getTimeBasedGreeting(userName);
+  const greeting = getTimeBasedGreeting(userName)
+  const [pricingAnalysis, setPricingAnalysis] = useState<PricingAnalysis | null>(null)
+  const [productInfo, setProductInfo] = useState<ProductInfo | null>(null)
+  const [analysisLoading, setAnalysisLoading] = useState(true)
 
-  // Mock financial data for demonstration
-  const mockFinancialStats = {
-    cashFlowScore: 72,
-    riskLevel: "Medium",
-    accountsMonitored: 5,
-    alertsThisWeek: 3
-  };
-
-  // Mock pricing data for demonstration
-  const mockPricingStats = {
-    pricingScore: 85,
-    priceOptimizations: 12,
-    revenueIncrease: 8.5,
-    competitorsTracked: 15
-  };
-
-  const mockRecentAlerts = [
-    {
-      id: 1,
-      title: "Cash flow dip detected",
-      severity: "medium",
-      date: "2 days ago",
-      status: "active",
-      description: "Outgoing payments exceed incoming by 15% this week",
-      type: "financial"
-    },
-    {
-      id: 2,
-      title: "Competitor price change detected",
-      severity: "high",
-      date: "1 day ago", 
-      status: "active",
-      description: "CompetitorX reduced pricing by 12% on similar products",
-      type: "pricing"
-    },
-    {
-      id: 3,
-      title: "Price optimization opportunity",
-      severity: "low",
-      date: "3 days ago",
-      status: "monitoring", 
-      description: "AI suggests 6% price increase could boost revenue by $2.3K",
-      type: "pricing"
-    },
-    {
-      id: 4,
-      title: "Payment delay pattern identified",
-      severity: "high",
-      date: "1 week ago", 
-      status: "resolved",
-      description: "3 clients showing consistent late payment behavior",
-      type: "financial"
+  useEffect(() => {
+    const fetchPricingAnalysis = async () => {
+      try {
+        const response = await fetch('/api/dashboard/pricing-analysis')
+        if (response.ok) {
+          const result = await response.json()
+          setPricingAnalysis(result.data)
+          setProductInfo(result.productInfo)
+        }
+      } catch (error) {
+        console.error('Failed to fetch pricing analysis:', error)
+      } finally {
+        setAnalysisLoading(false)
+      }
     }
-  ];
 
-  const mockCashFlowData = {
-    labels: ['2 weeks ago', '1 week ago', 'Today'],
-    datasets: [
-      {
-        label: 'Cash Flow Health Score',
-        data: [65, 78, 72],
-        borderColor: 'rgb(34, 197, 94)',
-        backgroundColor: 'rgba(34, 197, 94, 0.1)',
-        fill: true,
-        tension: 0.4,
-      },
-    ],
-  };
+    fetchPricingAnalysis()
+  }, [])
 
-  const mockRiskTrendData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-    datasets: [
-      {
-        label: 'Financial Risk Level',
-        data: [45, 52, 38, 41, 35, 28],
-        borderColor: 'rgb(239, 68, 68)',
-        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-        fill: true,
-        tension: 0.4,
-      },
-    ],
-  };
-
-  const mockPricingTrendData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-    datasets: [
-      {
-        label: 'Average Price Point',
-        data: [45, 48, 52, 49, 53, 56],
-        borderColor: 'rgb(59, 130, 246)',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        fill: true,
-        tension: 0.4,
-      },
-      {
-        label: 'Market Average',
-        data: [42, 44, 47, 46, 48, 50],
-        borderColor: 'rgb(156, 163, 175)',
-        backgroundColor: 'rgba(156, 163, 175, 0.1)',
-        fill: false,
-        tension: 0.4,
-        borderDash: [5, 5],
-      },
-    ],
-  };
+  const mockStats = {
+    monthlyRevenue: productInfo?.monthly_revenue || 12450,
+    totalUsers: productInfo?.total_users || 1247,
+    conversionRate: 3.2,
+    churnRate: 2.1,
+    analysisRuns: 23,
+    testsCreated: 8
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white dark:from-green-950 dark:to-gray-950">
+    <div className="min-h-screen bg-white dark:bg-gray-950">
       <TrialProvider>
-        {/* Trial Banner (must keep) - full width ribbon style */}
         <div className="w-full">
           <TrialBannerWrapper />
         </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
+        
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          {/* Header */}
+          <div className="mb-12">
+            <h1 className="text-4xl font-light text-gray-900 dark:text-white mb-2">
               {greeting}
             </h1>
-            <p className="mt-2 text-lg text-gray-600 dark:text-gray-400">
-              Monitor your financial health and optimize your pricing strategy with AI-powered insights to prevent stress and maximize revenue.
-            </p>
+            {productInfo && (
+              <p className="text-lg text-gray-500 dark:text-gray-400">
+                Here's how <span className="text-amber-600 font-medium">{productInfo.name}</span> is performing
+              </p>
+            )}
           </div>
 
-          {/* Main Grid Layout (Quick Actions, Financial Health, Pricing Intelligence) */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-2xl shadow-md p-6 border border-gray-200 dark:border-gray-800">
-              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
-                <Activity className="w-5 h-5 text-green-500 dark:text-green-400" /> Quick Actions
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/30 rounded-xl border border-green-100 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/50 transition-colors group">
-                  <Link href="/cash-flow-analysis">
-                  <div>
-                    <h3 className="font-medium text-green-900 dark:text-green-100 flex items-center gap-2">
-                      <BarChart3 className="w-4 h-4 text-green-500 group-hover:text-green-600 transition" /> Cash Flow Analysis
-                    </h3>
-                    <p className="text-sm text-green-700 dark:text-green-300">Deep dive into your finances</p>
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-green-500 group-hover:text-green-600 transition" />
-                  </Link>
-                </button>
-
-                <button className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/30 rounded-xl border border-blue-100 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors group">
-                  <Link href="/price-optimization">
-                  <div>
-                    <h3 className="font-medium text-blue-900 dark:text-blue-100 flex items-center gap-2">
-                      <Zap className="w-4 h-4 text-blue-500 group-hover:text-blue-600 transition" /> Price Optimization
-                    </h3>
-                    <p className="text-sm text-blue-700 dark:text-blue-300">AI-powered pricing strategy</p>
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-blue-500 group-hover:text-blue-600 transition" />
-                  </Link>
-                </button>
-
-                <button className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/30 rounded-xl border border-green-100 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/50 transition-colors group">
-                  <Link href="/stress-detector">
-                  <div>
-                    <h3 className="font-medium text-green-900 dark:text-green-100 flex items-center gap-2">
-                      <Shield className="w-4 h-4 text-green-500 group-hover:text-green-600 transition" /> Stress Detector
-                    </h3>
-                    <p className="text-sm text-green-700 dark:text-green-300">AI-powered risk assessment</p>
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-green-500 group-hover:text-green-600 transition" />
-                  </Link>
-                </button>
-
-                <button className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/30 rounded-xl border border-blue-100 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors group">
-                  <Link href="/market-analysis">
-                  <div>
-                    <h3 className="font-medium text-blue-900 dark:text-blue-100 flex items-center gap-2">
-                      <PieChart className="w-4 h-4 text-blue-500 group-hover:text-blue-600 transition" /> Market Analysis
-                    </h3>
-                    <p className="text-sm text-blue-700 dark:text-blue-300">Competitor & market insights</p>
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-blue-500 group-hover:text-blue-600 transition" />
-                  </Link>
-                </button>
-              </div>
+          {analysisLoading ? (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+              {[...Array(6)].map((_, i) => (
+                <Card key={i} className="animate-pulse border-gray-100 dark:border-gray-800">
+                  <CardContent className="pt-6">
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-4"></div>
+                    <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
+          ) : pricingAnalysis ? (
+            <>
+              {/* SAGE AI Recommendation - Hero Section */}
+              <div className="mb-12">
+                <Card className="bg-gradient-to-br rounded-3xl from-amber-400 via-orange-400 to-orange-500 dark:from-amber-950/20 dark:via-orange-950/10 dark:to-yellow-950/20 border-amber-200 dark:border-amber-800/50 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-100/20 to-transparent animate-pulse"></div>
+                  <CardContent className="pt-12 pb-12 relative">
+                    <div className="flex items-start gap-6">
+                      <Image 
+                        src="/logo.png" 
+                        alt="SAGE Logo" 
+                        width={100} 
+                        height={100}
+                        className="w-22 h-22"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-4">
+                          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                            SAGE AI Recommendation
+                          </h2>
+                          <Badge className="bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/40 dark:text-amber-300">
+                            Strategic
+                          </Badge>
+                        </div>
+                        
+                        {/* Main Recommendation */}
+                        <div className="mb-6">
+                          <p className="text-gray-700 dark:text-gray-200 text-lg mb-4 leading-relaxed font-medium">
+                            {pricingAnalysis.sage_recommendation.model}
+                          </p>
+                        </div>
 
-            {/* Combined Stats Panel */}
-            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-md p-6 border border-gray-200 dark:border-gray-800">
-              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
-                <DollarSign className="w-5 h-5 text-green-500 dark:text-green-400" /> Business Health
-              </h2>
-              <div className="space-y-4">
-                {/* Financial Health */}
-                <div className="pb-3 border-b border-gray-200 dark:border-gray-700">
-                  <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Financial</p>
-                  <div className="space-y-2">
-                    <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Cash Flow Score</p>
-                      <div className="flex items-center gap-2">
-                        <p className="text-xl font-semibold text-gray-900 dark:text-white">{mockFinancialStats.cashFlowScore}</p>
-                        <Badge variant={mockFinancialStats.cashFlowScore >= 70 ? "default" : "destructive"} className="text-xs">
-                          {mockFinancialStats.cashFlowScore >= 70 ? "Healthy" : "At Risk"}
-                        </Badge>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Risk Level</p>
-                      <p className="text-lg font-semibold text-yellow-600 dark:text-yellow-400">{mockFinancialStats.riskLevel}</p>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Pricing Intelligence */}
-                <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Pricing</p>
-                  <div className="space-y-2">
-                    <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Pricing Score</p>
-                      <div className="flex items-center gap-2">
-                        <p className="text-xl font-semibold text-gray-900 dark:text-white">{mockPricingStats.pricingScore}</p>
-                        <Badge variant="default" className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
-                          Optimized
-                        </Badge>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Revenue Increase</p>
-                      <p className="text-lg font-semibold text-green-600 dark:text-green-400">+{mockPricingStats.revenueIncrease}%</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+                        {/* Key Details Grid */}
+                        <div className="grid md:grid-cols-3 gap-6 mb-6">
+                          {/* Recommended Segments */}
+                          <div className="bg-white/20 dark:bg-gray-900/20 rounded-xl p-4">
+                            <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
+                              <Target className="w-4 h-4" />
+                              Target Segments
+                            </h4>
+                            <div className="space-y-2">
+                              {pricingAnalysis.sage_recommendation.segments.slice(0, 3).map((segment, index) => (
+                                <div key={index} className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                  <div className="w-1.5 h-1.5 bg-amber-600 rounded-full"></div>
+                                  {segment}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
 
-            {/* Recent Alerts */}
-            <div className="lg:col-span-3 bg-white dark:bg-gray-900 rounded-2xl shadow-md p-6 border border-gray-200 dark:border-gray-800">
-              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-amber-500 dark:text-amber-400" /> Recent Alerts & Opportunities
-              </h2>
-              <div className="space-y-3">
-                {mockRecentAlerts.map((alert) => (
-                  <div key={alert.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-medium text-gray-900 dark:text-white">{alert.title}</h3>
-                        <Badge variant={
-                          alert.severity === 'high' ? 'destructive' : 
-                          alert.severity === 'medium' ? 'secondary' : 'outline'
-                        } className="text-xs">
-                          {alert.severity}
-                        </Badge>
-                        <Badge variant="outline" className={`text-xs ${
-                          alert.type === 'pricing' ? 'border-blue-200 text-blue-600 dark:border-blue-800 dark:text-blue-400' :
-                          'border-green-200 text-green-600 dark:border-green-800 dark:text-green-400'
-                        }`}>
-                          {alert.type}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{alert.description}</p>
-                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{alert.date}</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="text-right">
-                        <div className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
-                          alert.status === 'resolved' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
-                          alert.status === 'active' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' :
-                          'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
-                        }`}>
-                          {alert.status}
+                          {/* Price Points */}
+                          <div className="bg-white/20 dark:bg-gray-900/20 rounded-xl p-4">
+                            <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
+                              <DollarSign className="w-4 h-4" />
+                              Suggested Pricing
+                            </h4>
+                            <div className="space-y-2">
+                              {pricingAnalysis.sage_recommendation.price_points.slice(0, 3).map((price, index) => (
+                                <div key={index} className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                  {price}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Key Reasoning */}
+                          <div className="bg-white/20 dark:bg-gray-900/20 rounded-xl p-4">
+                            <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
+                              <Lightbulb className="w-4 h-4" />
+                              Key Reasoning
+                            </h4>
+                            <div className="space-y-2">
+                              {pricingAnalysis.sage_recommendation.reasoning_chain.slice(0, 2).map((reason, index) => (
+                                <div key={index} className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
+                                  {reason}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Actions */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <Link href="/testing">
+                              <Button className="bg-black hover:bg-amber-600 rounded-xl text-white shadow-lg hover:shadow-xl transition-all">
+                                <TestTube className="w-4 h-4 mr-2" />
+                                Test Strategy
+                              </Button>
+                            </Link>
+                            <Link href="/deepresearch">
+                              <Button variant="outline" className="border-white/20 text-gray-700 dark:text-gray-200 hover:bg-neutral-200 rounded-xl">
+                                View Full Analysis
+                                <ArrowRight className="w-4 h-4 ml-2" />
+                              </Button>
+                            </Link>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 text-amber-900 bg-white/50 py-2 px-2 rounded-2xl dark:text-amber-300">
+                            <Lightbulb className="w-4 h-4" />
+                            <span className="text-sm font-medium">AI Confidence: 94%</span>
+                          </div>
                         </div>
                       </div>
-                      <ArrowRight className="w-4 h-4 text-gray-400" />
                     </div>
-                  </div>
-                ))}
+                  </CardContent>
+                </Card>
               </div>
-            </div>
-          </div>
 
-          {/* Insights Section (Charts) */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            {/* Cash Flow Health Trend */}
-            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-md p-6 border border-gray-200 dark:border-gray-800 flex flex-col">
-              <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-green-500 dark:text-green-400" /> Cash Flow Health Trend
-              </h2>
-              <div className="flex-1 flex items-center justify-center min-h-[220px]">
-                <Line
-                  data={mockCashFlowData}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { 
-                      legend: { display: false },
-                      tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        titleColor: '#fff',
-                        bodyColor: '#fff',
-                      }
-                    },
-                    scales: {
-                      x: { 
-                        title: { display: true, text: 'Timeline' },
-                        grid: { display: false }
-                      },
-                      y: { 
-                        title: { display: true, text: 'Health Score' }, 
-                        min: 0, 
-                        max: 100,
-                        grid: { color: 'rgba(0, 0, 0, 0.1)' }
-                      }
-                    }
-                  }}
-                />
-              </div>
-              <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">Track your financial health score over time.</p>
-            </div>
-            
-            {/* Pricing Trends */}
-            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-md p-6 border border-gray-200 dark:border-gray-800 flex flex-col">
-              <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
-                <Zap className="w-5 h-5 text-blue-500 dark:text-blue-400" /> Pricing vs Market
-              </h2>
-              <div className="flex-1 flex items-center justify-center min-h-[220px]">
-                <Line
-                  data={mockPricingTrendData}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { 
-                      legend: { 
-                        display: true, 
-                        position: 'top',
-                        labels: { boxWidth: 12, padding: 15 }
-                      },
-                      tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        titleColor: '#fff',
-                        bodyColor: '#fff',
-                      }
-                    },
-                    scales: {
-                      x: { 
-                        title: { display: true, text: 'Month' },
-                        grid: { display: false }
-                      },
-                      y: { 
-                        title: { display: true, text: 'Price ($)' }, 
-                        grid: { color: 'rgba(0, 0, 0, 0.1)' }
-                      }
-                    }
-                  }}
-                />
-              </div>
-              <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">Compare your pricing strategy against market averages.</p>
-            </div>
-          </div>
+              {/* Key Metrics Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                <Card className="border-gray-100 dark:border-gray-800 hover:shadow-lg transition-shadow">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Monthly Revenue</p>
+                        <p className="text-3xl font-light text-gray-900 dark:text-white">
+                          ${mockStats.monthlyRevenue.toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
+                        <DollarSign className="w-6 h-6 text-green-600 dark:text-green-400" />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 mt-4">
+                      <ArrowUp className="w-4 h-4 text-green-500" />
+                      <span className="text-sm text-green-600 dark:text-green-400 font-medium">+12.5%</span>
+                      <span className="text-sm text-gray-500">vs last month</span>
+                    </div>
+                  </CardContent>
+                </Card>
 
-          {/* Bottom Row - Risk Analysis & Pricing Intelligence */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Financial Risk Breakdown */}
-            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-md p-6 border border-gray-200 dark:border-gray-800 flex flex-col">
-              <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
-                <Target className="w-5 h-5 text-red-500 dark:text-red-400" /> Financial Risk Analysis
-              </h2>
-              <div className="flex-1 flex items-center justify-center min-h-[200px]">
-                <div className="text-center space-y-4 w-full">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-red-50 dark:bg-red-900/30 p-3 rounded-lg">
-                      <p className="text-xs text-red-600 dark:text-red-400 font-medium">Payment Delays</p>
-                      <p className="text-lg font-semibold text-red-800 dark:text-red-200">High</p>
+                <Card className="border-gray-100 dark:border-gray-800 hover:shadow-lg transition-shadow">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Active Users</p>
+                        <p className="text-3xl font-light text-gray-900 dark:text-white">
+                          {mockStats.totalUsers.toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                        <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                      </div>
                     </div>
-                    <div className="bg-yellow-50 dark:bg-yellow-900/30 p-3 rounded-lg">
-                      <p className="text-xs text-yellow-600 dark:text-yellow-400 font-medium">Cash Flow</p>
-                      <p className="text-lg font-semibold text-yellow-800 dark:text-yellow-200">Medium</p>
+                    <div className="flex items-center gap-2 mt-4">
+                      <ArrowUp className="w-4 h-4 text-green-500" />
+                      <span className="text-sm text-green-600 dark:text-green-400 font-medium">+8.2%</span>
+                      <span className="text-sm text-gray-500">vs last month</span>
                     </div>
-                    <div className="bg-green-50 dark:bg-green-900/30 p-3 rounded-lg">
-                      <p className="text-xs text-green-600 dark:text-green-400 font-medium">Expense Control</p>
-                      <p className="text-lg font-semibold text-green-800 dark:text-green-200">Good</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-gray-100 dark:border-gray-800 hover:shadow-lg transition-shadow">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Conversion Rate</p>
+                        <p className="text-3xl font-light text-gray-900 dark:text-white">
+                          {mockStats.conversionRate}%
+                        </p>
+                      </div>
+                      <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
+                        <TrendingUp className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                      </div>
                     </div>
-                    <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg">
-                      <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">Revenue Stability</p>
-                      <p className="text-lg font-semibold text-blue-800 dark:text-blue-200">Stable</p>
+                    <div className="flex items-center gap-2 mt-4">
+                      <ArrowDown className="w-4 h-4 text-red-500" />
+                      <span className="text-sm text-red-600 dark:text-red-400 font-medium">-0.3%</span>
+                      <span className="text-sm text-gray-500">vs last month</span>
                     </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-gray-100 dark:border-gray-800 hover:shadow-lg transition-shadow">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Churn Rate</p>
+                        <p className="text-3xl font-light text-gray-900 dark:text-white">
+                          {mockStats.churnRate}%
+                        </p>
+                      </div>
+                      <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
+                        <Activity className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 mt-4">
+                      <ArrowDown className="w-4 h-4 text-green-500" />
+                      <span className="text-sm text-green-600 dark:text-green-400 font-medium">-0.8%</span>
+                      <span className="text-sm text-gray-500">vs last month</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Quick Actions & Tools */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+                <div className="lg:col-span-2">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Quick Actions</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Link href="/testing" className="group">
+                      <Card className="border-gray-100 dark:border-gray-800 hover:border-amber-200 dark:hover:border-amber-800 hover:shadow-lg transition-all group-hover:scale-[1.02]">
+                        <CardContent className="pt-6">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center group-hover:bg-amber-200 dark:group-hover:bg-amber-900/50 transition-colors">
+                              <TestTube className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-gray-900 dark:text-white">Strategy Hub</h4>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Run pricing simulations</p>
+                            </div>
+                            <ArrowRight className="w-5 h-5 text-gray-400 group-hover:translate-x-1 transition-transform" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+
+                    <Link href="/deepresearch" className="group">
+                      <Card className="border-gray-100 dark:border-gray-800 hover:border-amber-200 dark:hover:border-amber-800 hover:shadow-lg transition-all group-hover:scale-[1.02]">
+                        <CardContent className="pt-6">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center group-hover:bg-blue-200 dark:group-hover:bg-blue-900/50 transition-colors">
+                              <Target className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-gray-900 dark:text-white">Deep Research</h4>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Market intelligence</p>
+                            </div>
+                            <ArrowRight className="w-5 h-5 text-gray-400 group-hover:translate-x-1 transition-transform" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+
+                    <Link href="/billing" className="group">
+                      <Card className="border-gray-100 dark:border-gray-800 hover:border-amber-200 dark:hover:border-amber-800 hover:shadow-lg transition-all group-hover:scale-[1.02]">
+                        <CardContent className="pt-6">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center group-hover:bg-green-200 dark:group-hover:bg-green-900/50 transition-colors">
+                              <BarChart3 className="w-6 h-6 text-green-600 dark:text-green-400" />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-gray-900 dark:text-white">Analytics</h4>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Performance insights</p>
+                            </div>
+                            <ArrowRight className="w-5 h-5 text-gray-400 group-hover:translate-x-1 transition-transform" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+
+                    <Link href="/triggers" className="group">
+                      <Card className="border-gray-100 dark:border-gray-800 hover:border-amber-200 dark:hover:border-amber-800 hover:shadow-lg transition-all group-hover:scale-[1.02]">
+                        <CardContent className="pt-6">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center group-hover:bg-purple-200 dark:group-hover:bg-purple-900/50 transition-colors">
+                              <Zap className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-gray-900 dark:text-white">Triggers</h4>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Setup automation</p>
+                            </div>
+                            <ArrowRight className="w-5 h-5 text-gray-400 group-hover:translate-x-1 transition-transform" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
                   </div>
                 </div>
-              </div>
-              <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">AI analysis of your financial risk factors across key areas.</p>
-            </div>
 
-            {/* Pricing Intelligence */}
-            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-md p-6 border border-gray-200 dark:border-gray-800 flex flex-col">
-              <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
-                <PieChart className="w-5 h-5 text-blue-500 dark:text-blue-400" /> Pricing Intelligence
-              </h2>
-              <div className="flex-1 flex items-center justify-center min-h-[200px]">
-                <div className="text-center space-y-4 w-full">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg">
-                      <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">Price Optimizations</p>
-                      <p className="text-lg font-semibold text-blue-800 dark:text-blue-200">{mockPricingStats.priceOptimizations}</p>
-                    </div>
-                    <div className="bg-green-50 dark:bg-green-900/30 p-3 rounded-lg">
-                      <p className="text-xs text-green-600 dark:text-green-400 font-medium">Revenue Boost</p>
-                      <p className="text-lg font-semibold text-green-800 dark:text-green-200">+{mockPricingStats.revenueIncrease}%</p>
-                    </div>
-                    <div className="bg-purple-50 dark:bg-purple-900/30 p-3 rounded-lg">
-                      <p className="text-xs text-purple-600 dark:text-purple-400 font-medium">Competitors Tracked</p>
-                      <p className="text-lg font-semibold text-purple-800 dark:text-purple-200">{mockPricingStats.competitorsTracked}</p>
-                    </div>
-                    <div className="bg-orange-50 dark:bg-orange-900/30 p-3 rounded-lg">
-                      <p className="text-xs text-orange-600 dark:text-orange-400 font-medium">Pricing Score</p>
-                      <p className="text-lg font-semibold text-orange-800 dark:text-orange-200">{mockPricingStats.pricingScore}/100</p>
-                    </div>
-                  </div>
+                {/* Usage Stats */}
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Usage This Month</h3>
+                  <Card className="border-gray-100 dark:border-gray-800">
+                    <CardContent className="pt-6">
+                      <div className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center">
+                              <Lightbulb className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                            </div>
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Analysis Runs</span>
+                          </div>
+                          <span className="text-lg font-semibold text-gray-900 dark:text-white">{mockStats.analysisRuns}</span>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                              <TestTube className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Tests Created</span>
+                          </div>
+                          <span className="text-lg font-semibold text-gray-900 dark:text-white">{mockStats.testsCreated}</span>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                              <Clock className="w-4 h-4 text-green-600 dark:text-green-400" />
+                            </div>
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">API Calls</span>
+                          </div>
+                          <span className="text-lg font-semibold text-gray-900 dark:text-white">1.2K</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
               </div>
-              <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">AI-powered pricing insights and competitor monitoring results.</p>
+
+              {/* Recent Activity */}
+              <div className="mb-12">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Recent Activity</h3>
+                <Card className="border-gray-100 dark:border-gray-800">
+                  <CardContent className="pt-6">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-4 p-4 bg-amber-50 dark:bg-amber-950/20 rounded-lg">
+                        <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center">
+                          <Sparkles className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">SAGE analyzed your pricing strategy</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">2 hours ago</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-900/50 rounded-lg transition-colors">
+                        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                          <TestTube className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">A/B test scenario created</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Yesterday</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-900/50 rounded-lg transition-colors">
+                        <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                          <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">Revenue increased by 12.5%</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">3 days ago</p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-16">
+              <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/30 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                <AlertTriangle className="w-10 h-10 text-amber-600 dark:text-amber-400" />
+              </div>
+              <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-3">
+                Complete Your Setup
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
+                Finish your product profile to unlock AI-powered pricing insights and analytics
+              </p>
+              <Link href="/product-profile">
+                <Button className="bg-amber-500 hover:bg-amber-600 text-white shadow-lg">
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Complete Setup
+                </Button>
+              </Link>
             </div>
-          </div>
+          )}
         </div>
       </TrialProvider>
     </div>
-  );
+  )
 }

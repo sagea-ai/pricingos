@@ -29,11 +29,29 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Features
+
+### Business Intelligence & Testing Lab
+- **Competitor Analysis**: Deep insights into competitive landscape, pricing strategies, and market positioning
+- **Pricing Optimization**: AI-powered recommendations for optimal pricing strategies and models
+- **Market Positioning**: Strategic guidance on market segments and brand positioning
+- **Growth Opportunities**: Identification of expansion paths and revenue opportunities
+- **A/B Testing Suite**: Comprehensive testing scenarios for pricing, messaging, features, and conversion optimization
+- **Strategic Recommendations**: Actionable insights based on product profile and market analysis
+
+### Core Platform
+- Smart financial stress detection for SMBs and freelancers
+- AI-driven pricing recommendations and competitor analysis
+- Cash flow monitoring and risk assessment
+- Real-time business health scoring
+- Automated insights and proactive recommendations
+
 ## IMP HAI IMP
 
 - Always run `npm run db:generate` after changing the Prisma schema
 - Make sure your database is running before starting the application
 - If you encounter "undefined model" errors, run `npm run db:generate` to regenerate the Prisma client
+- Complete product profile setup before accessing the Testing Lab (/testing)
 
 ## Learn More
 
