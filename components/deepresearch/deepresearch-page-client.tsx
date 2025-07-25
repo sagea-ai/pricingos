@@ -50,21 +50,81 @@ interface TrendAnalysis {
   description: string
 }
 
+interface BusinessHealth {
+  cashFlowInsights: string
+  pricingPosition: string
+  riskFactors: string[]
+  opportunityScore: number
+  stressLevel: 'low' | 'medium' | 'high'
+}
+
+interface ActionablePlan {
+  priority: 'high' | 'medium' | 'low'
+  category: string
+  action: string
+  expectedImpact: string
+  effort: 'low' | 'medium' | 'high'
+  cost: 'free' | 'low' | 'medium' | 'high'
+  roi: string
+}
+
+interface CompetitorIntel {
+  competitorType: 'Direct' | 'Indirect' | 'Aspirational'
+  pricingStrategy: string
+  differentiator: string
+  weakness: string
+  lessons: string
+}
+
+interface FinancialProjection {
+  scenario: 'Conservative' | 'Optimistic' | 'Aggressive'
+  timeframe: string
+  revenue: string
+  expenses: string
+  cashflow: string
+  keyAssumptions: string[]
+  triggerEvents: string[]
+}
+
+interface MarketOpportunity {
+  opportunity: string
+  timeWindow: string
+  entryBarrier: 'low' | 'medium' | 'high'
+  potentialRevenue: string
+  requiredInvestment: string
+  firstSteps: string[]
+}
+
+interface WarningSignal {
+  signal: string
+  severity: 'low' | 'medium' | 'high'
+  timeframe: string
+  preventiveAction: string
+  cost: string
+}
+
+interface QuickWin {
+  action: string
+  impact: string
+  timeToImplement: string
+  resources: string
+}
+
 interface ResearchResult {
   query: string
   summary: string
-  insights: ResearchInsight[]
-  trends: TrendAnalysis[]
+  businessHealth: BusinessHealth
+  actionablePlans: ActionablePlan[]
+  competitorIntelligence: CompetitorIntel[]
+  financialProjections: FinancialProjection[]
+  marketOpportunities: MarketOpportunity[]
+  warningSignals: WarningSignal[]
+  quickWins: QuickWin[]
   sources: Source[]
-  probabilisticOutcomes: Array<{
-    scenario: string
-    probability: number
-    timeframe: string
-    factors: string[]
-  }>
-  recommendations: string[]
   confidence: number
   researchDepth: number
+  urgency: 'low' | 'medium' | 'high'
+  implementationComplexity: 'simple' | 'moderate' | 'complex'
 }
 
 interface Organization {
@@ -156,24 +216,24 @@ export function DeepResearchPageClient({ organizations, currentOrganization }: D
   const carouselRef = useRef<HTMLDivElement>(null)
 
   const suggestionPrompts = [
-    "Cash flow patterns for SaaS startups in first 18 months",
-    "Pricing strategies for freelance graphic designers in 2024",
-    "Financial stress indicators for e-commerce SMBs",
-    "Competitor analysis for B2B consulting services pricing",
-    "Seasonal revenue patterns in retail businesses",
-    "Subscription model conversion rates by industry",
-    "SMB expense optimization strategies during economic downturns",
-    "Freelancer invoice collection best practices and timing",
-    "Market pricing for digital marketing services",
-    "Financial runway calculations for tech startups",
-    "Customer acquisition cost trends in fintech",
-    "Revenue diversification strategies for small businesses",
-    "Pricing psychology for service-based businesses",
-    "Financial health metrics for creative agencies",
-    "Market demand analysis for consulting services",
-    "Competitor pricing intelligence for software tools",
-    "Business model pivots during market shifts",
-    "Cash flow forecasting for seasonal businesses"
+    "Pricing strategy for freelance web design services in 2024",
+    "Cash flow optimization for seasonal retail businesses",
+    "Customer acquisition cost reduction for local service businesses", 
+    "Competitor pricing analysis for boutique consulting firms",
+    "Financial stress indicators for e-commerce SMBs during Q4",
+    "Revenue diversification strategies for creative agencies",
+    "Subscription model transition for service-based businesses",
+    "Invoice collection best practices for freelancers",
+    "Market positioning for premium vs budget service providers",
+    "Business model pivot strategies during economic uncertainty",
+    "Cost structure optimization for remote consulting businesses",
+    "Client retention strategies for subscription-based SMBs",
+    "Pricing psychology for high-value service businesses",
+    "Financial runway extension tactics for cash-strapped startups",
+    "Market demand analysis for digital marketing services",
+    "Competitive differentiation for crowded service markets",
+    "Operational efficiency improvements for solo entrepreneurs",
+    "Growth funding alternatives for bootstrapped SMBs"
   ]
 
   useEffect(() => {
@@ -637,99 +697,96 @@ export function DeepResearchPageClient({ organizations, currentOrganization }: D
                 </Card>
               </div>
 
-              {/* Key Insights */}
+              {/* Business Health Dashboard */}
               <div className="space-y-6">
                 <h2 className="text-2xl font-light text-gray-900 dark:text-white flex items-center gap-3">
                   <IoAnalyticsOutline className="w-6 h-6" />
-                  Business Insights
+                  Business Health Overview
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <Card className="border-0 shadow-sm bg-gray-50/50 dark:bg-gray-950/50">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-medium text-gray-900 dark:text-white">Opportunity Score</h3>
+                        <div className={`text-2xl font-bold ${
+                          result.businessHealth.opportunityScore >= 80 ? 'text-green-600' :
+                          result.businessHealth.opportunityScore >= 60 ? 'text-yellow-600' : 'text-red-600'
+                        }`}>
+                          {result.businessHealth.opportunityScore}
+                        </div>
+                      </div>
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div 
+                          className={`h-2 rounded-full ${
+                            result.businessHealth.opportunityScore >= 80 ? 'bg-green-600' :
+                            result.businessHealth.opportunityScore >= 60 ? 'bg-yellow-600' : 'bg-red-600'
+                          }`}
+                          style={{ width: `${result.businessHealth.opportunityScore}%` }}
+                        ></div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-0 shadow-sm bg-gray-50/50 dark:bg-gray-950/50">
+                    <CardContent className="p-6">
+                      <h3 className="font-medium text-gray-900 dark:text-white mb-2">Stress Level</h3>
+                      <div className="flex items-center gap-2">
+                        <div className={`w-3 h-3 rounded-full ${
+                          result.businessHealth.stressLevel === 'low' ? 'bg-green-500' :
+                          result.businessHealth.stressLevel === 'medium' ? 'bg-yellow-500' : 'bg-red-500'
+                        }`}></div>
+                        <span className="capitalize text-gray-700 dark:text-gray-300">
+                          {result.businessHealth.stressLevel}
+                        </span>
+                      </div>
+                      <div className="mt-3">
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {result.businessHealth.cashFlowInsights}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-0 shadow-sm bg-gray-50/50 dark:bg-gray-950/50">
+                    <CardContent className="p-6">
+                      <h3 className="font-medium text-gray-900 dark:text-white mb-3">Risk Factors</h3>
+                      <div className="space-y-2">
+                        {result.businessHealth.riskFactors.slice(0, 3).map((risk, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <IoWarningOutline className="w-4 h-4 text-amber-500 shrink-0" />
+                            <span className="text-sm text-gray-600 dark:text-gray-400">{risk}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              {/* Quick Wins */}
+              <div className="space-y-6">
+                <h2 className="text-2xl font-light text-gray-900 dark:text-white flex items-center gap-3">
+                  <IoFlashOutline className="w-6 h-6" />
+                  Quick Wins (Implement This Week)
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {result.insights.map((insight) => (
-                    <Card key={insight.id} className="border-0 shadow-sm bg-gray-50/50 dark:bg-gray-950/50">
+                  {result.quickWins.map((win, index) => (
+                    <Card key={index} className="border-0 shadow-sm bg-green-50/50 dark:bg-green-950/20">
                       <CardContent className="p-6">
-                        <div className="flex items-start gap-3 mb-3">
-                          {getImpactIcon(insight.impact)}
-                          <div className="flex-1">
-                            <h3 className="font-medium text-gray-900 dark:text-white mb-1">
-                              {insight.category}
-                            </h3>
-                            <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
-                              {insight.finding}
-                            </p>
+                        <div className="flex items-start gap-3">
+                          <div className="w-6 h-6 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                            <IoCheckmarkCircleOutline className="w-4 h-4 text-green-600" />
                           </div>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <Badge className={`text-xs ${getConfidenceColor(insight.confidence)}`}>
-                            {insight.confidence}% confidence
-                          </Badge>
-                          <span className="text-xs text-gray-500">
-                            {insight.sources.length} sources
-                          </span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-
-              {/* Trend Analysis */}
-              <div className="space-y-6">
-                <h2 className="text-2xl font-light text-gray-900 dark:text-white flex items-center gap-3">
-                  <IoTrendingUpOutline className="w-6 h-6" />
-                  Market Trends
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {result.trends.map((trend, index) => (
-                    <Card key={index} className="border-0 shadow-sm bg-gray-50/50 dark:bg-gray-950/50">
-                      <CardContent className="p-6">
-                        <div className="flex items-center gap-2 mb-3">
-                          <span className="text-2xl">{getTrendIcon(trend.direction)}</span>
-                          <h3 className="font-medium text-gray-900 dark:text-white">
-                            {trend.trend}
-                          </h3>
-                        </div>
-                        <p className="text-gray-600 dark:text-gray-300 text-sm mb-3 leading-relaxed">
-                          {trend.description}
-                        </p>
-                        <div className="flex items-center justify-between text-xs text-gray-500">
-                          <span>Magnitude: {trend.magnitude}%</span>
-                          <span>{trend.timeframe}</span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-
-              {/* Probabilistic Outcomes */}
-              <div className="space-y-6">
-                <h2 className="text-2xl font-light text-gray-900 dark:text-white flex items-center gap-3">
-                  <IoTimeOutline className="w-6 h-6" />
-                  Scenario Planning
-                </h2>
-                <div className="space-y-4">
-                  {result.probabilisticOutcomes.map((outcome, index) => (
-                    <Card key={index} className="border-0 shadow-sm bg-gray-50/50 dark:bg-gray-950/50">
-                      <CardContent className="p-6">
-                        <div className="flex items-start justify-between mb-4">
                           <div className="flex-1">
                             <h3 className="font-medium text-gray-900 dark:text-white mb-2">
-                              {outcome.scenario}
+                              {win.action}
                             </h3>
-                            <div className="flex flex-wrap gap-2 mb-3">
-                              {outcome.factors.map((factor, i) => (
-                                <Badge key={i} variant="outline" className="text-xs">
-                                  {factor}
-                                </Badge>
-                              ))}
-                            </div>
-                            <span className="text-xs text-gray-500">{outcome.timeframe}</span>
-                          </div>
-                          <div className="ml-6 text-center">
-                            <div className="w-16 h-16 bg-white dark:bg-gray-900 rounded-2xl flex items-center justify-center border border-gray-200 dark:border-gray-800">
-                              <span className="text-sm font-medium text-gray-900 dark:text-white">
-                                {outcome.probability}%
-                              </span>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                              {win.impact}
+                            </p>
+                            <div className="flex items-center justify-between text-xs text-gray-500">
+                              <span>⏱️ {win.timeToImplement}</span>
+                              <span>📋 {win.resources}</span>
                             </div>
                           </div>
                         </div>
@@ -739,37 +796,80 @@ export function DeepResearchPageClient({ organizations, currentOrganization }: D
                 </div>
               </div>
 
-              {/* Sources */}
+              {/* Actionable Plans */}
               <div className="space-y-6">
                 <h2 className="text-2xl font-light text-gray-900 dark:text-white flex items-center gap-3">
                   <IoDocumentTextOutline className="w-6 h-6" />
-                  Sources
+                  Strategic Action Plans
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {result.sources.map((source, index) => (
+                <div className="space-y-4">
+                  {result.actionablePlans.map((plan, index) => (
                     <Card key={index} className="border-0 shadow-sm bg-gray-50/50 dark:bg-gray-950/50">
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-gray-900 dark:text-white text-sm mb-1 truncate">
-                              {source.title}
-                            </h4>
-                            <a 
-                              href={source.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-xs text-amber-600 hover:text-amber-800 break-all"
-                            >
-                              {source.url}
-                            </a>
-                          </div>
-                          <div className="ml-3 flex flex-col items-end">
-                            <Badge variant="outline" className="text-xs mb-1">
-                              {source.type}
+                      <CardContent className="p-6">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-center gap-3">
+                            <Badge className={
+                              plan.priority === 'high' ? 'bg-red-100 text-red-800 border-red-200' :
+                              plan.priority === 'medium' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
+                              'bg-green-100 text-green-800 border-green-200'
+                            }>
+                              {plan.priority} priority
                             </Badge>
-                            <span className="text-xs text-gray-500">
-                              {source.relevance}% relevance
-                            </span>
+                            <Badge variant="outline">{plan.category}</Badge>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm font-medium text-gray-900 dark:text-white">
+                              ROI: {plan.roi}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {plan.effort} effort • {plan.cost} cost
+                            </div>
+                          </div>
+                        </div>
+                        <h3 className="font-medium text-gray-900 dark:text-white mb-2">
+                          {plan.action}
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-400 text-sm">
+                          {plan.expectedImpact}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+
+              {/* Financial Projections */}
+              <div className="space-y-6">
+                <h2 className="text-2xl font-light text-gray-900 dark:text-white flex items-center gap-3">
+                  <IoTrendingUpOutline className="w-6 h-6" />
+                  Financial Scenarios
+                </h2>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  {result.financialProjections.map((projection, index) => (
+                    <Card key={index} className="border-0 shadow-sm bg-gray-50/50 dark:bg-gray-950/50">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="font-medium text-gray-900 dark:text-white">
+                            {projection.scenario}
+                          </h3>
+                          <Badge variant="outline">{projection.timeframe}</Badge>
+                        </div>
+                        <div className="space-y-3">
+                          <div>
+                            <div className="text-xs text-gray-500 mb-1">Revenue</div>
+                            <div className="text-sm font-medium text-green-600">{projection.revenue}</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-gray-500 mb-1">Cash Flow</div>
+                            <div className="text-sm font-medium text-gray-900 dark:text-white">
+                              {projection.cashflow}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-gray-500 mb-1">Key Assumptions</div>
+                            <div className="text-xs text-gray-600 dark:text-gray-400">
+                              {projection.keyAssumptions.slice(0, 2).join(', ')}
+                            </div>
                           </div>
                         </div>
                       </CardContent>
@@ -778,24 +878,149 @@ export function DeepResearchPageClient({ organizations, currentOrganization }: D
                 </div>
               </div>
 
-              {/* Recommendations */}
+              {/* Warning Signals */}
               <div className="space-y-6">
-                <h2 className="text-2xl font-light text-gray-900 dark:text-white">
-                  Strategic Recommendations
+                <h2 className="text-2xl font-light text-gray-900 dark:text-white flex items-center gap-3">
+                  <IoWarningOutline className="w-6 h-6" />
+                  Early Warning System
                 </h2>
                 <div className="space-y-3">
-                  {result.recommendations.map((recommendation, index) => (
-                    <Card key={index} className="border-0 shadow-sm bg-gray-50/50 dark:bg-gray-950/50">
-                      <CardContent className="p-4">
-                        <div className="flex items-start gap-3">
-                          <div className="w-6 h-6 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center shrink-0 mt-0.5">
-                            <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
-                              {index + 1}
-                            </span>
+                  {result.warningSignals.map((warning, index) => (
+                    <Card key={index} className={`border-0 shadow-sm ${
+                      warning.severity === 'high' ? 'bg-red-50/50 dark:bg-red-950/20' :
+                      warning.severity === 'medium' ? 'bg-yellow-50/50 dark:bg-yellow-950/20' :
+                      'bg-gray-50/50 dark:bg-gray-950/50'
+                    }`}>
+                      <CardContent className="p-6">
+                        <div className="flex items-start gap-4">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                            warning.severity === 'high' ? 'bg-red-100 dark:bg-red-900/30' :
+                            warning.severity === 'medium' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
+                            'bg-gray-100 dark:bg-gray-900/30'
+                          }`}>
+                            <IoWarningOutline className={`w-4 h-4 ${
+                              warning.severity === 'high' ? 'text-red-600' :
+                              warning.severity === 'medium' ? 'text-yellow-600' :
+                              'text-gray-600'
+                            }`} />
                           </div>
-                          <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                            {recommendation}
-                          </p>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-2">
+                              <h3 className="font-medium text-gray-900 dark:text-white">
+                                {warning.signal}
+                              </h3>
+                              <Badge className={
+                                warning.severity === 'high' ? 'bg-red-100 text-red-800 border-red-200' :
+                                warning.severity === 'medium' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
+                                'bg-gray-100 text-gray-800 border-gray-200'
+                              }>
+                                {warning.severity}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                              {warning.preventiveAction}
+                            </p>
+                            <div className="flex items-center justify-between text-xs text-gray-500">
+                              <span>Timeline: {warning.timeframe}</span>
+                              <span>Prevention cost: {warning.cost}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+
+              {/* Competitor Intelligence */}
+              <div className="space-y-6">
+                <h2 className="text-2xl font-light text-gray-900 dark:text-white">
+                  Competitive Intelligence
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {result.competitorIntelligence.map((intel, index) => (
+                    <Card key={index} className="border-0 shadow-sm bg-gray-50/50 dark:bg-gray-950/50">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="font-medium text-gray-900 dark:text-white">
+                            {intel.competitorType} Competitor
+                          </h3>
+                        </div>
+                        <div className="space-y-3">
+                          <div>
+                            <div className="text-xs font-medium text-gray-500 mb-1">PRICING STRATEGY</div>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                              {intel.pricingStrategy}
+                            </p>
+                          </div>
+                          <div>
+                            <div className="text-xs font-medium text-gray-500 mb-1">DIFFERENTIATOR</div>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                              {intel.differentiator}
+                            </p>
+                          </div>
+                          <div>
+                            <div className="text-xs font-medium text-gray-500 mb-1">OPPORTUNITY</div>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                              {intel.weakness}
+                            </p>
+                          </div>
+                          <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                            <div className="text-xs font-medium text-amber-600 mb-1">KEY TAKEAWAY</div>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                              {intel.lessons}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+
+              {/* Market Opportunities */}
+              <div className="space-y-6">
+                <h2 className="text-2xl font-light text-gray-900 dark:text-white">
+                  Market Opportunities
+                </h2>
+                <div className="space-y-4">
+                  {result.marketOpportunities.map((opportunity, index) => (
+                    <Card key={index} className="border-0 shadow-sm bg-blue-50/50 dark:bg-blue-950/20">
+                      <CardContent className="p-6">
+                        <div className="flex items-start justify-between mb-4">
+                          <h3 className="font-medium text-gray-900 dark:text-white">
+                            {opportunity.opportunity}
+                          </h3>
+                          <div className="text-right">
+                            <div className="text-sm font-medium text-blue-600">
+                              {opportunity.potentialRevenue}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {opportunity.entryBarrier} barrier
+                            </div>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <div className="text-xs font-medium text-gray-500 mb-2">FIRST STEPS</div>
+                            <ul className="space-y-1">
+                              {opportunity.firstSteps.map((step, i) => (
+                                <li key={i} className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full shrink-0"></div>
+                                  {step}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div>
+                            <div className="text-xs font-medium text-gray-500 mb-2">INVESTMENT NEEDED</div>
+                            <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
+                              {opportunity.requiredInvestment}
+                            </p>
+                            <div className="text-xs text-gray-500">
+                              Window: {opportunity.timeWindow}
+                            </div>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
