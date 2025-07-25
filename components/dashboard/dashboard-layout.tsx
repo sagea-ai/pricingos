@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { BarChart3, Calendar, AlertTriangle, TrendingDown, ArrowRight, MessageSquare, TrendingUp, DollarSign, Shield, Target, Activity, Zap, PieChart, Sparkles, TestTube } from "lucide-react"
+import { BarChart3, Calendar, AlertTriangle, TrendingDown, ArrowRight, MessageSquare, TrendingUp, DollarSign, Shield, Target, Activity, Zap, PieChart, Sparkles, TestTube, Users, Clock, Lightbulb, ArrowUp, ArrowDown } from "lucide-react"
 import Link from "next/link"
 import { TrialProvider } from "../trial/trial-provider"
 import { TrialBannerWrapper } from "../trial/trial-banner-wrapper"
@@ -103,353 +103,345 @@ export function DashboardLayout({
     fetchPricingAnalysis()
   }, [])
 
+  const mockStats = {
+    monthlyRevenue: productInfo?.monthly_revenue || 12450,
+    totalUsers: productInfo?.total_users || 1247,
+    conversionRate: 3.2,
+    churnRate: 2.1,
+    analysisRuns: 23,
+    testsCreated: 8
+  }
+
   return (
-    <div className="min-h-screen bg-amber-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-white dark:bg-gray-950">
       <TrialProvider>
         <div className="w-full">
           <TrialBannerWrapper />
         </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <div className="max-w-7xl mx-auto px-6 py-8">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-4xl font-light text-gray-900 dark:text-white tracking-tight">
+          <div className="mb-12">
+            <h1 className="text-4xl font-light text-gray-900 dark:text-white mb-2">
               {greeting}
             </h1>
             {productInfo && (
-              <p className="mt-2 text-lg text-gray-600 dark:text-gray-400 font-light">
-                Strategic insights for <span className="font-medium text-gray-900 dark:text-white">{productInfo.name}</span>
+              <p className="text-lg text-gray-500 dark:text-gray-400">
+                Here's how <span className="text-amber-600 font-medium">{productInfo.name}</span> is performing
               </p>
             )}
           </div>
 
           {analysisLoading ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
               {[...Array(6)].map((_, i) => (
-                <Card key={i} className="animate-pulse">
+                <Card key={i} className="animate-pulse border-gray-100 dark:border-gray-800">
                   <CardContent className="pt-6">
                     <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-4"></div>
-                    <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
                   </CardContent>
                 </Card>
               ))}
             </div>
           ) : pricingAnalysis ? (
             <>
-              {/* SAGE Recommendation - Hero Section */}
-              <div className="mb-8">
-                <Card className="bg-gradient-to-br from-amber-100 via-amber-50 to-orange-50 dark:from-amber-900/30 dark:via-amber-900/20 dark:to-orange-900/20 rounded-3xl shadow-lg border-2 border-amber-200 dark:border-amber-800/50">
-                  <CardHeader className="pb-6">
-                    <CardTitle className="text-2xl font-medium text-gray-900 dark:text-white flex items-center gap-4">
-                      <div className="w-12 h-12 bg-amber-200 dark:bg-amber-900/60 rounded-2xl flex items-center justify-center">
-                        <Sparkles className="w-6 h-6 text-amber-700 dark:text-amber-400" />
+              {/* SAGE AI Recommendation - Hero Section */}
+              <div className="mb-12">
+                <Card className="bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:from-amber-950/20 dark:via-orange-950/10 dark:to-yellow-950/20 border-amber-200 dark:border-amber-800/50 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-100/20 to-transparent animate-pulse"></div>
+                  <CardContent className="pt-8 pb-8 relative">
+                    <div className="flex items-start gap-6">
+                      <div className="w-16 h-16 bg-amber-400 rounded-2xl flex items-center justify-center shadow-lg">
+                        <Sparkles className="w-8 h-8 text-white" />
                       </div>
-                      <div>
-                        <div className="flex items-center gap-3">
-                          SAGE AI Recommendation
-                          <Badge className="bg-amber-200 text-amber-800 border-amber-300 dark:bg-amber-900/40 dark:text-amber-300 dark:border-amber-700 text-sm font-medium">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-3">
+                          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                            SAGE AI Recommendation
+                          </h2>
+                          <Badge className="bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/40 dark:text-amber-300">
                             Strategic
                           </Badge>
                         </div>
-                        <p className="text-sm font-normal text-amber-700 dark:text-amber-300 mt-1">
-                          AI-powered pricing strategy tailored for your product
-                        </p>
-                      </div>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                      <div className="lg:col-span-2">
-                        <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                        <p className="text-gray-600 dark:text-gray-300 text-lg mb-6 leading-relaxed">
                           {pricingAnalysis.sage_recommendation.model}
-                        </h4>
-                        <div className="grid grid-cols-3 gap-4 mb-6">
-                          {pricingAnalysis.sage_recommendation.segments.map((segment, index) => (
-                            <div key={index} className="text-center p-4 bg-white dark:bg-gray-800 rounded-2xl border-2 border-amber-100 dark:border-amber-800 shadow-sm">
-                              <p className="text-sm text-amber-600 dark:text-amber-400 font-medium mb-2">{segment}</p>
-                              <p className="text-xl font-bold text-gray-900 dark:text-white">
-                                {pricingAnalysis.sage_recommendation.price_points[index]}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-amber-100 dark:border-amber-800">
-                        <h5 className="text-sm font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wider mb-4">
-                          AI Reasoning
-                        </h5>
-                        <div className="space-y-3">
-                          {pricingAnalysis.sage_recommendation.reasoning_chain.slice(0, 3).map((step, index) => (
-                            <div key={index} className="flex items-start gap-3">
-                              <div className="w-6 h-6 bg-amber-100 dark:bg-amber-900/50 rounded-full flex items-center justify-center text-xs font-bold text-amber-700 dark:text-amber-300 flex-shrink-0">
-                                {index + 1}
-                              </div>
-                              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                                {step}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Quick Actions & Business Health */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-3xl shadow-sm p-8 border border-gray-100 dark:border-gray-800">
-                  <h2 className="text-xl font-medium mb-6 text-gray-900 dark:text-white flex items-center gap-3">
-                    <div className="w-8 h-8 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
-                      <Activity className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                    </div>
-                    Strategic Actions
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Link href="/testing" className="group">
-                      <div className="flex items-center justify-between p-6 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl border border-amber-100 dark:border-amber-800 hover:shadow-md transition-all hover:scale-[1.02]">
-                        <div>
-                          <h3 className="font-medium text-amber-900 dark:text-amber-100 flex items-center gap-2 mb-2">
-                            <TestTube className="w-4 h-4" /> Strategy Hub
-                          </h3>
-                          <p className="text-sm text-amber-700 dark:text-amber-300">AI pricing simulations</p>
-                        </div>
-                        <ArrowRight className="w-4 h-4 text-amber-600 group-hover:translate-x-1 transition-transform" />
-                      </div>
-                    </Link>
-
-                    <Link href="/competitors" className="group">
-                      <div className="flex items-center justify-between p-6 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-2xl border border-orange-100 dark:border-orange-800 hover:shadow-md transition-all hover:scale-[1.02]">
-                        <div>
-                          <h3 className="font-medium text-orange-900 dark:text-orange-100 flex items-center gap-2 mb-2">
-                            <Target className="w-4 h-4" /> Competitor Intel
-                          </h3>
-                          <p className="text-sm text-orange-700 dark:text-orange-300">Market positioning</p>
-                        </div>
-                        <ArrowRight className="w-4 h-4 text-orange-600 group-hover:translate-x-1 transition-transform" />
-                      </div>
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Business Health */}
-                <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm p-8 border border-gray-100 dark:border-gray-800">
-                  <h2 className="text-xl font-medium mb-6 text-gray-900 dark:text-white flex items-center gap-3">
-                    <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
-                      <DollarSign className="w-4 h-4 text-green-600 dark:text-green-400" />
-                    </div>
-                    Business Metrics
-                  </h2>
-                  <div className="space-y-6">
-                    <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Monthly Revenue</p>
-                      <p className="text-2xl font-light text-gray-900 dark:text-white">
-                        ${productInfo?.monthly_revenue?.toLocaleString() || '0'}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Users</p>
-                      <p className="text-2xl font-light text-gray-900 dark:text-white">
-                        {productInfo?.total_users?.toLocaleString() || '0'}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Current Price</p>
-                      <p className="text-lg font-medium text-gray-900 dark:text-white">
-                        {productInfo?.current_price || 'Not set'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Feature-to-Value Mapping & Pricing Model Fit */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <Card className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800">
-                  <CardHeader className="pb-4">
-                    <CardTitle className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-3">
-                      <div className="w-8 h-8 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
-                        <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                      </div>
-                      Feature-to-Value Mapping
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                      {pricingAnalysis.feature_to_value_mapping.insight}
-                    </p>
-                    <div className="space-y-2">
-                      <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium">
-                        High-Value Features
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {pricingAnalysis.feature_to_value_mapping.highlighted_features.map((feature, index) => (
-                          <Badge key={index} variant="secondary" className="bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800">
-                            {feature}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-2xl border border-amber-100 dark:border-amber-800">
-                      <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
-                        Value Gap: {pricingAnalysis.feature_to_value_mapping.value_gap}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Pricing Model Fit */}
-                <Card className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800">
-                  <CardHeader className="pb-4">
-                    <CardTitle className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-3">
-                      <div className="w-8 h-8 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
-                        <TrendingUp className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                      </div>
-                      Pricing Model Fit
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium mb-2">
-                          Current
                         </p>
-                        <Badge variant="outline" className="text-sm">
-                          {pricingAnalysis.pricing_model_fit.current_model}
-                        </Badge>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium mb-2">
-                          Recommended
-                        </p>
-                        <Badge className="bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800 text-sm">
-                          {pricingAnalysis.pricing_model_fit.recommended_model}
-                        </Badge>
-                      </div>
-                    </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                      {pricingAnalysis.pricing_model_fit.rationale}
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Competitor Analysis */}
-              <div className="mb-8">
-                <Card className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800">
-                  <CardHeader className="pb-4">
-                    <CardTitle className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-3">
-                      <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
-                        <Target className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                      </div>
-                      Competitor Analysis
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-6">
-                      {pricingAnalysis.competitor_analysis.insight}
-                    </p>
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b border-gray-100 dark:border-gray-800">
-                            <th className="text-left text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium py-3">Product</th>
-                            <th className="text-left text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium py-3">Price</th>
-                            <th className="text-left text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium py-3">Features</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
-                          {pricingAnalysis.competitor_analysis.matrix.map((competitor, index) => (
-                            <tr key={index} className={competitor.name === productInfo?.name ? 'bg-amber-50 dark:bg-amber-900/10' : ''}>
-                              <td className="py-4">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium text-gray-900 dark:text-white">
-                                    {competitor.name}
-                                  </span>
-                                  {competitor.name === productInfo?.name && (
-                                    <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800">You</Badge>
-                                  )}
-                                </div>
-                              </td>
-                              <td className="py-4">
-                                <span className="text-gray-900 dark:text-white font-medium">
-                                  {competitor.price}
-                                </span>
-                              </td>
-                              <td className="py-4">
-                                <div className="flex flex-wrap gap-1">
-                                  {competitor.features.slice(0, 3).map((feature, featureIndex) => (
-                                    <Badge key={featureIndex} variant="outline" className="text-xs">
-                                      {feature}
-                                    </Badge>
-                                  ))}
-                                  {competitor.features.length > 3 && (
-                                    <Badge variant="outline" className="text-xs">
-                                      +{competitor.features.length - 3} more
-                                    </Badge>
-                                  )}
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* A/B Test Scenarios */}
-              <div className="mb-8">
-                <Card className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800">
-                  <CardHeader className="pb-4">
-                    <CardTitle className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-3">
-                      <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
-                        <TestTube className="w-4 h-4 text-green-600 dark:text-green-400" />
-                      </div>
-                      A/B Testing Scenarios
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {pricingAnalysis.ab_test_scenarios.map((scenario, index) => (
-                        <div key={index} className="p-6 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
-                          <h4 className="font-medium text-gray-900 dark:text-white mb-3 text-sm">
-                            {scenario.scenario}
-                          </h4>
-                          <p className="text-sm text-green-600 dark:text-green-400 font-medium mb-3">
-                            {scenario.expected_impact}
-                          </p>
-                          <div className="space-y-2">
-                            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium">
-                              Key Assumptions
-                            </p>
-                            {scenario.assumptions.slice(0, 2).map((assumption, assumptionIndex) => (
-                              <p key={assumptionIndex} className="text-xs text-gray-600 dark:text-gray-400">
-                                • {assumption}
-                              </p>
-                            ))}
+                        <div className="flex items-center gap-4">
+                          <Link href="/testing">
+                            <Button className="bg-amber-500 hover:bg-amber-600 text-white shadow-lg hover:shadow-xl transition-all">
+                              <TestTube className="w-4 h-4 mr-2" />
+                              Test Strategy
+                            </Button>
+                          </Link>
+                          <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
+                            <Lightbulb className="w-4 h-4" />
+                            <span className="text-sm font-medium">AI Confidence: 94%</span>
                           </div>
                         </div>
-                      ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Key Metrics Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                <Card className="border-gray-100 dark:border-gray-800 hover:shadow-lg transition-shadow">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Monthly Revenue</p>
+                        <p className="text-3xl font-light text-gray-900 dark:text-white">
+                          ${mockStats.monthlyRevenue.toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
+                        <DollarSign className="w-6 h-6 text-green-600 dark:text-green-400" />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 mt-4">
+                      <ArrowUp className="w-4 h-4 text-green-500" />
+                      <span className="text-sm text-green-600 dark:text-green-400 font-medium">+12.5%</span>
+                      <span className="text-sm text-gray-500">vs last month</span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-gray-100 dark:border-gray-800 hover:shadow-lg transition-shadow">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Active Users</p>
+                        <p className="text-3xl font-light text-gray-900 dark:text-white">
+                          {mockStats.totalUsers.toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                        <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 mt-4">
+                      <ArrowUp className="w-4 h-4 text-green-500" />
+                      <span className="text-sm text-green-600 dark:text-green-400 font-medium">+8.2%</span>
+                      <span className="text-sm text-gray-500">vs last month</span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-gray-100 dark:border-gray-800 hover:shadow-lg transition-shadow">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Conversion Rate</p>
+                        <p className="text-3xl font-light text-gray-900 dark:text-white">
+                          {mockStats.conversionRate}%
+                        </p>
+                      </div>
+                      <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
+                        <TrendingUp className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 mt-4">
+                      <ArrowDown className="w-4 h-4 text-red-500" />
+                      <span className="text-sm text-red-600 dark:text-red-400 font-medium">-0.3%</span>
+                      <span className="text-sm text-gray-500">vs last month</span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-gray-100 dark:border-gray-800 hover:shadow-lg transition-shadow">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Churn Rate</p>
+                        <p className="text-3xl font-light text-gray-900 dark:text-white">
+                          {mockStats.churnRate}%
+                        </p>
+                      </div>
+                      <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
+                        <Activity className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 mt-4">
+                      <ArrowDown className="w-4 h-4 text-green-500" />
+                      <span className="text-sm text-green-600 dark:text-green-400 font-medium">-0.8%</span>
+                      <span className="text-sm text-gray-500">vs last month</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Quick Actions & Tools */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+                <div className="lg:col-span-2">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Quick Actions</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Link href="/testing" className="group">
+                      <Card className="border-gray-100 dark:border-gray-800 hover:border-amber-200 dark:hover:border-amber-800 hover:shadow-lg transition-all group-hover:scale-[1.02]">
+                        <CardContent className="pt-6">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center group-hover:bg-amber-200 dark:group-hover:bg-amber-900/50 transition-colors">
+                              <TestTube className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-gray-900 dark:text-white">Strategy Hub</h4>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Run pricing simulations</p>
+                            </div>
+                            <ArrowRight className="w-5 h-5 text-gray-400 group-hover:translate-x-1 transition-transform" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+
+                    <Link href="/deepresearch" className="group">
+                      <Card className="border-gray-100 dark:border-gray-800 hover:border-amber-200 dark:hover:border-amber-800 hover:shadow-lg transition-all group-hover:scale-[1.02]">
+                        <CardContent className="pt-6">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center group-hover:bg-blue-200 dark:group-hover:bg-blue-900/50 transition-colors">
+                              <Target className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-gray-900 dark:text-white">Deep Research</h4>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Market intelligence</p>
+                            </div>
+                            <ArrowRight className="w-5 h-5 text-gray-400 group-hover:translate-x-1 transition-transform" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+
+                    <Link href="/billing" className="group">
+                      <Card className="border-gray-100 dark:border-gray-800 hover:border-amber-200 dark:hover:border-amber-800 hover:shadow-lg transition-all group-hover:scale-[1.02]">
+                        <CardContent className="pt-6">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center group-hover:bg-green-200 dark:group-hover:bg-green-900/50 transition-colors">
+                              <BarChart3 className="w-6 h-6 text-green-600 dark:text-green-400" />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-gray-900 dark:text-white">Analytics</h4>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Performance insights</p>
+                            </div>
+                            <ArrowRight className="w-5 h-5 text-gray-400 group-hover:translate-x-1 transition-transform" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+
+                    <Link href="/triggers" className="group">
+                      <Card className="border-gray-100 dark:border-gray-800 hover:border-amber-200 dark:hover:border-amber-800 hover:shadow-lg transition-all group-hover:scale-[1.02]">
+                        <CardContent className="pt-6">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center group-hover:bg-purple-200 dark:group-hover:bg-purple-900/50 transition-colors">
+                              <Zap className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-gray-900 dark:text-white">Triggers</h4>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Setup automation</p>
+                            </div>
+                            <ArrowRight className="w-5 h-5 text-gray-400 group-hover:translate-x-1 transition-transform" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Usage Stats */}
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Usage This Month</h3>
+                  <Card className="border-gray-100 dark:border-gray-800">
+                    <CardContent className="pt-6">
+                      <div className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center">
+                              <Lightbulb className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                            </div>
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Analysis Runs</span>
+                          </div>
+                          <span className="text-lg font-semibold text-gray-900 dark:text-white">{mockStats.analysisRuns}</span>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                              <TestTube className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Tests Created</span>
+                          </div>
+                          <span className="text-lg font-semibold text-gray-900 dark:text-white">{mockStats.testsCreated}</span>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                              <Clock className="w-4 h-4 text-green-600 dark:text-green-400" />
+                            </div>
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">API Calls</span>
+                          </div>
+                          <span className="text-lg font-semibold text-gray-900 dark:text-white">1.2K</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              {/* Recent Activity */}
+              <div className="mb-12">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Recent Activity</h3>
+                <Card className="border-gray-100 dark:border-gray-800">
+                  <CardContent className="pt-6">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-4 p-4 bg-amber-50 dark:bg-amber-950/20 rounded-lg">
+                        <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center">
+                          <Sparkles className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">SAGE analyzed your pricing strategy</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">2 hours ago</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-900/50 rounded-lg transition-colors">
+                        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                          <TestTube className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">A/B test scenario created</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Yesterday</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-900/50 rounded-lg transition-colors">
+                        <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                          <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">Revenue increased by 12.5%</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">3 days ago</p>
+                        </div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
               </div>
             </>
           ) : (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <AlertTriangle className="w-8 h-8 text-amber-600 dark:text-amber-400" />
+            <div className="text-center py-16">
+              <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/30 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                <AlertTriangle className="w-10 h-10 text-amber-600 dark:text-amber-400" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                No Product Profile Found
+              <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-3">
+                Complete Your Setup
               </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Complete your product profile to unlock pricing insights
+              <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
+                Finish your product profile to unlock AI-powered pricing insights and analytics
               </p>
               <Link href="/product-profile">
-                <Button className="bg-amber-600 hover:bg-amber-700 text-white">
-                  Complete Product Profile
+                <Button className="bg-amber-500 hover:bg-amber-600 text-white shadow-lg">
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Complete Setup
                 </Button>
               </Link>
             </div>
