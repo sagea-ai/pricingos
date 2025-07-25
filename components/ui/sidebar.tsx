@@ -140,7 +140,7 @@ export function SessionNavBar({
             <div className="flex h-16 w-full shrink-0 items-center dark:invert border-b px-3">
               <div className="flex items-center gap-3">
                 <Image src="/logo.png"
-                  alt="Reasonet Logo"
+                  alt="PricingOS"
                   width={42}
                   height={42}
                   className="h-8 w-8 rounded-md">
@@ -149,7 +149,7 @@ export function SessionNavBar({
                   variants={variants}
                   className="text-lg font-semibold text-foreground"
                 >
-                  {!isCollapsed && "Reasonet"}
+                  {!isCollapsed && "PricingOS"}
                 </motion.span>
               </div>
             </div>
@@ -261,10 +261,22 @@ export function SessionNavBar({
                   <div className="space-y-1">
                     <div className="px-2 py-1">
                       <motion.span variants={variants} className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                        {!isCollapsed && "Core Vitals"}
+                        {!isCollapsed && "Core"}
                       </motion.span>
                     </div>
                     
+                    <Link
+                      href="/testing"
+                      className={cn(
+                        "flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm font-medium transition-colors hover:bg-amber-50 hover:text-amber-700",
+                        pathname?.includes("testing") && "bg-amber-100 text-amber-700",
+                      )}
+                    >
+                      <SiReasonstudios className="h-4 w-4 shrink-0" />
+                      <motion.span variants={variants} className="truncate">
+                        {!isCollapsed && "A/B testing"}
+                      </motion.span>
+                    </Link>
                     <Link
                       href="/simulate"
                       className={cn(
@@ -272,33 +284,21 @@ export function SessionNavBar({
                         pathname?.includes("simulate") && "bg-amber-100 text-amber-700",
                       )}
                     >
-                      <SiReasonstudios className="h-4 w-4 shrink-0" />
-                      <motion.span variants={variants} className="truncate">
-                        {!isCollapsed && "Simulate an Idea"}
-                      </motion.span>
-                    </Link>
-                    <Link
-                      href="/deepresearch"
-                      className={cn(
-                        "flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm font-medium transition-colors hover:bg-amber-50 hover:text-amber-700",
-                        pathname?.includes("deepresearch") && "bg-amber-100 text-amber-700",
-                      )}
-                    >
                       <BsGlobeAmericas className="h-4 w-4 shrink-0" />
                       <motion.span variants={variants} className="truncate">
-                        {!isCollapsed && "Deep Research"}
+                        {!isCollapsed && "Simulate"}
                       </motion.span>
                     </Link>
                     <Link
-                      href="/workspaces"
+                      href="/triggers"
                       className={cn(
                         "flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm font-medium transition-colors hover:bg-amber-50 hover:text-amber-700",
-                        pathname?.includes("workspaces") && "bg-amber-100 text-amber-700",
+                        pathname?.includes("triggers") && "bg-amber-100 text-amber-700",
                       )}
                     >
                       <BsStack className="h-4 w-4 shrink-0" />
                       <motion.span variants={variants} className="truncate">
-                        {!isCollapsed && "Workspaces"}
+                        {!isCollapsed && "Setup Triggers"}
                       </motion.span>
                     </Link>
 
