@@ -141,7 +141,7 @@ export function SessionNavBar({
                   alt="PricingOS"
                   width={42}
                   height={42}
-                  className="h-8 w-8 rounded-md">
+                  className="h-9 w-9 rounded-md">
                 </Image>
                 <motion.span
                   variants={variants}
