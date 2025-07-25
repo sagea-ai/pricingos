@@ -77,6 +77,8 @@ model Organization {
   creator             User                  @relation("OrganizationCreator", fields: [creatorId], references: [id], onDelete: Cascade)
   repositories        Repository[]
   workspaces          Workspace[]
+  triggerSettings     TriggerSetting[]
+  triggerEventLogs    TriggerEventLog[]
 
   @@map("organizations")
 }
@@ -505,6 +507,57 @@ model WorkspaceInvitation {
   @@map("workspace_invitations")
 }
 
+model TriggerSetting {
+  id             String          @id @default(cuid())
+  triggerId      String // e.g., 'critical-cash-runway', 'low-cash-runway'
+  name           String
+  description    String          @db.Text
+  category       TriggerCategory
+  severity       TriggerSeverity
+  isEnabled      Boolean         @default(false)
+  emailTemplate  String?
+  organizationId String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  emailLogs    TriggerEmailLog[]
+
+  @@unique([triggerId, organizationId])
+  @@map("trigger_settings")
+}
+
+model TriggerEmailLog {
+  id               String   @id @default(cuid())
+  triggerSettingId String
+  recipientEmail   String
+  subject          String
+  emailTemplate    String
+  sentAt           DateTime @default(now())
+  status           String // 'sent', 'failed', 'pending'
+  errorMessage     String?
+  resendId         String? // Resend email ID for tracking
+
+  triggerSetting TriggerSetting @relation(fields: [triggerSettingId], references: [id], onDelete: Cascade)
+
+  @@map("trigger_email_logs")
+}
+
+model TriggerEventLog {
+  id             String   @id @default(cuid())
+  organizationId String
+  triggerId      String
+  triggerData    Json
+  emailSent      Boolean  @default(false)
+  recipients     String[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("trigger_event_logs")
+}
+
 enum CompanySize {
   JUST_ME
   TWO_TO_TEN
@@ -632,4 +685,17 @@ enum NotificationType {
   WORKSPACE_ACTIVITY
   ANALYSIS_COMPLETE
   MEMBER_JOINED
+}
+
+enum TriggerCategory {
+  FINANCIAL
+  USER
+  SYSTEM
+}
+
+enum TriggerSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
 }
