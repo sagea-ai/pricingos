@@ -586,70 +586,28 @@ export function FinancesContent({ organizationName, organizationId, productProfi
 
   const handleCSVUpload = async (file: File, type: 'stripe' | 'khalti' | 'expenses') => {
     try {
-      const text = await file.text()
-      const lines = text.split('\n').filter(line => line.trim())
+      console.log('Uploading file:', file.name, 'Type:', type, 'Size:', file.size);
       
-      if (lines.length < 2) {
-        throw new Error('CSV file must have at least a header row and one data row')
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('type', type);
+
+      const response = await fetch('/api/finances/upload-csv', {
+        method: 'POST',
+        body: formData,
+      });
+
+      console.log('Response status:', response.status);
+      
+      const result = await response.json();
+      console.log('Response data:', result);
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to upload CSV');
       }
-      
-      const headers = lines[0].split(',').map(h => h.trim().toLowerCase())
-      
-      // Validate required headers
-      const requiredHeaders = ['date', 'amount', 'description']
-      const missingHeaders = requiredHeaders.filter(header => !headers.includes(header))
-      if (missingHeaders.length > 0) {
-        throw new Error(`Missing required headers: ${missingHeaders.join(', ')}`)
-      }
-      
-      const transactions: TransactionData[] = lines.slice(1).map((line, index) => {
-        try {
-          const values = line.split(',').map(v => v.trim())
-          const transactionData: any = {}
-          
-          headers.forEach((header, headerIndex) => {
-            transactionData[header] = values[headerIndex] || ''
-          })
-          
-          // Validate and parse date
-          const dateStr = transactionData.date || transactionData.created_at
-          if (!dateStr) {
-            throw new Error(`Missing date in row ${index + 2}`)
-          }
-          
-          const parsedDate = new Date(dateStr)
-          if (isNaN(parsedDate.getTime())) {
-            throw new Error(`Invalid date format in row ${index + 2}: ${dateStr}`)
-          }
-          
-          // Validate and parse amount
-          const amountStr = transactionData.amount || transactionData.gross || '0'
-          const amount = parseFloat(amountStr)
-          if (isNaN(amount)) {
-            throw new Error(`Invalid amount in row ${index + 2}: ${amountStr}`)
-          }
-          
-          return {
-            date: parsedDate.toISOString().split('T')[0], // Normalize to YYYY-MM-DD format
-            amount: amount,
-            type: (transactionData.type || (type === 'expenses' ? 'expense' : 'revenue')) as 'revenue' | 'expense',
-            description: transactionData.description || transactionData.customer_email || 'Transaction',
-            category: transactionData.category || type,
-            gateway: (transactionData.gateway && transactionData.gateway.trim() !== '' ? transactionData.gateway : (type === 'expenses' ? undefined : type)) as 'stripe' | 'khalti' | undefined
-          }
-        } catch (rowError) {
-          console.error(`Error parsing row ${index + 2}:`, rowError)
-          throw rowError
-        }
-      }).filter(t => t.amount > 0) // Only include positive amounts
-      
-      if (transactions.length === 0) {
-        throw new Error('No valid transactions found in the CSV file')
-      }
-      
-      const newData = [...uploadedData, ...transactions]
-      setUploadedData(newData)
-      updateCashRunwayCalculations(newData)
+
+      // Show success message
+      alert(`${result.message}${result.errors ? `\n\nWarnings:\n${result.errors.join('\n')}` : ''}`);
       
       // Mark the appropriate integration as connected
       if (type === 'stripe') {
@@ -660,13 +618,13 @@ export function FinancesContent({ organizationName, organizationId, productProfi
       
       setShowUploadModal(false)
       
-      // Show success message
-      alert(`Successfully imported ${transactions.length} transactions from CSV file`)
+      // Refresh the page to show updated data
+      window.location.reload();
       
     } catch (error) {
-      console.error('Failed to parse CSV:', error)
+      console.error('Failed to upload CSV:', error)
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
-      alert(`Failed to parse CSV file: ${errorMessage}`)
+      alert(`Failed to upload CSV file: ${errorMessage}`)
     }
   }
 
