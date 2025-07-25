@@ -274,19 +274,19 @@ export function SessionNavBar({
                     >
                       <SiReasonstudios className="h-4 w-4 shrink-0" />
                       <motion.span variants={variants} className="truncate">
-                        {!isCollapsed && "A/B testing"}
+                        {!isCollapsed && "A/B Testing"}
                       </motion.span>
                     </Link>
                     <Link
-                      href="/simulate"
+                      href="/deepresearch"
                       className={cn(
                         "flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm font-medium transition-colors hover:bg-amber-50 hover:text-amber-700",
-                        pathname?.includes("simulate") && "bg-amber-100 text-amber-700",
+                        pathname?.includes("deepresearch") && "bg-amber-100 text-amber-700",
                       )}
                     >
                       <BsGlobeAmericas className="h-4 w-4 shrink-0" />
                       <motion.span variants={variants} className="truncate">
-                        {!isCollapsed && "Simulate"}
+                        {!isCollapsed && "Deep Research"}
                       </motion.span>
                     </Link>
                     <Link
