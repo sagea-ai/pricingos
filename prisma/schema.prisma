@@ -24,48 +24,54 @@ model User {
   trialStartedAt            DateTime?
   trialEndsAt               DateTime?
   isTrialActive             Boolean                    @default(false)
+  activeProductProfileId    String?
   createdAnalyses           Analysis[]
   activities                Activity[]
   chatSessions              ChatSession[]
   credits                   Credit[]
+  financial_metrics         financial_metrics[]
+  financial_transactions    financial_transactions[]
   organizationMemberships   OrganizationMember[]
   createdOrganizations      Organization[]             @relation("OrganizationCreator")
+  payment_integrations      payment_integrations[]
+  productProfiles           ProductProfile[]
   repositoryAccess          RepositoryAccess[]
+  emailEvents               UserEmailEvent[]
+  notifications             UserNotification[]         @relation("UserNotifications")
+  activeProductProfile      ProductProfile?            @relation("ActiveProductProfile", fields: [activeProductProfileId], references: [id])
   referredBy                User?                      @relation("UserReferrals", fields: [referredById], references: [id])
   referrals                 User[]                     @relation("UserReferrals")
-  emailEvents               UserEmailEvent[]
-  createdWorkspaces         Workspace[]                @relation("WorkspaceCreator")
-  workspaceMemberships      WorkspaceMember[]
   workspaceActivities       WorkspaceActivity[]        @relation("WorkspaceActivityAuthor")
   workspaceActivityMentions WorkspaceActivityMention[] @relation("WorkspaceActivityMentions")
-  notifications             UserNotification[]         @relation("UserNotifications")
-  productProfiles           ProductProfile[]
-  activeProductProfileId    String?
-  activeProductProfile      ProductProfile? @relation("ActiveProductProfile", fields: [activeProductProfileId], references: [id])
+  workspaceMemberships      WorkspaceMember[]
+  createdWorkspaces         Workspace[]                @relation("WorkspaceCreator")
 
   @@map("users")
 }
 
 model ProductProfile {
-  id                  String              @id @default(cuid())
-  productName         String
-  coreValue           String              @db.Text
-  features            String[]            @default([])
-  market              String?
-  currentPricingModel String?
-  currentPrice        String?
-  userType            String?             @default("Self-serve")
-  churnRate           Float?
-  monthlyRevenue      Float?
-  totalUsers          Int?                @default(0)
-  paymentIntegrations String[]            @default([])
-  userId              String
-  createdAt           DateTime            @default(now())
-  updatedAt           DateTime            @default(now())
-  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  competitors         ProductCompetitor[]
-  PricingAnalysis     PricingAnalysis[]
-  activeForUsers      User[]              @relation("ActiveProductProfile")
+  id                     String                   @id @default(cuid())
+  productName            String
+  coreValue              String
+  features               String[]                 @default([])
+  userId                 String
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @default(now())
+  currentPrice           String?
+  currentPricingModel    String?
+  market                 String?
+  churnRate              Float?
+  monthlyRevenue         Float?
+  paymentIntegrations    String[]                 @default([])
+  totalUsers             Int?                     @default(0)
+  userType               String?                  @default("Self-serve")
+  financial_metrics      financial_metrics[]
+  financial_transactions financial_transactions[]
+  payment_integrations   payment_integrations[]
+  PricingAnalysis        PricingAnalysis[]
+  competitors            ProductCompetitor[]
+  user                   User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activeForUsers         User[]                   @relation("ActiveProductProfile")
 
   @@map("product_profiles")
 }
@@ -98,8 +104,8 @@ model ProductCompetitor {
   similarityScore    Float?
   notes              String?
   createdAt          DateTime       @default(now())
-  productProfile     ProductProfile @relation(fields: [productProfileId], references: [id], onDelete: Cascade)
   competitor         Competitor     @relation(fields: [competitorId], references: [id], onDelete: Cascade)
+  productProfile     ProductProfile @relation(fields: [productProfileId], references: [id], onDelete: Cascade)
 
   @@unique([productProfileId, competitorId])
   @@map("product_competitors")
@@ -257,16 +263,16 @@ model Analysis {
   completedAt       DateTime?
   repositoryId      String
   userId            String
-  workspaceId       String?
   prNumber          Int?
   branch            String?
   commit            String?
   options           Json
   fileIndexingJobId String?
+  workspaceId       String?
   fileIndexingJob   FileIndexingJob? @relation(fields: [fileIndexingJobId], references: [id])
   repository        Repository       @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
   createdBy         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  workspace         Workspace?       @relation("WorkspaceAnalyses", fields: [workspaceId], references: [id], onDelete: SetNull)
+  workspace         Workspace?       @relation("WorkspaceAnalyses", fields: [workspaceId], references: [id])
   results           AnalysisResult[]
 }
 
@@ -437,27 +443,25 @@ model UserEmailEvent {
 }
 
 model Workspace {
-  id          String  @id @default(cuid())
-  name        String
-  description String?
-  slug        String  @unique
-  icon        String  @default("📝")
-  isPrivate   Boolean @default(false)
-  prompt      String? @db.Text
-
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @default(now())
+  id             String                @id @default(cuid())
+  name           String
+  prompt         String?
+  description    String?
+  slug           String                @unique
+  icon           String                @default("📝")
+  isPrivate      Boolean               @default(false)
   organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   creatorId      String
-  creator        User         @relation("WorkspaceCreator", fields: [creatorId], references: [id])
-
-  members       WorkspaceMember[]
-  analyses      Analysis[]            @relation("WorkspaceAnalyses")
-  scenarios     Scenario[]
-  activities    WorkspaceActivity[]
-  notifications UserNotification[]    @relation("WorkspaceNotifications")
-  invitations   WorkspaceInvitation[]
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @default(now())
+  analyses       Analysis[]            @relation("WorkspaceAnalyses")
+  scenarios      Scenario[]
+  notifications  UserNotification[]    @relation("WorkspaceNotifications")
+  activities     WorkspaceActivity[]
+  invitations    WorkspaceInvitation[]
+  members        WorkspaceMember[]
+  creator        User                  @relation("WorkspaceCreator", fields: [creatorId], references: [id])
+  organization   Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@map("workspaces")
 }
@@ -477,27 +481,25 @@ model WorkspaceMember {
 }
 
 model Scenario {
-  id                String  @id @default(cuid())
+  id                String    @id @default(cuid())
   title             String
   type              String
   probability       Int
   timeframe         String
-  description       String  @db.Text
-  marketData        String? @db.Text
-  verifiableFactors String? @db.Text
-  backwardReasoning String? @db.Text
-
-  workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  description       String
+  marketData        String?
+  verifiableFactors String?
+  backwardReasoning String?
+  workspaceId       String
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @default(now())
+  workspace         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@map("scenarios")
 }
 
 model WorkspaceActivity {
-  id          String   @id @default(cuid())
+  id          String                     @id @default(cuid())
   type        String
   title       String
   description String?
@@ -506,27 +508,25 @@ model WorkspaceActivity {
   workspaceId String
   authorId    String
   parentId    String?
-  level       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now())
-
-  workspace Workspace                  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  author    User                       @relation("WorkspaceActivityAuthor", fields: [authorId], references: [id], onDelete: Cascade)
-  parent    WorkspaceActivity?         @relation("ActivityReplies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies   WorkspaceActivity[]        @relation("ActivityReplies")
-  mentions  WorkspaceActivityMention[]
+  level       Int                        @default(0)
+  createdAt   DateTime                   @default(now())
+  updatedAt   DateTime                   @default(now())
+  author      User                       @relation("WorkspaceActivityAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  parent      WorkspaceActivity?         @relation("ActivityReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     WorkspaceActivity[]        @relation("ActivityReplies")
+  workspace   Workspace                  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  mentions    WorkspaceActivityMention[]
 
   @@map("workspace_activities")
 }
 
 model WorkspaceActivityMention {
-  id                  String   @id @default(cuid())
+  id                  String            @id @default(cuid())
   workspaceActivityId String
   userId              String
-  createdAt           DateTime @default(now())
-
-  workspaceActivity WorkspaceActivity @relation(fields: [workspaceActivityId], references: [id], onDelete: Cascade)
-  user              User              @relation("WorkspaceActivityMentions", fields: [userId], references: [id], onDelete: Cascade)
+  createdAt           DateTime          @default(now())
+  user                User              @relation("WorkspaceActivityMentions", fields: [userId], references: [id], onDelete: Cascade)
+  workspaceActivity   WorkspaceActivity @relation(fields: [workspaceActivityId], references: [id], onDelete: Cascade)
 
   @@unique([workspaceActivityId, userId])
   @@map("workspace_activity_mentions")
@@ -541,9 +541,8 @@ model UserNotification {
   userId      String
   workspaceId String?
   createdAt   DateTime         @default(now())
-
-  user      User       @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
-  workspace Workspace? @relation("WorkspaceNotifications", fields: [workspaceId], references: [id], onDelete: SetNull)
+  user        User             @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace?       @relation("WorkspaceNotifications", fields: [workspaceId], references: [id])
 
   @@map("user_notifications")
 }
@@ -561,10 +560,85 @@ model WorkspaceInvitation {
   expiresAt        DateTime
   acceptedAt       DateTime?
   createdAt        DateTime      @default(now())
-
-  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace        Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@map("workspace_invitations")
+}
+
+model financial_metrics {
+  id                      String         @id
+  productProfileId        String
+  userId                  String
+  totalRevenue            Float          @default(0)
+  monthlyRecurringRevenue Float          @default(0)
+  oneTimePayments         Float          @default(0)
+  averageRevenuePerUser   Float          @default(0)
+  activeSubscriptions     Int            @default(0)
+  churnRate               Float?
+  revenueGrowthRate       Float          @default(0)
+  mrrGrowthRate           Float          @default(0)
+  subscriptionGrowthRate  Float          @default(0)
+  totalExpenses           Float          @default(0)
+  monthlyExpenses         Float          @default(0)
+  currentCash             Float          @default(0)
+  monthlyBurnRate         Float          @default(0)
+  dailyBurnRate           Float?
+  dailyRevenue            Float?
+  netDailyBurn            Float?
+  runwayMonths            Float          @default(0)
+  runwayDays              Int?
+  projectedCashDepletion  DateTime?
+  calculatedAt            DateTime       @default(now())
+  dataSourcePeriod        String?
+  transactionCount        Int            @default(0)
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @default(now())
+  product_profiles        ProductProfile @relation(fields: [productProfileId], references: [id], onDelete: Cascade)
+  users                   User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([productProfileId, calculatedAt])
+  @@index([productProfileId, calculatedAt])
+  @@index([productProfileId])
+}
+
+model financial_transactions {
+  id               String          @id
+  amount           Float
+  type             TransactionType
+  description      String
+  category         String?
+  gateway          PaymentGateway?
+  date             DateTime
+  metadata         Json?
+  productProfileId String
+  userId           String
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @default(now())
+  product_profiles ProductProfile  @relation(fields: [productProfileId], references: [id], onDelete: Cascade)
+  users            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([productProfileId, date])
+  @@index([productProfileId, gateway])
+  @@index([productProfileId, type])
+}
+
+model payment_integrations {
+  id               String         @id
+  gateway          PaymentGateway
+  isConnected      Boolean        @default(false)
+  accountId        String?
+  lastSync         DateTime?
+  syncStatus       SyncStatus     @default(DISCONNECTED)
+  settings         Json?
+  errorMessage     String?
+  productProfileId String
+  userId           String
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @default(now())
+  product_profiles ProductProfile @relation(fields: [productProfileId], references: [id], onDelete: Cascade)
+  users            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([productProfileId, gateway])
 }
 
 enum CompanySize {
@@ -694,4 +768,25 @@ enum NotificationType {
   WORKSPACE_ACTIVITY
   ANALYSIS_COMPLETE
   MEMBER_JOINED
+}
+
+enum PaymentGateway {
+  STRIPE
+  KHALTI
+  PAYPAL
+  BANK_TRANSFER
+  OTHER
+}
+
+enum SyncStatus {
+  DISCONNECTED
+  CONNECTED
+  SYNCING
+  ERROR
+  SYNC_COMPLETE
+}
+
+enum TransactionType {
+  REVENUE
+  EXPENSE
 }
