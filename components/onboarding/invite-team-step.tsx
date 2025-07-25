@@ -40,8 +40,8 @@ export function InviteTeamStep({ onComplete, onBack, isSubmitting }: InviteTeamS
   return (
     <div className="space-y-8">
       <div className="text-center">
-        <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-sky-100 to-sky-200 dark:from-sky-800 dark:to-sky-900 rounded-2xl flex items-center justify-center">
-          <Users className="h-8 w-8 text-sky-600 dark:text-sky-400" />
+        <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-800 dark:to-amber-900 rounded-2xl flex items-center justify-center">
+          <Users className="h-8 w-8 text-amber-600 dark:text-amber-400" />
         </div>
         <h2 className="text-2xl font-extralight text-gray-900 dark:text-white mb-3 tracking-tight">
           Invite Your Team
@@ -54,7 +54,7 @@ export function InviteTeamStep({ onComplete, onBack, isSubmitting }: InviteTeamS
       <div className="space-y-6">
         <div className="space-y-3">
           <Label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-            <Mail className="h-4 w-4 text-sky-500" />
+            <Mail className="h-4 w-4 text-amber-500" />
             Email addresses
           </Label>
           <div className="flex gap-3">
@@ -66,14 +66,14 @@ export function InviteTeamStep({ onComplete, onBack, isSubmitting }: InviteTeamS
               onChange={(e) => setCurrentEmail(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && addEmail()}
               disabled={isSubmitting}
-              className="h-12 border-gray-200 dark:border-gray-700 focus:border-sky-500 focus:ring-sky-500 rounded-xl"
+              className="h-12 border-gray-200 dark:border-gray-700 focus:border-amber-500 focus:ring-amber-500 rounded-xl"
             />
             <Button
               type="button"
               variant="outline"
               onClick={addEmail}
               disabled={!currentEmail || !currentEmail.includes('@') || isSubmitting}
-              className="h-12 px-4 border-gray-200 dark:border-gray-700 hover:bg-sky-50 hover:border-sky-300 rounded-xl"
+              className="h-12 px-4 border-gray-200 dark:border-gray-700 hover:bg-amber-50 hover:border-amber-300 rounded-xl"
             >
               <Plus className="h-4 w-4" />
             </Button>
@@ -87,9 +87,9 @@ export function InviteTeamStep({ onComplete, onBack, isSubmitting }: InviteTeamS
             </Label>
             <div className="space-y-2 max-h-40 overflow-y-auto">
               {emails.map((email, index) => (
-                <div key={index} className="flex items-center gap-3 p-3 bg-sky-50 dark:bg-sky-900/20 rounded-xl border border-sky-100 dark:border-sky-800">
-                  <div className="w-8 h-8 bg-sky-100 dark:bg-sky-800 rounded-full flex items-center justify-center">
-                    <Mail className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+                <div key={index} className="flex items-center gap-3 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-100 dark:border-amber-800">
+                  <div className="w-8 h-8 bg-amber-100 dark:bg-amber-800 rounded-full flex items-center justify-center">
+                    <Mail className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                   </div>
                   <span className="flex-1 text-sm font-medium text-gray-900 dark:text-white">{email}</span>
                   <Button
@@ -124,7 +124,7 @@ export function InviteTeamStep({ onComplete, onBack, isSubmitting }: InviteTeamS
           <Button
             onClick={handleComplete}
             disabled={isSubmitting}
-            className="flex-1 h-12 bg-sky-600 hover:bg-sky-700 text-white rounded-xl font-medium tracking-wide transition-all duration-200 ease-out hover:shadow-lg hover:shadow-sky-200"
+            className="flex-1 h-12 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-medium tracking-wide transition-all duration-200 ease-out hover:shadow-lg hover:shadow-amber-200"
           >
             {isSubmitting ? 'Completing...' : 'Complete Setup'}
           </Button>

@@ -110,8 +110,8 @@ export function CompanyProfileStep({ onComplete, isSubmitting, initialReferralCo
   return (
     <div className="space-y-4">
       <div className="text-center">
-        <div className="w-12 h-12 mx-auto mb-3 bg-gradient-to-br from-sky-100 to-sky-200 dark:from-sky-800 dark:to-sky-900 rounded-xl flex items-center justify-center">
-          <Building2 className="h-6 w-6 text-sky-600 dark:text-sky-400" />
+        <div className="w-12 h-12 mx-auto mb-3 bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-800 dark:to-amber-900 rounded-xl flex items-center justify-center">
+          <Building2 className="h-6 w-6 text-amber-600 dark:text-amber-400" />
         </div>
         <h2 className="text-xl font-extralight text-gray-900 dark:text-white mb-2 tracking-tight">
           Company Profile
@@ -133,7 +133,7 @@ export function CompanyProfileStep({ onComplete, isSubmitting, initialReferralCo
               className="space-y-2"
             >
               <Label htmlFor="companyName" className="text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                <Building2 className="h-3 w-3 text-sky-500" />
+                <Building2 className="h-3 w-3 text-amber-500" />
                 Company name *
               </Label>
               <Input
@@ -143,7 +143,7 @@ export function CompanyProfileStep({ onComplete, isSubmitting, initialReferralCo
                 onChange={(e) => handleInputChange('companyName', e.target.value)}
                 autoFocus={currentField === 0}
                 disabled={isSubmitting}
-                className="h-9 border-gray-200 dark:border-gray-700 focus:border-sky-500 focus:ring-sky-500 rounded-lg text-sm"
+                className="h-9 border-gray-200 dark:border-gray-700 focus:border-amber-500 focus:ring-amber-500 rounded-lg text-sm"
               />
               {errors.companyName && (
                 <p className="text-xs text-red-500">{errors.companyName}</p>
@@ -161,7 +161,7 @@ export function CompanyProfileStep({ onComplete, isSubmitting, initialReferralCo
               className="space-y-2"
             >
               <Label htmlFor="website" className="text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                <Globe className="h-3 w-3 text-sky-500" />
+                <Globe className="h-3 w-3 text-amber-500" />
                 Website *
               </Label>
               <Input
@@ -172,7 +172,7 @@ export function CompanyProfileStep({ onComplete, isSubmitting, initialReferralCo
                 onChange={(e) => handleInputChange('website', e.target.value)}
                 autoFocus={currentField === 1}
                 disabled={isSubmitting}
-                className="h-9 border-gray-200 dark:border-gray-700 focus:border-sky-500 focus:ring-sky-500 rounded-lg text-sm"
+                className="h-9 border-gray-200 dark:border-gray-700 focus:border-amber-500 focus:ring-amber-500 rounded-lg text-sm"
               />
               {errors.website && (
                 <p className="text-xs text-red-500">{errors.website}</p>
@@ -190,14 +190,14 @@ export function CompanyProfileStep({ onComplete, isSubmitting, initialReferralCo
               className="space-y-2"
             >
               <Label htmlFor="companySize" className="text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                <Users className="h-3 w-3 text-sky-500" />
+                <Users className="h-3 w-3 text-amber-500" />
                 Company size
               </Label>
               <Select 
                 onValueChange={(value) => setFormData({ ...formData, companySize: value })}
                 disabled={isSubmitting}
               >
-                <SelectTrigger className="h-9 border-gray-200 dark:border-gray-700 focus:border-sky-500 focus:ring-sky-500 rounded-lg text-sm">
+                <SelectTrigger className="h-9 border-gray-200 dark:border-gray-700 focus:border-amber-500 focus:ring-amber-500 rounded-lg text-sm">
                   <SelectValue placeholder="Select company size" />
                 </SelectTrigger>
                 <SelectContent>
@@ -222,14 +222,14 @@ export function CompanyProfileStep({ onComplete, isSubmitting, initialReferralCo
               className="space-y-2"
             >
               <Label htmlFor="industry" className="text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                <Briefcase className="h-3 w-3 text-sky-500" />
+                <Briefcase className="h-3 w-3 text-amber-500" />
                 Industry
               </Label>
               <Select 
                 onValueChange={(value) => setFormData({ ...formData, industry: value })}
                 disabled={isSubmitting}
               >
-                <SelectTrigger className="h-9 border-gray-200 dark:border-gray-700 focus:border-sky-500 focus:ring-sky-500 rounded-lg text-sm">
+                <SelectTrigger className="h-9 border-gray-200 dark:border-gray-700 focus:border-amber-500 focus:ring-amber-500 rounded-lg text-sm">
                   <SelectValue placeholder="Select industry" />
                 </SelectTrigger>
                 <SelectContent>
@@ -255,7 +255,7 @@ export function CompanyProfileStep({ onComplete, isSubmitting, initialReferralCo
               className="space-y-2"
             >
               <Label htmlFor="referralCode" className="text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                <Building2 className="h-3 w-3 text-sky-500" />
+                <Building2 className="h-3 w-3 text-amber-500" />
                 Referral code (optional)
               </Label>
               <Input
@@ -264,7 +264,7 @@ export function CompanyProfileStep({ onComplete, isSubmitting, initialReferralCo
                 value={formData.referralCode}
                 onChange={(e) => setFormData({ ...formData, referralCode: e.target.value.toUpperCase() })}
                 disabled={isSubmitting}
-                className="h-9 border-gray-200 dark:border-gray-700 focus:border-sky-500 focus:ring-sky-500 rounded-lg text-sm"
+                className="h-9 border-gray-200 dark:border-gray-700 focus:border-amber-500 focus:ring-amber-500 rounded-lg text-sm"
               />
               {formData.referralCode && (
                 <p className="text-xs text-green-600 dark:text-green-400">
@@ -287,7 +287,7 @@ export function CompanyProfileStep({ onComplete, isSubmitting, initialReferralCo
           <Button
             onClick={handleComplete}
             disabled={!isValid || isSubmitting}
-            className="w-full h-9 bg-sky-600 hover:bg-sky-700 text-white rounded-lg font-medium tracking-wide transition-all duration-200 ease-out hover:shadow-lg hover:shadow-sky-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+            className="w-full h-9 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-medium tracking-wide transition-all duration-200 ease-out hover:shadow-lg hover:shadow-amber-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
           >
             {isSubmitting ? 'Setting up...' : 'Continue'}
           </Button>

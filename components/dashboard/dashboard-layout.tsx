@@ -137,7 +137,7 @@ export function DashboardLayout({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-white dark:from-sky-950 dark:to-gray-950">
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white dark:from-amber-950 dark:to-gray-950">
       <TrialProvider>
         {/* Trial Banner (must keep) - full width ribbon style */}
         <div className="w-full">
@@ -157,30 +157,30 @@ export function DashboardLayout({
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-2xl shadow-md p-6 border border-gray-200 dark:border-gray-800">
               <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-sky-400 dark:text-sky-300" /> Start Analysis
+                <Sparkles className="w-5 h-5 text-amber-400 dark:text-amber-300" /> Start Analysis
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button className="flex items-center justify-between p-4 bg-sky-50 dark:bg-sky-900/30 rounded-xl border border-sky-100 dark:border-sky-800 hover:bg-sky-100 dark:hover:bg-sky-900/50 transition-colors group">
+                <button className="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-900/30 rounded-xl border border-amber-100 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-colors group">
                   <Link href="/simulate">
                   <div>
-                    <h3 className="font-medium text-sky-900 dark:text-sky-100 flex items-center gap-2">
-                      <EclipseIcon className="w-4 h-4 text-sky-400 group-hover:text-sky-600 transition" /> New Startup Idea
+                    <h3 className="font-medium text-amber-900 dark:text-amber-100 flex items-center gap-2">
+                      <EclipseIcon className="w-4 h-4 text-amber-400 group-hover:text-amber-600 transition" /> New Startup Idea
                     </h3>
-                    <p className="text-sm text-sky-700 dark:text-sky-300">Get investor-like feedback</p>
+                    <p className="text-sm text-amber-700 dark:text-amber-300">Get investor-like feedback</p>
                   </div>
-                  <ArrowRight className="w-5 h-5 text-sky-500 group-hover:text-sky-600 transition" />
+                  <ArrowRight className="w-5 h-5 text-amber-500 group-hover:text-amber-600 transition" />
                   </Link>
                 </button>
 
-                <button className="flex items-center justify-between p-4 bg-sky-50 dark:bg-sky-900/30 rounded-xl border border-sky-100 dark:border-sky-800 hover:bg-sky-100 dark:hover:bg-sky-900/50 transition-colors group">
+                <button className="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-900/30 rounded-xl border border-amber-100 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-colors group">
                   <Link href="/Deep Research">
                   <div>
-                    <h3 className="font-medium text-sky-900 dark:text-sky-100 flex items-center gap-2">
-                      <TrendingUp className="w-4 h-4 text-sky-400 group-hover:text-sky-600 transition" /> Deep Research
+                    <h3 className="font-medium text-amber-900 dark:text-amber-100 flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-amber-400 group-hover:text-amber-600 transition" /> Deep Research
                     </h3>
-                    <p className="text-sm text-sky-700 dark:text-sky-300">Validate your approach</p>
+                    <p className="text-sm text-amber-700 dark:text-amber-300">Validate your approach</p>
                   </div>
-                  <ArrowRight className="w-5 h-5 text-sky-500 group-hover:text-sky-600 transition" />
+                  <ArrowRight className="w-5 h-5 text-amber-500 group-hover:text-amber-600 transition" />
                   </Link>
                 </button>
               </div>
@@ -189,7 +189,7 @@ export function DashboardLayout({
             {/* Stats Card */}
             <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-md p-6 border border-gray-200 dark:border-gray-800">
               <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-sky-400 dark:text-sky-300" /> Your Stats
+                <BarChart3 className="w-5 h-5 text-amber-400 dark:text-amber-300" /> Your Stats
               </h2>
               <div className="space-y-4">
                 <div>
@@ -206,7 +206,7 @@ export function DashboardLayout({
             {/* Recent Analyses */}
             <div className="lg:col-span-3 bg-white dark:bg-gray-900 rounded-2xl shadow-md p-6 border border-gray-200 dark:border-gray-800">
               <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
-                <MessageSquare className="w-5 h-5 text-sky-400 dark:text-sky-300" /> Recent Analyses
+                <MessageSquare className="w-5 h-5 text-amber-400 dark:text-amber-300" /> Recent Analyses
               </h2>
               <div className="space-y-3">
                 {mockRecentAnalyses.map((analysis) => (
@@ -239,7 +239,7 @@ export function DashboardLayout({
             {/* Startup Analysis Score Trend */}
             <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-md p-6 border border-gray-200 dark:border-gray-800 flex flex-col">
               <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-sky-400 dark:text-sky-300" /> Startup Analysis Score Trend
+                <BarChart3 className="w-5 h-5 text-amber-400 dark:text-amber-300" /> Startup Analysis Score Trend
               </h2>
               <div className="flex-1 flex items-center justify-center min-h-[220px]">
                 <Line
@@ -275,14 +275,14 @@ export function DashboardLayout({
             {/* GTM & Defensibility Radar Chart */}
             <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-md p-6 border border-gray-200 dark:border-gray-800 flex flex-col">
               <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-sky-400 dark:text-sky-300" /> Analysis Breakdown
+                <TrendingUp className="w-5 h-5 text-amber-400 dark:text-amber-300" /> Analysis Breakdown
               </h2>
               <div className="flex-1 flex items-center justify-center min-h-[220px]">
                 <div className="text-center space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-sky-50 dark:bg-sky-900/30 p-3 rounded-lg">
-                      <p className="text-xs text-sky-600 dark:text-sky-400 font-medium">Market Size</p>
-                      <p className="text-lg font-semibold text-sky-800 dark:text-sky-200">8.2/10</p>
+                    <div className="bg-amber-50 dark:bg-amber-900/30 p-3 rounded-lg">
+                      <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">Market Size</p>
+                      <p className="text-lg font-semibold text-amber-800 dark:text-amber-200">8.2/10</p>
                     </div>
                     <div className="bg-green-50 dark:bg-green-900/30 p-3 rounded-lg">
                       <p className="text-xs text-green-600 dark:text-green-400 font-medium">Defensibility</p>
