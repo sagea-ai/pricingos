@@ -18,7 +18,7 @@ export default async function FinancesPage() {
         id: true,
         firstName: true,
         lastName: true,
-        productProfile: {
+        activeProductProfile: {
           select: {
             productName: true,
             currentPricingModel: true,
@@ -58,7 +58,7 @@ export default async function FinancesPage() {
       <FinancesClientWrapper 
         organizations={organizations}
         currentOrganization={currentOrganization}
-        productProfile={user.productProfile}
+        productProfile={user.activeProductProfile}
       />
     );
   } catch (error) {

@@ -18,7 +18,7 @@ export default async function PricingStrategyPage() {
   const user = await db.user.findUnique({
     where: { clerkId: userId },
     include: {
-      productProfile: true,
+      activeProductProfile: true,
       organizationMemberships: {
         include: {
           organization: {
@@ -37,7 +37,7 @@ export default async function PricingStrategyPage() {
     redirect("/onboarding");
   }
 
-  if (!user.productProfile) {
+  if (!user.activeProductProfile) {
     redirect("/product-profile");
   }
 
@@ -51,7 +51,7 @@ export default async function PricingStrategyPage() {
   return (
     <TestingPageClient 
       user={user}
-      productProfile={user.productProfile}
+      productProfile={user.activeProductProfile}
       organizations={organizations}
       currentOrganization={currentOrganization}
     />
