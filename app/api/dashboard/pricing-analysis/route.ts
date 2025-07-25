@@ -91,16 +91,18 @@ Output Format: Return only a well-structured JSON like the following:
     }
   ],
   "sage_recommendation": {
-    "model": "Recommended pricing model",
-    "segments": ["Segment 1", "Segment 2", "Segment 3"],
-    "price_points": ["$X", "$Y", "$Z"],
+    "model": "Clear, actionable recommendation in 1-2 sentences explaining the best pricing approach for this product",
+    "segments": ["Starter ($X/mo)", "Professional ($Y/mo)", "Enterprise ($Z/mo)"],
+    "price_points": ["$19/month", "$49/month", "$99/month"],
     "reasoning_chain": [
-      "Step 1 reasoning",
-      "Step 2 reasoning",
-      "Step 3 reasoning"
+      "Short reason for pricing model choice",
+      "Key market positioning insight",
+      "Expected revenue impact"
     ]
   }
 }
+
+Make the sage_recommendation.model field a clear, concise recommendation (max 2 sentences). The segments should include tier names with prices, and reasoning_chain should be 3 short, specific insights.
 
 Only return valid JSON. Do not add commentary or explanation.`
 

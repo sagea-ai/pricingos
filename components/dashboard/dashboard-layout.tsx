@@ -152,15 +152,15 @@ export function DashboardLayout({
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-100/20 to-transparent animate-pulse"></div>
                   <CardContent className="pt-12 pb-12 relative">
                     <div className="flex items-start gap-6">
-                        <Image 
-                          src="/logo.png" 
-                          alt="SAGE Logo" 
-                          width={100} 
-                          height={100}
-                          className="w-22 h-22"
-                        />
+                      <Image 
+                        src="/logo.png" 
+                        alt="SAGE Logo" 
+                        width={100} 
+                        height={100}
+                        className="w-22 h-22"
+                      />
                       <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-3">
+                        <div className="flex items-center gap-3 mb-4">
                           <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
                             SAGE AI Recommendation
                           </h2>
@@ -168,17 +168,81 @@ export function DashboardLayout({
                             Strategic
                           </Badge>
                         </div>
-                        <p className="text-gray-600 dark:text-gray-300 text-lg mb-6 leading-relaxed">
-                          {pricingAnalysis.sage_recommendation.model}
-                        </p>
-                        <div className="flex items-center gap-4">
-                          <Link href="/testing">
-                            <Button className="bg-amber-500 hover:bg-amber-600 text-white shadow-lg hover:shadow-xl transition-all">
-                              <TestTube className="w-4 h-4 mr-2" />
-                              Test Strategy
-                            </Button>
-                          </Link>
-                          <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
+                        
+                        {/* Main Recommendation */}
+                        <div className="mb-6">
+                          <p className="text-gray-700 dark:text-gray-200 text-lg mb-4 leading-relaxed font-medium">
+                            {pricingAnalysis.sage_recommendation.model}
+                          </p>
+                        </div>
+
+                        {/* Key Details Grid */}
+                        <div className="grid md:grid-cols-3 gap-6 mb-6">
+                          {/* Recommended Segments */}
+                          <div className="bg-white/20 dark:bg-gray-900/20 rounded-xl p-4">
+                            <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
+                              <Target className="w-4 h-4" />
+                              Target Segments
+                            </h4>
+                            <div className="space-y-2">
+                              {pricingAnalysis.sage_recommendation.segments.slice(0, 3).map((segment, index) => (
+                                <div key={index} className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                  <div className="w-1.5 h-1.5 bg-amber-600 rounded-full"></div>
+                                  {segment}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Price Points */}
+                          <div className="bg-white/20 dark:bg-gray-900/20 rounded-xl p-4">
+                            <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
+                              <DollarSign className="w-4 h-4" />
+                              Suggested Pricing
+                            </h4>
+                            <div className="space-y-2">
+                              {pricingAnalysis.sage_recommendation.price_points.slice(0, 3).map((price, index) => (
+                                <div key={index} className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                  {price}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Key Reasoning */}
+                          <div className="bg-white/20 dark:bg-gray-900/20 rounded-xl p-4">
+                            <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
+                              <Lightbulb className="w-4 h-4" />
+                              Key Reasoning
+                            </h4>
+                            <div className="space-y-2">
+                              {pricingAnalysis.sage_recommendation.reasoning_chain.slice(0, 2).map((reason, index) => (
+                                <div key={index} className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
+                                  {reason}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Actions */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <Link href="/testing">
+                              <Button className="bg-black hover:bg-amber-600 rounded-xl text-white shadow-lg hover:shadow-xl transition-all">
+                                <TestTube className="w-4 h-4 mr-2" />
+                                Test Strategy
+                              </Button>
+                            </Link>
+                            <Link href="/deepresearch">
+                              <Button variant="outline" className="border-white/20 text-gray-700 dark:text-gray-200 hover:bg-neutral-200 rounded-xl">
+                                View Full Analysis
+                                <ArrowRight className="w-4 h-4 ml-2" />
+                              </Button>
+                            </Link>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 text-amber-900 bg-white/50 py-2 px-2 rounded-2xl dark:text-amber-300">
                             <Lightbulb className="w-4 h-4" />
                             <span className="text-sm font-medium">AI Confidence: 94%</span>
                           </div>
