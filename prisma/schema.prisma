@@ -26,14 +26,14 @@ model User {
   isTrialActive             Boolean                    @default(false)
   activeProductProfileId    String?
   createdAnalyses           Analysis[]
+  FinancialMetrics          FinancialMetrics[]
+  FinancialTransactions     FinancialTransactions[]
+  PaymentIntegrations       PaymentIntegrations[]
   activities                Activity[]
   chatSessions              ChatSession[]
   credits                   Credit[]
-  financial_metrics         financial_metrics[]
-  financial_transactions    financial_transactions[]
   organizationMemberships   OrganizationMember[]
   createdOrganizations      Organization[]             @relation("OrganizationCreator")
-  payment_integrations      payment_integrations[]
   productProfiles           ProductProfile[]
   repositoryAccess          RepositoryAccess[]
   emailEvents               UserEmailEvent[]
@@ -50,28 +50,28 @@ model User {
 }
 
 model ProductProfile {
-  id                     String                   @id @default(cuid())
-  productName            String
-  coreValue              String
-  features               String[]                 @default([])
-  userId                 String
-  createdAt              DateTime                 @default(now())
-  updatedAt              DateTime                 @default(now())
-  currentPrice           String?
-  currentPricingModel    String?
-  market                 String?
-  churnRate              Float?
-  monthlyRevenue         Float?
-  paymentIntegrations    String[]                 @default([])
-  totalUsers             Int?                     @default(0)
-  userType               String?                  @default("Self-serve")
-  financial_metrics      financial_metrics[]
-  financial_transactions financial_transactions[]
-  payment_integrations   payment_integrations[]
-  PricingAnalysis        PricingAnalysis[]
-  competitors            ProductCompetitor[]
-  user                   User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  activeForUsers         User[]                   @relation("ActiveProductProfile")
+  id                    String                  @id @default(cuid())
+  productName           String
+  coreValue             String
+  features              String[]                @default([])
+  userId                String
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @default(now())
+  currentPrice          String?
+  currentPricingModel   String?
+  market                String?
+  churnRate             Float?
+  monthlyRevenue        Float?
+  paymentIntegrations   String[]                @default([])
+  totalUsers            Int?                    @default(0)
+  userType              String?                 @default("Self-serve")
+  FinancialMetrics      FinancialMetrics[]
+  FinancialTransactions FinancialTransactions[]
+  PaymentIntegrations   PaymentIntegrations[]
+  PricingAnalysis       PricingAnalysis[]
+  competitors           ProductCompetitor[]
+  user                  User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activeForUsers        User[]                  @relation("ActiveProductProfile")
 
   @@map("product_profiles")
 }
@@ -565,7 +565,7 @@ model WorkspaceInvitation {
   @@map("workspace_invitations")
 }
 
-model financial_metrics {
+model FinancialMetrics {
   id                      String         @id
   productProfileId        String
   userId                  String
@@ -601,7 +601,7 @@ model financial_metrics {
   @@index([productProfileId])
 }
 
-model financial_transactions {
+model FinancialTransactions {
   id               String          @id
   amount           Float
   type             TransactionType
@@ -622,7 +622,7 @@ model financial_transactions {
   @@index([productProfileId, type])
 }
 
-model payment_integrations {
+model PaymentIntegrations {
   id               String         @id
   gateway          PaymentGateway
   isConnected      Boolean        @default(false)
@@ -764,7 +764,6 @@ enum WorkspaceRole {
 
 enum NotificationType {
   WORKSPACE_MENTION
-  WORKSPACE_REPLY
   WORKSPACE_ACTIVITY
   ANALYSIS_COMPLETE
   MEMBER_JOINED
