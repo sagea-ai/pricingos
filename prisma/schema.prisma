@@ -8,39 +8,56 @@ datasource db {
 }
 
 model User {
-  id                      String               @id @default(cuid())
-  clerkId                 String               @unique
-  email                   String               @unique
-  firstName               String?
-  lastName                String?
-  imageUrl                String?
-  createdAt               DateTime             @default(now())
-  updatedAt               DateTime             @default(now())
-  hasCompletedOnboarding  Boolean              @default(false)
-  onboardingStep          Int                  @default(1)
-  referralCode            String               @unique @default(cuid())
-  referredById            String?
-  subscriptionTier        SubscriptionTier     @default(FREE)
-  trialStartedAt          DateTime?
-  trialEndsAt             DateTime?
-  isTrialActive           Boolean              @default(false)
-  createdAnalyses         Analysis[]
-  activities              Activity[]
-  chatSessions            ChatSession[]
-  credits                 Credit[]
-  organizationMemberships OrganizationMember[]
-  createdOrganizations    Organization[]       @relation("OrganizationCreator")
-  repositoryAccess        RepositoryAccess[]
-  referredBy              User?                @relation("UserReferrals", fields: [referredById], references: [id])
-  referrals               User[]               @relation("UserReferrals")
-  emailEvents             UserEmailEvent[]
-  createdWorkspaces       Workspace[]          @relation("WorkspaceCreator")
-  workspaceMemberships    WorkspaceMember[]
-  workspaceActivities        WorkspaceActivity[]       @relation("WorkspaceActivityAuthor")
-  workspaceActivityMentions  WorkspaceActivityMention[] @relation("WorkspaceActivityMentions")
-  notifications              UserNotification[]         @relation("UserNotifications")
+  id                        String                     @id @default(cuid())
+  clerkId                   String                     @unique
+  email                     String                     @unique
+  firstName                 String?
+  lastName                  String?
+  imageUrl                  String?
+  createdAt                 DateTime                   @default(now())
+  updatedAt                 DateTime                   @default(now())
+  hasCompletedOnboarding    Boolean                    @default(false)
+  onboardingStep            Int                        @default(1)
+  referralCode              String                     @unique @default(cuid())
+  referredById              String?
+  subscriptionTier          SubscriptionTier           @default(FREE)
+  trialStartedAt            DateTime?
+  trialEndsAt               DateTime?
+  isTrialActive             Boolean                    @default(false)
+  createdAnalyses           Analysis[]
+  activities                Activity[]
+  chatSessions              ChatSession[]
+  credits                   Credit[]
+  organizationMemberships   OrganizationMember[]
+  createdOrganizations      Organization[]             @relation("OrganizationCreator")
+  repositoryAccess          RepositoryAccess[]
+  referredBy                User?                      @relation("UserReferrals", fields: [referredById], references: [id])
+  referrals                 User[]                     @relation("UserReferrals")
+  emailEvents               UserEmailEvent[]
+  createdWorkspaces         Workspace[]                @relation("WorkspaceCreator")
+  workspaceMemberships      WorkspaceMember[]
+  workspaceActivities       WorkspaceActivity[]        @relation("WorkspaceActivityAuthor")
+  workspaceActivityMentions WorkspaceActivityMention[] @relation("WorkspaceActivityMentions")
+  notifications             UserNotification[]         @relation("UserNotifications")
+  productProfile            ProductProfile?
 
   @@map("users")
+}
+
+model ProductProfile {
+  id                  String   @id @default(cuid())
+  productName         String
+  coreValue           String   @db.Text
+  features            String[] @default([])
+  market              String?
+  currentPricingModel String?
+  currentPrice        String?
+  userId              String   @unique
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @default(now())
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("product_profiles")
 }
 
 model Organization {
@@ -374,10 +391,10 @@ model Workspace {
   creator        User         @relation("WorkspaceCreator", fields: [creatorId], references: [id])
 
   members       WorkspaceMember[]
-  analyses      Analysis[]        @relation("WorkspaceAnalyses")
+  analyses      Analysis[]            @relation("WorkspaceAnalyses")
   scenarios     Scenario[]
   activities    WorkspaceActivity[]
-  notifications UserNotification[] @relation("WorkspaceNotifications")
+  notifications UserNotification[]    @relation("WorkspaceNotifications")
   invitations   WorkspaceInvitation[]
 
   @@map("workspaces")
@@ -396,10 +413,11 @@ model WorkspaceMember {
   @@unique([userId, workspaceId])
   @@map("workspace_members")
 }
+
 model Scenario {
   id                String  @id @default(cuid())
   title             String
-  type              String 
+  type              String
   probability       Int
   timeframe         String
   description       String  @db.Text
@@ -429,22 +447,22 @@ model WorkspaceActivity {
   level       Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now())
-  
-  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  author    User      @relation("WorkspaceActivityAuthor", fields: [authorId], references: [id], onDelete: Cascade)
-  parent    WorkspaceActivity? @relation("ActivityReplies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies   WorkspaceActivity[] @relation("ActivityReplies")
+
+  workspace Workspace                  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  author    User                       @relation("WorkspaceActivityAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  parent    WorkspaceActivity?         @relation("ActivityReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   WorkspaceActivity[]        @relation("ActivityReplies")
   mentions  WorkspaceActivityMention[]
 
   @@map("workspace_activities")
 }
 
 model WorkspaceActivityMention {
-  id                   String            @id @default(cuid())
-  workspaceActivityId  String
-  userId               String
-  createdAt            DateTime          @default(now())
-  
+  id                  String   @id @default(cuid())
+  workspaceActivityId String
+  userId              String
+  createdAt           DateTime @default(now())
+
   workspaceActivity WorkspaceActivity @relation(fields: [workspaceActivityId], references: [id], onDelete: Cascade)
   user              User              @relation("WorkspaceActivityMentions", fields: [userId], references: [id], onDelete: Cascade)
 
@@ -453,15 +471,15 @@ model WorkspaceActivityMention {
 }
 
 model UserNotification {
-  id           String           @id @default(cuid())
-  type         NotificationType
-  title        String
-  message      String
-  isRead       Boolean          @default(false)
-  userId       String
-  workspaceId  String?
-  createdAt    DateTime         @default(now())
-  
+  id          String           @id @default(cuid())
+  type        NotificationType
+  title       String
+  message     String
+  isRead      Boolean          @default(false)
+  userId      String
+  workspaceId String?
+  createdAt   DateTime         @default(now())
+
   user      User       @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
   workspace Workspace? @relation("WorkspaceNotifications", fields: [workspaceId], references: [id], onDelete: SetNull)
 
@@ -469,10 +487,10 @@ model UserNotification {
 }
 
 model WorkspaceInvitation {
-  id               String    @id @default(cuid())
+  id               String        @id @default(cuid())
   email            String
   role             WorkspaceRole @default(MEMBER)
-  token            String    @unique
+  token            String        @unique
   workspaceId      String
   workspaceName    String
   organizationId   String
@@ -480,9 +498,9 @@ model WorkspaceInvitation {
   invitedById      String
   expiresAt        DateTime
   acceptedAt       DateTime?
-  createdAt        DateTime  @default(now())
-  
-  workspace        Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt        DateTime      @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@map("workspace_invitations")
 }
@@ -576,6 +594,7 @@ enum ActivityType {
   MEMBER_INVITED
   INTEGRATION_ADDED
   ORGANIZATION_CREATED
+  PRODUCT_PROFILE_CREATED
 }
 
 enum CreditType {
