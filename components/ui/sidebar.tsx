@@ -271,7 +271,7 @@ export function SessionNavBar({
                     >
                       <SiReasonstudios className="h-4 w-4 shrink-0" />
                       <motion.span variants={variants} className="truncate">
-                        {!isCollapsed && "A/B testing"}
+                        {!isCollapsed && "A/B Testing"}
                       </motion.span>
                     </Link>
                     <Link
