@@ -373,7 +373,7 @@ export function SessionNavBar({
                     >
                       <UserCog className="h-4 w-4 shrink-0" />
                       <motion.span variants={variants} className="truncate">
-                        {!isCollapsed && "Organization"}
+                        {!isCollapsed && "Teams"}
                       </motion.span>
                     </Link>
                     
