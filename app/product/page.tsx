@@ -18,7 +18,7 @@ export default async function ProductPage() {
         id: true,
         firstName: true,
         lastName: true,
-        productProfile: {
+        activeProductProfile: {
           select: {
             id: true,
             productName: true
@@ -44,7 +44,7 @@ export default async function ProductPage() {
     }
 
     // If user hasn't completed product profile, redirect to product profile
-    if (!user.productProfile) {
+    if (!user.activeProductProfile) {
       redirect("/product-profile");
     }
 

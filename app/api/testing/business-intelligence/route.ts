@@ -20,15 +20,15 @@ export async function POST(request: NextRequest) {
     const user = await db.user.findUnique({
       where: { clerkId: userId },
       include: {
-        productProfile: true
+        activeProductProfile: true
       }
     })
 
-    if (!user?.productProfile) {
+    if (!user?.activeProductProfile) {
       return NextResponse.json({ error: 'No product profile found' }, { status: 404 })
     }
 
-    const { productName, coreValue, features, market, currentPricingModel, currentPrice } = user.productProfile
+    const { productName, coreValue, features, market, currentPricingModel, currentPrice } = user.activeProductProfile
 
     const systemPrompt = `You are a strategic business intelligence analyst specializing in SMB market analysis, competitive positioning, and pricing optimization. 
 
