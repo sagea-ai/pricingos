@@ -164,8 +164,8 @@ function OnboardingContent() {
       const result = await response.json()
 
       if (response.ok && result.success) {
-        toast.success('Welcome to PricingOS!')
-        router.push('/dashboard') 
+        toast.success('Organization setup complete!')
+        router.push('/product-profile') 
       } else {
         console.error('Onboarding failed:', result)
         setError(result.error || result.details || 'Failed to complete setup')
