@@ -336,7 +336,7 @@ export function FinancesContent({ organizationName, organizationId, productProfi
         </div>
 
         {/* Critical Alert - Redesigned */}
-        {(stripeIntegration.isConnected || khaltiIntegration.isConnected || uploadedData.length > 0) && 
+        {hasData && 
          (cashRunwayData.runwayDays && cashRunwayData.runwayDays < 30 || cashRunwayData.runwayMonths < 1) && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -452,7 +452,7 @@ export function FinancesContent({ organizationName, organizationId, productProfi
           </motion.div>
         )}
 
-        {!stripeIntegration.isConnected && !khaltiIntegration.isConnected && uploadedData.length === 0 ? (
+        {!hasData ? (
           /* Setup Section - Redesigned */
           <motion.div
             initial={{ opacity: 0, y: 20 }}
