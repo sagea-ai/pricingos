@@ -424,7 +424,7 @@ export function DashboardLayout({
                                 Test Strategy
                               </Button>
                             </Link>
-                            <Link href="/deepresearch">
+                            <Link href={`/deepresearch?type=pricing_recommendation&product=${encodeURIComponent(productInfo?.name || 'Product')}`}>
                               <Button variant="outline" className="border-white/20 text-gray-700 dark:text-gray-200 hover:bg-neutral-200 rounded-xl">
                                 View Full Analysis
                                 <ArrowRight className="w-4 h-4 ml-2" />
