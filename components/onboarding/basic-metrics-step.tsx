@@ -26,7 +26,7 @@ export function BasicMetricsStep({ onComplete, onSkip, isSubmitting }: BasicMetr
     monthlyRevenue: '',
     totalUsers: '',
     averagePrice: '',
-    businessStage: '',
+    businessStage: 'idea',
     isEstimate: true
   })
 
@@ -161,25 +161,6 @@ export function BasicMetricsStep({ onComplete, onSkip, isSubmitting }: BasicMetr
             </Card>
           </motion.div>
         )}
-      </div>
-
-      <div className="flex justify-between pt-4">
-        <Button
-          variant="outline"
-          onClick={onSkip}
-          disabled={isSubmitting}
-          className="px-6"
-        >
-          Skip for Now
-        </Button>
-
-        <Button
-          onClick={handleComplete}
-          disabled={!formData.businessStage || isSubmitting}
-          className="px-6 bg-green-600 hover:bg-green-700"
-        >
-          {isSubmitting ? 'Saving...' : hasMinimumData ? 'Save Metrics' : 'Continue'}
-        </Button>
       </div>
     </div>
   )

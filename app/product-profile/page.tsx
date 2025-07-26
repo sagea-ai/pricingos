@@ -72,7 +72,7 @@ function ProductProfileContent() {
     monthlyRevenue: undefined as number | undefined,
     totalUsers: undefined as number | undefined,
     averagePrice: undefined as number | undefined,
-    businessStage: '',
+    businessStage: 'idea',
     isEstimate: true
   })
 
