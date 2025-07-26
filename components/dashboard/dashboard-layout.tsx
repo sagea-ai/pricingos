@@ -1,3 +1,5 @@
+'use client'
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -100,8 +102,8 @@ export function DashboardLayout({
   const [analysisLoading, setAnalysisLoading] = useState(true)
   const [products, setProducts] = useState<any[]>([])
   const [activeProductId, setActiveProductId] = useState<string | null>(null)
-  const [financialMetrics, setFinancialMetrics] = useState<FinancialMetrics | null>(null)
-  const [hasFinancialData, setHasFinancialData] = useState(false)
+  const [productMetrics, setProductMetrics] = useState<any>(null)
+  const [hasProductData, setHasProductData] = useState(false)
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -144,27 +146,27 @@ export function DashboardLayout({
   }, [activeProductId])
 
   useEffect(() => {
-    const fetchFinancialMetrics = async () => {
+    const fetchProductMetrics = async () => {
       if (!activeProductId) return
       
       try {
-        const response = await fetch('/api/dashboard/financial-metrics')
+        const response = await fetch('/api/dashboard/product-metrics')
         if (response.ok) {
           const result = await response.json()
           if (result.hasData && result.metrics) {
-            setFinancialMetrics(result.metrics)
-            setHasFinancialData(true)
+            setProductMetrics(result.metrics)
+            setHasProductData(true)
           } else {
-            setHasFinancialData(false)
+            setHasProductData(false)
           }
         }
       } catch (error) {
-        console.error('Failed to fetch financial metrics:', error)
-        setHasFinancialData(false)
+        console.error('Failed to fetch product metrics:', error)
+        setHasProductData(false)
       }
     }
 
-    fetchFinancialMetrics()
+    fetchProductMetrics()
   }, [activeProductId])
 
   const handleProductChange = async (productId: string) => {
@@ -191,15 +193,6 @@ export function DashboardLayout({
     } finally {
       setAnalysisLoading(false)
     }
-  }
-
-  const mockStats = {
-    monthlyRevenue: financialMetrics?.monthlyRevenue || 0,
-    totalUsers: financialMetrics?.totalUsers || 0,
-    conversionRate: financialMetrics?.conversionRate || 0,
-    churnRate: financialMetrics?.churnRate || 0,
-    analysisRuns: 23,
-    testsCreated: 8
   }
 
   return (
@@ -263,17 +256,17 @@ export function DashboardLayout({
               <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
                 Start by defining your product to unlock AI-powered pricing insights and analytics
               </p>
-              <Link href="/product-profile">
+              <Link href="/product">
                 <Button className="bg-amber-500 hover:bg-amber-600 text-white shadow-lg">
                   <Sparkles className="w-4 mr-2" />
                   Create Product
                 </Button>
               </Link>
             </div>
-          ) : !hasFinancialData ? (
+          ) : !hasProductData ? (
             <div className="text-center py-16">
-              <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                <DollarSign className="w-10 h-10 text-blue-600 dark:text-blue-400" />
+              <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/30 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                <DollarSign className="w-10 h-10 text-amber-600 dark:text-amber-400" />
               </div>
               <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-3">
                 Add Your Business Metrics
@@ -282,14 +275,14 @@ export function DashboardLayout({
                 Share some basic numbers about {productInfo?.name || 'your product'} to see meaningful insights and AI recommendations
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Link href="/product-profile">
-                  <Button className="bg-blue-500 hover:bg-blue-600 text-white shadow-lg">
+                <Link href="/product">
+                  <Button className="bg-amber-500 hover:bg-amber-600 text-white shadow-lg">
                     <Calculator className="w-4 h-4 mr-2" />
                     Add Basic Metrics
                   </Button>
                 </Link>
                 <Link href="/finances">
-                  <Button variant="outline" className="border-blue-200 text-blue-600 hover:bg-blue-50">
+                  <Button variant="outline" className="border-amber-200 text-amber-600 hover:bg-blue-50">
                     <BarChart3 className="w-4 h-4 mr-2" />
                     Or Upload CSV Data
                   </Button>
@@ -301,16 +294,16 @@ export function DashboardLayout({
               {[...Array(6)].map((_, i) => (
                 <Card key={i} className="animate-pulse border-gray-100 dark:border-gray-800">
                   <CardContent className="pt-6">
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-4"></div>
-                    <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-4" />
+                    <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
                   </CardContent>
                 </Card>
               ))}
             </div>
           ) : pricingAnalysis ? (
             <>
-              {/* Show data source indicator if using estimates */}
-              {financialMetrics && (
+              {/* Data Source Banner */}
+              {productMetrics && (
                 <div className="mb-6">
                   <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-950/20 rounded-xl border border-blue-200 dark:border-blue-800">
                     <div className="flex items-center gap-3">
@@ -319,10 +312,10 @@ export function DashboardLayout({
                       </div>
                       <div>
                         <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                          Metrics from Basic Business Data
+                          {productMetrics.isEstimate ? 'Metrics from Basic Business Data' : 'Metrics from Uploaded Data'}
                         </p>
                         <p className="text-xs text-blue-700 dark:text-blue-300">
-                          Upload CSV data for more detailed analytics
+                          {productMetrics.isEstimate ? 'Upload CSV data for more detailed analytics' : 'Real data from your business'}
                         </p>
                       </div>
                     </div>
@@ -335,8 +328,8 @@ export function DashboardLayout({
                   </div>
                 </div>
               )}
-              
-              {/* SAGE AI Recommendation - Hero Section */}
+
+              {/* SAGE AI Recommendation Card */}
               <div className="mb-12">
                 <Card className="bg-gradient-to-br rounded-3xl from-amber-400 via-orange-400 to-orange-500 dark:from-amber-950/20 dark:via-orange-950/10 dark:to-yellow-950/20 border-amber-200 dark:border-amber-800/50 relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-100/20 to-transparent animate-pulse"></div>
@@ -443,15 +436,18 @@ export function DashboardLayout({
                 </Card>
               </div>
 
-              {/* Key Metrics Grid */}
+              {/* Product Metrics Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                {/* Monthly Revenue */}
                 <Card className="border-gray-100 dark:border-gray-800 hover:shadow-lg transition-shadow">
                   <CardContent className="pt-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Monthly Revenue</p>
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                          Monthly Revenue
+                        </p>
                         <p className="text-3xl font-light text-gray-900 dark:text-white">
-                          ${financialMetrics?.monthlyRevenue?.toLocaleString() || '0'}
+                          ${productMetrics?.monthlyRevenue?.toLocaleString() || '0'}
                         </p>
                       </div>
                       <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
@@ -459,33 +455,36 @@ export function DashboardLayout({
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mt-4">
-                      {(financialMetrics?.revenueGrowthRate || 0) >= 0 ? (
+                      {(productMetrics?.revenueGrowthRate || 0) >= 0 ? (
                         <ArrowUp className="w-4 h-4 text-green-500" />
                       ) : (
                         <ArrowDown className="w-4 h-4 text-red-500" />
                       )}
                       <span className={`text-sm font-medium ${
-                        (financialMetrics?.revenueGrowthRate || 0) >= 0 
-                          ? 'text-green-600 dark:text-green-400' 
-                          : 'text-red-600 dark:text-red-400'
+                        (productMetrics?.revenueGrowthRate || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                       }`}>
-                        {financialMetrics?.revenueGrowthRate ? 
-                          `${financialMetrics.revenueGrowthRate > 0 ? '+' : ''}${financialMetrics.revenueGrowthRate.toFixed(1)}%` 
+                        {productMetrics?.revenueGrowthRate 
+                          ? `${productMetrics.revenueGrowthRate > 0 ? '+' : ''}${productMetrics.revenueGrowthRate.toFixed(1)}%` 
                           : 'N/A'
                         }
                       </span>
-                      <span className="text-sm text-gray-500">vs last month</span>
+                      <span className="text-sm text-gray-500">
+                        {productMetrics?.isEstimate ? 'estimated growth' : 'vs last month'}
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
 
+                {/* Total Users */}
                 <Card className="border-gray-100 dark:border-gray-800 hover:shadow-lg transition-shadow">
                   <CardContent className="pt-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Active Users</p>
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                          Total Users
+                        </p>
                         <p className="text-3xl font-light text-gray-900 dark:text-white">
-                          {financialMetrics?.totalUsers?.toLocaleString() || '0'}
+                          {productMetrics?.totalUsers?.toLocaleString() || '0'}
                         </p>
                       </div>
                       <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
@@ -493,33 +492,36 @@ export function DashboardLayout({
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mt-4">
-                      {(financialMetrics?.userGrowthRate || 0) >= 0 ? (
+                      {(productMetrics?.userGrowthRate || 0) >= 0 ? (
                         <ArrowUp className="w-4 h-4 text-green-500" />
                       ) : (
                         <ArrowDown className="w-4 h-4 text-red-500" />
                       )}
                       <span className={`text-sm font-medium ${
-                        (financialMetrics?.userGrowthRate || 0) >= 0 
-                          ? 'text-green-600 dark:text-green-400' 
-                          : 'text-red-600 dark:text-red-400'
+                        (productMetrics?.userGrowthRate || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                       }`}>
-                        {financialMetrics?.userGrowthRate ? 
-                          `${financialMetrics.userGrowthRate > 0 ? '+' : ''}${financialMetrics.userGrowthRate.toFixed(1)}%` 
+                        {productMetrics?.userGrowthRate 
+                          ? `${productMetrics.userGrowthRate > 0 ? '+' : ''}${productMetrics.userGrowthRate.toFixed(1)}%` 
                           : 'N/A'
                         }
                       </span>
-                      <span className="text-sm text-gray-500">vs last month</span>
+                      <span className="text-sm text-gray-500">
+                        {productMetrics?.isEstimate ? 'estimated growth' : 'vs last month'}
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
 
+                {/* Average Price */}
                 <Card className="border-gray-100 dark:border-gray-800 hover:shadow-lg transition-shadow">
                   <CardContent className="pt-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Conversion Rate</p>
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                          Average Price
+                        </p>
                         <p className="text-3xl font-light text-gray-900 dark:text-white">
-                          {financialMetrics?.conversionRate ? `${financialMetrics.conversionRate.toFixed(1)}%` : '0%'}
+                          ${productMetrics?.averagePrice ? productMetrics.averagePrice.toFixed(0) : '0'}
                         </p>
                       </div>
                       <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
@@ -527,33 +529,23 @@ export function DashboardLayout({
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mt-4">
-                      {(financialMetrics?.conversionGrowthRate || 0) >= 0 ? (
-                        <ArrowUp className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <ArrowDown className="w-4 h-4 text-red-500" />
-                      )}
-                      <span className={`text-sm font-medium ${
-                        (financialMetrics?.conversionGrowthRate || 0) >= 0 
-                          ? 'text-green-600 dark:text-green-400' 
-                          : 'text-red-600 dark:text-red-400'
-                      }`}>
-                        {financialMetrics?.conversionGrowthRate ? 
-                          `${financialMetrics.conversionGrowthRate > 0 ? '+' : ''}${financialMetrics.conversionGrowthRate.toFixed(1)}%` 
-                          : 'N/A'
-                        }
+                      <span className="text-sm text-gray-500">
+                        {productMetrics?.businessStage ? `${productMetrics.businessStage} stage` : 'per user/month'}
                       </span>
-                      <span className="text-sm text-gray-500">vs last month</span>
                     </div>
                   </CardContent>
                 </Card>
 
+                {/* Business Stage */}
                 <Card className="border-gray-100 dark:border-gray-800 hover:shadow-lg transition-shadow">
                   <CardContent className="pt-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Churn Rate</p>
-                        <p className="text-3xl font-light text-gray-900 dark:text-white">
-                          {financialMetrics?.churnRate ? `${financialMetrics.churnRate.toFixed(1)}%` : '0%'}
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                          Business Stage
+                        </p>
+                        <p className="text-2xl font-light text-gray-900 dark:text-white capitalize">
+                          {productMetrics?.businessStage || 'Unknown'}
                         </p>
                       </div>
                       <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
@@ -561,22 +553,9 @@ export function DashboardLayout({
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mt-4">
-                      {(financialMetrics?.churnGrowthRate || 0) <= 0 ? (
-                        <ArrowDown className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <ArrowUp className="w-4 h-4 text-red-500" />
-                      )}
-                      <span className={`text-sm font-medium ${
-                        (financialMetrics?.churnGrowthRate || 0) <= 0 
-                          ? 'text-green-600 dark:text-green-400' 
-                          : 'text-red-600 dark:text-red-400'
-                      }`}>
-                        {financialMetrics?.churnGrowthRate ? 
-                          `${financialMetrics.churnGrowthRate > 0 ? '+' : ''}${financialMetrics.churnGrowthRate.toFixed(1)}%` 
-                          : 'N/A'
-                        }
-                      </span>
-                      <span className="text-sm text-gray-500">vs last month</span>
+                      <Badge variant="secondary" className="text-xs">
+                        {productMetrics?.isEstimate ? 'Estimated metrics' : 'Actual data'}
+                      </Badge>
                     </div>
                   </CardContent>
                 </Card>
@@ -670,7 +649,7 @@ export function DashboardLayout({
                             </div>
                             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Analysis Runs</span>
                           </div>
-                          <span className="text-lg font-semibold text-gray-900 dark:text-white">{mockStats.analysisRuns}</span>
+                          <span className="text-lg font-semibold text-gray-900 dark:text-white">{productMetrics?.analysisRuns || 0}</span>
                         </div>
 
                         <div className="flex items-center justify-between">
@@ -680,7 +659,7 @@ export function DashboardLayout({
                             </div>
                             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Tests Created</span>
                           </div>
-                          <span className="text-lg font-semibold text-gray-900 dark:text-white">{mockStats.testsCreated}</span>
+                          <span className="text-lg font-semibold text-gray-900 dark:text-white">{productMetrics?.testsCreated || 0}</span>
                         </div>
 
                         <div className="flex items-center justify-between">
@@ -749,7 +728,7 @@ export function DashboardLayout({
               <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
                 Finish your product profile to unlock AI-powered pricing insights and analytics
               </p>
-              <Link href="/product-profile">
+              <Link href="/product">
                 <Button className="bg-amber-500 hover:bg-amber-600 text-white shadow-lg">
                   <Sparkles className="w-4 h-4 mr-2" />
                   Complete Setup
