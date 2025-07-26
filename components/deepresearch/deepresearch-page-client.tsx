@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -30,7 +31,10 @@ interface Source {
   title: string
   url: string
   relevance: number
-  type: 'research' | 'news' | 'academic' | 'government' | 'industry'
+  type: 'competitor_pricing' | 'market_research' | 'industry_report' | 'pricing_study' | 'feature_analysis'
+  credibility: 'high' | 'medium' | 'low'
+  dataPoint: string
+  usedFor: string
 }
 
 interface ResearchInsight {
@@ -50,6 +54,56 @@ interface TrendAnalysis {
   description: string
 }
 
+interface PricingValidation {
+  recommendedStrategy: string
+  marketPosition: string
+  competitiveJustification: string
+  valueProposition: string
+  riskAssessment: string
+  confidenceLevel: 'high' | 'medium' | 'low'
+  implementationReadiness: 'ready' | 'needs_adjustment' | 'requires_testing'
+}
+
+interface CompetitorBenchmark {
+  competitorName: string
+  pricing: string
+  features: string[]
+  marketShare: string
+  strengths: string
+  weaknesses: string
+  pricingStrategy: string
+  ourAdvantage: string
+  sourceUrl: string
+}
+
+interface FeatureDifferentiation {
+  category: string
+  ourFeatures: string[]
+  competitorGaps: string
+  valueImpact: string
+  pricingJustification: string
+  marketDemand: string
+}
+
+interface PricingImplementation {
+  phase: 'immediate' | 'short_term' | 'long_term'
+  action: string
+  rationale: string
+  expectedImpact: string
+  riskMitigation: string
+  successMetrics: string
+  competitiveResponse: string
+}
+
+interface PricingRationale {
+  coreJustification: string
+  competitiveAdvantage: string
+  valueAlignment: string
+  marketDynamics: string
+  riskFactors: string
+  alternativeStrategies: string
+}
+
 interface BusinessHealth {
   cashFlowInsights: string
   pricingPosition: string
@@ -66,14 +120,22 @@ interface ActionablePlan {
   effort: 'low' | 'medium' | 'high'
   cost: 'free' | 'low' | 'medium' | 'high'
   roi: string
+  competitorContext?: string
 }
 
 interface CompetitorIntel {
   competitorType: 'Direct' | 'Indirect' | 'Aspirational'
+  competitorName: string
+  pricingModel: string
+  pricePoints: string[]
   pricingStrategy: string
-  differentiator: string
-  weakness: string
+  keyDifferentiators: string
+  marketPosition: string
+  customerSegments: string
+  weaknesses: string
+  threats: string
   lessons: string
+  dataSource: string
 }
 
 interface FinancialProjection {
@@ -113,6 +175,11 @@ interface QuickWin {
 interface ResearchResult {
   query: string
   summary: string
+  pricingValidation: PricingValidation
+  competitorBenchmark: CompetitorBenchmark[]
+  featureDifferentiation: FeatureDifferentiation[]
+  pricingImplementation: PricingImplementation[]
+  pricingRationale: PricingRationale
   businessHealth: BusinessHealth
   actionablePlans: ActionablePlan[]
   competitorIntelligence: CompetitorIntel[]
@@ -122,7 +189,6 @@ interface ResearchResult {
   quickWins: QuickWin[]
   sources: Source[]
   confidence: number
-  researchDepth: number
   urgency: 'low' | 'medium' | 'high'
   implementationComplexity: 'simple' | 'moderate' | 'complex'
 }
@@ -205,6 +271,7 @@ const TypewriterText = ({
 
 export function DeepResearchPageClient({ organizations, currentOrganization }: DeepResearchPageClientProps) {
   const { user } = useUser()
+  const searchParams = useSearchParams()
   const [query, setQuery] = useState('')
   const [isResearching, setIsResearching] = useState(false)
   const [result, setResult] = useState<ResearchResult | null>(null)
@@ -213,6 +280,7 @@ export function DeepResearchPageClient({ organizations, currentOrganization }: D
   const [showReasoning, setShowReasoning] = useState(false)
   const [currentReasoningStep, setCurrentReasoningStep] = useState<string>('')
   const [reasoningPhase, setReasoningPhase] = useState<'forward' | 'backward' | 'validation' | 'synthesis'>('forward')
+  const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false)
   const carouselRef = useRef<HTMLDivElement>(null)
 
   const suggestionPrompts = [
@@ -235,6 +303,161 @@ export function DeepResearchPageClient({ organizations, currentOrganization }: D
     "Operational efficiency improvements for solo entrepreneurs",
     "Growth funding alternatives for bootstrapped SMBs"
   ]
+
+  // Function to generate comprehensive prompts based on analysis data
+  const generateComprehensivePrompt = (analysisData: any) => {
+    const { type, recommendation, productInfo, analysis } = analysisData
+
+    if (type === 'pricing_recommendation') {
+      return `Deep Analysis Request: Comprehensive Pricing Strategy Validation for ${productInfo.name}
+
+CONTEXT & BACKGROUND:
+Product: ${productInfo.name}
+Current Pricing: ${productInfo.price} (${productInfo.pricing_model})
+Market: ${productInfo.market}
+Monthly Revenue: $${productInfo.revenue?.toLocaleString() || 'N/A'}
+User Base: ${productInfo.users?.toLocaleString() || 'N/A'} users
+
+SAGE AI RECOMMENDATION TO ANALYZE:
+"${recommendation.model}"
+
+Recommended Pricing Structure:
+${recommendation.segments?.map((segment: string) => `• ${segment}`).join('\n') || 'N/A'}
+
+Key Reasoning Points:
+${recommendation.reasoning_chain?.map((reason: string) => `• ${reason}`).join('\n') || 'N/A'}
+
+ANALYSIS COMPONENTS TO VALIDATE:
+
+1. FEATURE-VALUE MAPPING:
+${analysis.feature_mapping ? `
+Insight: ${analysis.feature_mapping.insight}
+Highlighted Features: ${analysis.feature_mapping.highlighted_features?.join(', ') || 'N/A'}
+Value Gap: ${analysis.feature_mapping.value_gap}
+` : 'Not available'}
+
+2. PRICING MODEL FIT:
+${analysis.pricing_fit ? `
+Current Model: ${analysis.pricing_fit.current_model}
+Recommended Model: ${analysis.pricing_fit.recommended_model}
+Rationale: ${analysis.pricing_fit.rationale}
+` : 'Not available'}
+
+3. COMPETITIVE POSITIONING:
+${analysis.competitors ? `
+${analysis.competitors.insight}
+Competitor Matrix: ${analysis.competitors.matrix?.map((comp: any) => `${comp.name} (${comp.price})`).join(', ') || 'N/A'}
+` : 'Not available'}
+
+4. A/B TEST SCENARIOS:
+${analysis.ab_tests?.map((test: any) => `
+• Scenario: ${test.scenario}
+• Expected Impact: ${test.expected_impact}
+• Key Assumptions: ${test.assumptions?.join(', ') || 'N/A'}
+`).join('') || 'Not available'}
+
+DEEP RESEARCH REQUEST:
+Please provide a comprehensive analysis that includes:
+
+1. BIDIRECTIONAL REASONING VALIDATION:
+   - Forward reasoning: Why this pricing strategy makes sense given market conditions
+   - Backward reasoning: Starting from the desired outcome, validate each assumption
+   - Cross-validation: Check reasoning consistency and identify potential blind spots
+
+2. MARKET INTELLIGENCE DEEP DIVE:
+   - Competitive landscape analysis beyond the basic matrix
+   - Market positioning opportunities and risks
+   - Pricing psychology factors specific to this market segment
+   - Customer willingness-to-pay indicators
+
+3. FINANCIAL IMPACT MODELING:
+   - Revenue impact projections (conservative, optimistic, aggressive scenarios)
+   - Customer acquisition cost implications
+   - Churn risk assessment with new pricing
+   - Cash flow runway analysis
+
+4. IMPLEMENTATION STRATEGY:
+   - Step-by-step rollout plan with timelines
+   - Risk mitigation strategies
+   - Communication strategy for existing customers
+   - Success metrics and monitoring approach
+
+5. ALTERNATIVE SCENARIOS:
+   - What-if analysis for different market conditions
+   - Contingency pricing strategies
+   - Long-term scalability considerations
+
+6. VALIDATION & SOURCES:
+   - Industry benchmarks and data sources
+   - Similar successful case studies
+   - Market research supporting the recommendations
+   - Potential weaknesses in the current analysis
+
+Please provide detailed reasoning for each component, with specific confidence levels and actionable next steps.`
+    }
+
+    // Default fallback for other analysis types
+    return `Comprehensive analysis of: ${JSON.stringify(analysisData, null, 2)}`
+  }
+
+  // Handle incoming analysis data from URL parameters
+  useEffect(() => {
+    const analysisType = searchParams.get('type')
+    const productName = searchParams.get('product')
+    
+    if (analysisType === 'pricing_recommendation' && productName) {
+      // Show loading immediately
+      setIsLoadingAnalysis(true)
+      setCurrentReasoningStep('Preparing comprehensive analysis...')
+      
+      // Fetch fresh analysis data from API
+      const fetchAnalysisAndGenerate = async () => {
+        try {
+          setCurrentReasoningStep('Fetching latest pricing analysis...')
+          const response = await fetch('/api/dashboard/pricing-analysis')
+          if (response.ok) {
+            const result = await response.json()
+            const analysisData = {
+              type: 'pricing_recommendation',
+              recommendation: result.data.sage_recommendation,
+              productInfo: {
+                name: result.productInfo?.name || productName,
+                pricing_model: result.productInfo?.current_pricing_model,
+                price: result.productInfo?.current_price,
+                market: result.productInfo?.market,
+                revenue: result.productInfo?.monthly_revenue,
+                users: result.productInfo?.total_users
+              },
+              analysis: {
+                feature_mapping: result.data.feature_to_value_mapping,
+                pricing_fit: result.data.pricing_model_fit,
+                competitors: result.data.competitor_analysis,
+                ab_tests: result.data.ab_test_scenarios
+              }
+            }
+            
+            setCurrentReasoningStep('Generating comprehensive research prompt...')
+            const comprehensivePrompt = generateComprehensivePrompt(analysisData)
+            setQuery(comprehensivePrompt)
+            
+            setCurrentReasoningStep('Starting deep analysis...')
+            setIsLoadingAnalysis(false)
+            
+            // Auto-start research after populating the query
+            setTimeout(() => {
+              handleResearch()
+            }, 500)
+          }
+        } catch (error) {
+          console.error('Failed to fetch analysis data:', error)
+          setIsLoadingAnalysis(false)
+          setCurrentReasoningStep('')
+        }
+      }
+      
+      fetchAnalysisAndGenerate()
+    }
+  }, [searchParams])
 
   useEffect(() => {
     const carousel = carouselRef.current
@@ -425,9 +648,37 @@ export function DeepResearchPageClient({ organizations, currentOrganization }: D
           <h1 className="text-4xl font-bold text-gray-600 dark:text-gray-400 mb-2 tracking-tight">
             {getGreeting()}
           </h1>
+          {searchParams.get('type') === 'pricing_recommendation' && (
+            <div className="mt-4">
+              <Badge className="bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/40 dark:text-amber-300">
+                Analyzing SAGE AI Recommendation
+              </Badge>
+            </div>
+          )}
         </div>
 
-        {!result && !isResearching && (
+        {/* Loading Analysis State */}
+        {isLoadingAnalysis && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center space-y-8"
+          >
+            <div className="w-24 h-24 bg-amber-50 dark:bg-amber-950/30 rounded-3xl mx-auto flex items-center justify-center border border-amber-200 dark:border-amber-800">
+              <IoSearchOutline className="w-12 h-12 text-amber-600 animate-pulse" />
+            </div>
+            <div className="space-y-4">
+              <h2 className="text-2xl font-light text-gray-900 dark:text-white">
+                Preparing Full Analysis
+              </h2>
+              <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto leading-relaxed">
+                {currentReasoningStep || 'Setting up comprehensive analysis of your SAGE AI recommendation...'}
+              </p>
+            </div>
+          </motion.div>
+        )}
+
+        {!result && !isResearching && !isLoadingAnalysis && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -684,7 +935,7 @@ export function DeepResearchPageClient({ organizations, currentOrganization }: D
                       {result.confidence}% confidence
                     </Badge>
                     <Badge variant="outline">
-                      Depth: {result.researchDepth}/10
+                      Confidence: {result.confidence}%
                     </Badge>
                   </div>
                 </div>
@@ -696,6 +947,189 @@ export function DeepResearchPageClient({ organizations, currentOrganization }: D
                   </CardContent>
                 </Card>
               </div>
+
+              {/* Pricing Validation */}
+              {result.pricingValidation && (
+                <div className="space-y-6">
+                  <h2 className="text-2xl font-light text-gray-900 dark:text-white flex items-center gap-3">
+                    <IoFlashOutline className="w-6 h-6" />
+                    Pricing Strategy Validation
+                  </h2>
+                  <Card className="border-0 shadow-sm bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-950/20 dark:to-blue-950/20">
+                    <CardContent className="p-6">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                          <div>
+                            <div className="text-xs font-medium text-green-600 mb-2">RECOMMENDED STRATEGY</div>
+                            <p className="text-sm font-medium text-gray-900 dark:text-white">
+                              {result.pricingValidation.recommendedStrategy}
+                            </p>
+                          </div>
+                          <div>
+                            <div className="text-xs font-medium text-blue-600 mb-2">MARKET POSITION</div>
+                            <Badge variant="outline" className="text-xs">
+                              {result.pricingValidation.marketPosition}
+                            </Badge>
+                          </div>
+                          <div>
+                            <div className="text-xs font-medium text-purple-600 mb-2">VALUE PROPOSITION</div>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                              {result.pricingValidation.valueProposition}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="space-y-4">
+                          <div>
+                            <div className="text-xs font-medium text-amber-600 mb-2">COMPETITIVE JUSTIFICATION</div>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                              {result.pricingValidation.competitiveJustification}
+                            </p>
+                          </div>
+                          <div>
+                            <div className="text-xs font-medium text-red-600 mb-2">RISK ASSESSMENT</div>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                              {result.pricingValidation.riskAssessment}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div>
+                              <div className="text-xs font-medium text-gray-500 mb-1">CONFIDENCE</div>
+                              <Badge className={`text-xs ${
+                                result.pricingValidation.confidenceLevel === 'high' 
+                                  ? 'bg-green-100 text-green-800' 
+                                  : result.pricingValidation.confidenceLevel === 'medium'
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-red-100 text-red-800'
+                              }`}>
+                                {result.pricingValidation.confidenceLevel}
+                              </Badge>
+                            </div>
+                            <div>
+                              <div className="text-xs font-medium text-gray-500 mb-1">READINESS</div>
+                              <Badge variant="outline" className="text-xs">
+                                {result.pricingValidation.implementationReadiness}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
+              {/* Competitor Benchmark */}
+              {result.competitorBenchmark && result.competitorBenchmark.length > 0 && (
+                <div className="space-y-6">
+                  <h2 className="text-2xl font-light text-gray-900 dark:text-white flex items-center gap-3">
+                    <IoTrendingUpOutline className="w-6 h-6" />
+                    Competitive Pricing Benchmark
+                  </h2>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {result.competitorBenchmark.map((competitor, index) => (
+                      <Card key={index} className="border-0 shadow-sm bg-gray-50/50 dark:bg-gray-950/50">
+                        <CardContent className="p-6">
+                          <div className="flex items-center justify-between mb-4">
+                            <h3 className="font-medium text-gray-900 dark:text-white">
+                              {competitor.competitorName}
+                            </h3>
+                            <Badge variant="outline" className="text-xs">
+                              {competitor.pricing}
+                            </Badge>
+                          </div>
+                          <div className="space-y-3">
+                            <div>
+                              <div className="text-xs font-medium text-gray-500 mb-1">FEATURES</div>
+                              <div className="flex flex-wrap gap-1">
+                                {competitor.features.slice(0, 3).map((feature, i) => (
+                                  <Badge key={i} variant="secondary" className="text-xs">
+                                    {feature}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                            <div>
+                              <div className="text-xs font-medium text-green-600 mb-1">OUR ADVANTAGE</div>
+                              <p className="text-sm text-gray-700 dark:text-gray-300">
+                                {competitor.ourAdvantage}
+                              </p>
+                            </div>
+                            <div>
+                              <div className="text-xs font-medium text-amber-600 mb-1">THEIR WEAKNESS</div>
+                              <p className="text-sm text-gray-700 dark:text-gray-300">
+                                {competitor.weaknesses}
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Feature Differentiation */}
+              {result.featureDifferentiation && result.featureDifferentiation.length > 0 && (
+                <div className="space-y-6">
+                  <h2 className="text-2xl font-light text-gray-900 dark:text-white flex items-center gap-3">
+                    <IoCheckmarkCircleOutline className="w-6 h-6" />
+                    Feature Differentiation & Value
+                  </h2>
+                  <div className="space-y-4">
+                    {result.featureDifferentiation.map((diff, index) => (
+                      <Card key={index} className="border-0 shadow-sm bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20">
+                        <CardContent className="p-6">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div>
+                              <h3 className="font-medium text-gray-900 dark:text-white mb-3">
+                                {diff.category}
+                              </h3>
+                              <div className="space-y-3">
+                                <div>
+                                  <div className="text-xs font-medium text-blue-600 mb-1">OUR FEATURES</div>
+                                  <div className="flex flex-wrap gap-1">
+                                    {diff.ourFeatures.map((feature, i) => (
+                                      <Badge key={i} className="text-xs bg-blue-100 text-blue-800">
+                                        {feature}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                                <div>
+                                  <div className="text-xs font-medium text-red-600 mb-1">COMPETITOR GAPS</div>
+                                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                                    {diff.competitorGaps}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="space-y-3">
+                              <div>
+                                <div className="text-xs font-medium text-green-600 mb-1">VALUE IMPACT</div>
+                                <p className="text-sm text-gray-700 dark:text-gray-300">
+                                  {diff.valueImpact}
+                                </p>
+                              </div>
+                              <div>
+                                <div className="text-xs font-medium text-purple-600 mb-1">PRICING JUSTIFICATION</div>
+                                <p className="text-sm text-gray-700 dark:text-gray-300">
+                                  {diff.pricingJustification}
+                                </p>
+                              </div>
+                              <div>
+                                <div className="text-xs font-medium text-amber-600 mb-1">MARKET DEMAND</div>
+                                <p className="text-sm text-gray-700 dark:text-gray-300">
+                                  {diff.marketDemand}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Business Health Dashboard */}
               <div className="space-y-6">
@@ -796,6 +1230,74 @@ export function DeepResearchPageClient({ organizations, currentOrganization }: D
                 </div>
               </div>
 
+              {/* Pricing Implementation */}
+              {result.pricingImplementation && result.pricingImplementation.length > 0 && (
+                <div className="space-y-6">
+                  <h2 className="text-2xl font-light text-gray-900 dark:text-white flex items-center gap-3">
+                    <IoTimeOutline className="w-6 h-6" />
+                    Pricing Implementation Roadmap
+                  </h2>
+                  <div className="space-y-4">
+                    {result.pricingImplementation.map((phase, index) => (
+                      <Card key={index} className="border-0 shadow-sm bg-gradient-to-r from-green-50 to-teal-50 dark:from-green-950/20 dark:to-teal-950/20">
+                        <CardContent className="p-6">
+                          <div className="flex items-center gap-3 mb-4">
+                            <Badge className={`text-xs ${
+                              phase.phase === 'immediate' 
+                                ? 'bg-red-100 text-red-800' 
+                                : phase.phase === 'short_term'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-blue-100 text-blue-800'
+                            }`}>
+                              {phase.phase.replace('_', ' ').toUpperCase()}
+                            </Badge>
+                            <h3 className="font-medium text-gray-900 dark:text-white">
+                              {phase.action}
+                            </h3>
+                          </div>
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div className="space-y-3">
+                              <div>
+                                <div className="text-xs font-medium text-green-600 mb-1">RATIONALE</div>
+                                <p className="text-sm text-gray-700 dark:text-gray-300">
+                                  {phase.rationale}
+                                </p>
+                              </div>
+                              <div>
+                                <div className="text-xs font-medium text-blue-600 mb-1">EXPECTED IMPACT</div>
+                                <p className="text-sm text-gray-700 dark:text-gray-300">
+                                  {phase.expectedImpact}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="space-y-3">
+                              <div>
+                                <div className="text-xs font-medium text-amber-600 mb-1">RISK MITIGATION</div>
+                                <p className="text-sm text-gray-700 dark:text-gray-300">
+                                  {phase.riskMitigation}
+                                </p>
+                              </div>
+                              <div>
+                                <div className="text-xs font-medium text-purple-600 mb-1">SUCCESS METRICS</div>
+                                <p className="text-sm text-gray-700 dark:text-gray-300">
+                                  {phase.successMetrics}
+                                </p>
+                              </div>
+                              <div>
+                                <div className="text-xs font-medium text-red-600 mb-1">COMPETITIVE RESPONSE</div>
+                                <p className="text-sm text-gray-700 dark:text-gray-300">
+                                  {phase.competitiveResponse}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Actionable Plans */}
               <div className="space-y-6">
                 <h2 className="text-2xl font-light text-gray-900 dark:text-white flex items-center gap-3">
@@ -829,9 +1331,17 @@ export function DeepResearchPageClient({ organizations, currentOrganization }: D
                         <h3 className="font-medium text-gray-900 dark:text-white mb-2">
                           {plan.action}
                         </h3>
-                        <p className="text-gray-600 dark:text-gray-400 text-sm">
+                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
                           {plan.expectedImpact}
                         </p>
+                        {plan.competitorContext && (
+                          <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                            <div className="text-xs font-medium text-blue-600 mb-1">COMPETITIVE CONTEXT</div>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                              {plan.competitorContext}
+                            </p>
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   ))}
@@ -954,15 +1464,15 @@ export function DeepResearchPageClient({ organizations, currentOrganization }: D
                             </p>
                           </div>
                           <div>
-                            <div className="text-xs font-medium text-gray-500 mb-1">DIFFERENTIATOR</div>
+                            <div className="text-xs font-medium text-gray-500 mb-1">KEY DIFFERENTIATORS</div>
                             <p className="text-sm text-gray-700 dark:text-gray-300">
-                              {intel.differentiator}
+                              {intel.keyDifferentiators}
                             </p>
                           </div>
                           <div>
-                            <div className="text-xs font-medium text-gray-500 mb-1">OPPORTUNITY</div>
+                            <div className="text-xs font-medium text-gray-500 mb-1">WEAKNESSES</div>
                             <p className="text-sm text-gray-700 dark:text-gray-300">
-                              {intel.weakness}
+                              {intel.weaknesses}
                             </p>
                           </div>
                           <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
@@ -1027,13 +1537,127 @@ export function DeepResearchPageClient({ organizations, currentOrganization }: D
                   ))}
                 </div>
               </div>
+
+              {/* Pricing Rationale */}
+              {result.pricingRationale && (
+                <div className="space-y-6">
+                  <h2 className="text-2xl font-light text-gray-900 dark:text-white flex items-center gap-3">
+                    <IoInformationCircleOutline className="w-6 h-6" />
+                    Pricing Strategy Rationale
+                  </h2>
+                  <Card className="border-0 shadow-sm bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20">
+                    <CardContent className="p-6">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                          <div>
+                            <div className="text-xs font-medium text-indigo-600 mb-2">CORE JUSTIFICATION</div>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                              {result.pricingRationale.coreJustification}
+                            </p>
+                          </div>
+                          <div>
+                            <div className="text-xs font-medium text-purple-600 mb-2">COMPETITIVE ADVANTAGE</div>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                              {result.pricingRationale.competitiveAdvantage}
+                            </p>
+                          </div>
+                          <div>
+                            <div className="text-xs font-medium text-green-600 mb-2">VALUE ALIGNMENT</div>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                              {result.pricingRationale.valueAlignment}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="space-y-4">
+                          <div>
+                            <div className="text-xs font-medium text-blue-600 mb-2">MARKET DYNAMICS</div>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                              {result.pricingRationale.marketDynamics}
+                            </p>
+                          </div>
+                          <div>
+                            <div className="text-xs font-medium text-red-600 mb-2">RISK FACTORS</div>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                              {result.pricingRationale.riskFactors}
+                            </p>
+                          </div>
+                          <div>
+                            <div className="text-xs font-medium text-amber-600 mb-2">ALTERNATIVE STRATEGIES</div>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                              {result.pricingRationale.alternativeStrategies}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
+              {/* Enhanced Sources & References */}
+              {result.sources && result.sources.length > 0 && (
+                <div className="space-y-6">
+                  <h2 className="text-2xl font-light text-gray-900 dark:text-white flex items-center gap-3">
+                    <IoDocumentTextOutline className="w-6 h-6" />
+                    Sources & Data Validation
+                  </h2>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {result.sources.map((source, index) => (
+                      <Card key={index} className="border-0 shadow-sm bg-gray-50/50 dark:bg-gray-950/50">
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-3">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h3 className="font-medium text-sm text-gray-900 dark:text-white">
+                                  {source.title}
+                                </h3>
+                                <Badge className={`text-xs ${
+                                  source.credibility === 'high' 
+                                    ? 'bg-green-100 text-green-800' 
+                                    : source.credibility === 'medium'
+                                    ? 'bg-yellow-100 text-yellow-800'
+                                    : 'bg-red-100 text-red-800'
+                                }`}>
+                                  {source.credibility}
+                                </Badge>
+                              </div>
+                              <Badge variant="outline" className="text-xs mb-2">
+                                {source.type.replace('_', ' ')}
+                              </Badge>
+                              <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                                {source.dataPoint}
+                              </p>
+                              <div className="text-xs text-gray-500">
+                                <span className="font-medium">Used for:</span> {source.usedFor}
+                              </div>
+                              <div className="text-xs text-gray-500 mt-1">
+                                <span className="font-medium">Relevance:</span> {source.relevance}%
+                              </div>
+                              {source.url && source.url !== 'methodology' && (
+                                <a 
+                                  href={source.url} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-xs text-blue-600 hover:text-blue-800 mt-2 inline-block"
+                                >
+                                  View Source →
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
       {/* Floating Search Bar for when results are shown */}
-      {(result || isResearching) && (
+      {(result || isResearching) && !isLoadingAnalysis && (
         <DeepResearchSearchBar
           query={query}
           onQueryChange={setQuery}
