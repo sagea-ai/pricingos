@@ -268,6 +268,8 @@ When analyzing pricing recommendations, you must:
 4. Provide specific sources for all claims and comparisons
 5. Explain the reasoning chain that led to the pricing recommendation
 
+IMPORTANT: For all competitor-related fields, use real company names operating in the relevant domain if possible. If you cannot find real companies, generate plausible, real-sounding company names that fit the product's industry and geography. Avoid generic names like "Competitor X" or "Competitor Y".
+
 Provide a JSON response with this exact structure focused on pricing validation:
 {
   "query": "The research query",
