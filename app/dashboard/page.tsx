@@ -45,8 +45,8 @@ export default async function HomePage() {
     }
 
     // If user hasn't created any product profiles, redirect to product profile
-    if (!user.productProfiles || user.productProfiles.length === 0) {
-      redirect("/product-profile");
+    if (!user.activeProductProfileId || user.activeProductProfileId.length === 0) {
+      redirect("/product");
     }
 
     const organizations = user.organizationMemberships.map(membership => membership.organization);
