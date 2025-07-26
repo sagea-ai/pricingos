@@ -601,6 +601,7 @@ model FinancialMetrics {
   @@unique([productProfileId, calculatedAt])
   @@index([productProfileId, calculatedAt])
   @@index([productProfileId])
+  @@map("financial_metrics")
 }
 
 model FinancialTransactions {
@@ -622,6 +623,7 @@ model FinancialTransactions {
   @@index([productProfileId, date])
   @@index([productProfileId, gateway])
   @@index([productProfileId, type])
+  @@map("financial_transactions")
 }
 
 model PaymentIntegrations {
@@ -641,6 +643,8 @@ model PaymentIntegrations {
   users            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([productProfileId, gateway])
+  @@map("payment_integrations")
+}
 
 model TriggerSetting {
   id             String          @id @default(cuid())
@@ -796,6 +800,7 @@ enum SubscriptionTier {
   FREE
   PRO
   TRIAL
+  ENTERPRISE
 }
 
 enum EmailEventType {
@@ -841,6 +846,7 @@ enum SyncStatus {
 enum TransactionType {
   REVENUE
   EXPENSE
+}
 
 enum TriggerCategory {
   FINANCIAL
