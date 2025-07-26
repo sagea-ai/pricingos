@@ -1,7 +1,9 @@
+'use client'
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { BarChart3, Calendar, AlertTriangle, TrendingDown, ArrowRight, MessageSquare, TrendingUp, DollarSign, Shield, Target, Activity, Zap, PieChart, TestTube, Users, Clock, Lightbulb, ArrowUp, ArrowDown, Sparkles, Package, Plus } from "lucide-react"
+import { BarChart3, Calendar, AlertTriangle, TrendingDown, ArrowRight, MessageSquare, TrendingUp, DollarSign, Shield, Target, Activity, Zap, PieChart, TestTube, Users, Clock, Lightbulb, ArrowUp, ArrowDown, Sparkles, Package, Plus, Calculator, Upload } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { TrialProvider } from "../trial/trial-provider"
@@ -60,6 +62,18 @@ interface DashboardLayoutProps {
   isLoading?: boolean
 }
 
+interface FinancialMetrics {
+  monthlyRevenue: number
+  totalUsers: number
+  conversionRate: number
+  churnRate: number
+  revenueGrowthRate: number
+  userGrowthRate: number
+  conversionGrowthRate: number
+  churnGrowthRate: number
+  lastUpdated: Date
+}
+
 // Time-based greeting function
 function getTimeBasedGreeting(userName?: string): string {
   const hour = new Date().getHours();
@@ -88,6 +102,8 @@ export function DashboardLayout({
   const [analysisLoading, setAnalysisLoading] = useState(true)
   const [products, setProducts] = useState<any[]>([])
   const [activeProductId, setActiveProductId] = useState<string | null>(null)
+  const [productMetrics, setProductMetrics] = useState<any>(null)
+  const [hasProductData, setHasProductData] = useState(false)
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -129,6 +145,30 @@ export function DashboardLayout({
     }
   }, [activeProductId])
 
+  useEffect(() => {
+    const fetchProductMetrics = async () => {
+      if (!activeProductId) return
+      
+      try {
+        const response = await fetch('/api/dashboard/product-metrics')
+        if (response.ok) {
+          const result = await response.json()
+          if (result.hasData && result.metrics) {
+            setProductMetrics(result.metrics)
+            setHasProductData(true)
+          } else {
+            setHasProductData(false)
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch product metrics:', error)
+        setHasProductData(false)
+      }
+    }
+
+    fetchProductMetrics()
+  }, [activeProductId])
+
   const handleProductChange = async (productId: string) => {
     try {
       const response = await fetch('/api/products/set-active', {
@@ -153,15 +193,6 @@ export function DashboardLayout({
     } finally {
       setAnalysisLoading(false)
     }
-  }
-
-  const mockStats = {
-    monthlyRevenue: productInfo?.monthly_revenue || 12450,
-    totalUsers: productInfo?.total_users || 1247,
-    conversionRate: 3.2,
-    churnRate: 2.1,
-    analysisRuns: 23,
-    testsCreated: 8
   }
 
   return (
@@ -225,27 +256,80 @@ export function DashboardLayout({
               <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
                 Start by defining your product to unlock AI-powered pricing insights and analytics
               </p>
-              <Link href="/product-profile">
+              <Link href="/product">
                 <Button className="bg-amber-500 hover:bg-amber-600 text-white shadow-lg">
-                  <Sparkles className="w-4 h-4 mr-2" />
+                  <Sparkles className="w-4 mr-2" />
                   Create Product
                 </Button>
               </Link>
+            </div>
+          ) : !hasProductData ? (
+            <div className="text-center py-16">
+              <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/30 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                <DollarSign className="w-10 h-10 text-amber-600 dark:text-amber-400" />
+              </div>
+              <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-3">
+                Add Your Business Metrics
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
+                Share some basic numbers about {productInfo?.name || 'your product'} to see meaningful insights and AI recommendations
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Link href="/product">
+                  <Button className="bg-amber-500 hover:bg-amber-600 text-white shadow-lg">
+                    <Calculator className="w-4 h-4 mr-2" />
+                    Add Basic Metrics
+                  </Button>
+                </Link>
+                <Link href="/finances">
+                  <Button variant="outline" className="border-amber-200 text-amber-600 hover:bg-blue-50">
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Or Upload CSV Data
+                  </Button>
+                </Link>
+              </div>
             </div>
           ) : analysisLoading ? (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
               {[...Array(6)].map((_, i) => (
                 <Card key={i} className="animate-pulse border-gray-100 dark:border-gray-800">
                   <CardContent className="pt-6">
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-4"></div>
-                    <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-4" />
+                    <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
                   </CardContent>
                 </Card>
               ))}
             </div>
           ) : pricingAnalysis ? (
             <>
-              {/* SAGE AI Recommendation - Hero Section */}
+              {/* Data Source Banner */}
+              {productMetrics && (
+                <div className="mb-6">
+                  <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-950/20 rounded-xl border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/40 rounded-lg flex items-center justify-center">
+                        <Calculator className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                          {productMetrics.isEstimate ? 'Metrics from Basic Business Data' : 'Metrics from Uploaded Data'}
+                        </p>
+                        <p className="text-xs text-blue-700 dark:text-blue-300">
+                          {productMetrics.isEstimate ? 'Upload CSV data for more detailed analytics' : 'Real data from your business'}
+                        </p>
+                      </div>
+                    </div>
+                    <Link href="/finances">
+                      <Button size="sm" variant="outline" className="border-blue-300 text-blue-700 hover:bg-blue-100">
+                        <Upload className="w-4 h-4 mr-2" />
+                        Upload Data
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              )}
+
+              {/* SAGE AI Recommendation Card */}
               <div className="mb-12">
                 <Card className="bg-gradient-to-br rounded-3xl from-amber-400 via-orange-400 to-orange-500 dark:from-amber-950/20 dark:via-orange-950/10 dark:to-yellow-950/20 border-amber-200 dark:border-amber-800/50 relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-100/20 to-transparent animate-pulse"></div>
@@ -352,15 +436,18 @@ export function DashboardLayout({
                 </Card>
               </div>
 
-              {/* Key Metrics Grid */}
+              {/* Product Metrics Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                {/* Monthly Revenue */}
                 <Card className="border-gray-100 dark:border-gray-800 hover:shadow-lg transition-shadow">
                   <CardContent className="pt-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Monthly Revenue</p>
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                          Monthly Revenue
+                        </p>
                         <p className="text-3xl font-light text-gray-900 dark:text-white">
-                          ${mockStats.monthlyRevenue.toLocaleString()}
+                          ${productMetrics?.monthlyRevenue?.toLocaleString() || '0'}
                         </p>
                       </div>
                       <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
@@ -368,20 +455,36 @@ export function DashboardLayout({
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mt-4">
-                      <ArrowUp className="w-4 h-4 text-green-500" />
-                      <span className="text-sm text-green-600 dark:text-green-400 font-medium">+12.5%</span>
-                      <span className="text-sm text-gray-500">vs last month</span>
+                      {(productMetrics?.revenueGrowthRate || 0) >= 0 ? (
+                        <ArrowUp className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <ArrowDown className="w-4 h-4 text-red-500" />
+                      )}
+                      <span className={`text-sm font-medium ${
+                        (productMetrics?.revenueGrowthRate || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                      }`}>
+                        {productMetrics?.revenueGrowthRate 
+                          ? `${productMetrics.revenueGrowthRate > 0 ? '+' : ''}${productMetrics.revenueGrowthRate.toFixed(1)}%` 
+                          : 'N/A'
+                        }
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        {productMetrics?.isEstimate ? 'estimated growth' : 'vs last month'}
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
 
+                {/* Total Users */}
                 <Card className="border-gray-100 dark:border-gray-800 hover:shadow-lg transition-shadow">
                   <CardContent className="pt-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Active Users</p>
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                          Total Users
+                        </p>
                         <p className="text-3xl font-light text-gray-900 dark:text-white">
-                          {mockStats.totalUsers.toLocaleString()}
+                          {productMetrics?.totalUsers?.toLocaleString() || '0'}
                         </p>
                       </div>
                       <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
@@ -389,20 +492,36 @@ export function DashboardLayout({
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mt-4">
-                      <ArrowUp className="w-4 h-4 text-green-500" />
-                      <span className="text-sm text-green-600 dark:text-green-400 font-medium">+8.2%</span>
-                      <span className="text-sm text-gray-500">vs last month</span>
+                      {(productMetrics?.userGrowthRate || 0) >= 0 ? (
+                        <ArrowUp className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <ArrowDown className="w-4 h-4 text-red-500" />
+                      )}
+                      <span className={`text-sm font-medium ${
+                        (productMetrics?.userGrowthRate || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                      }`}>
+                        {productMetrics?.userGrowthRate 
+                          ? `${productMetrics.userGrowthRate > 0 ? '+' : ''}${productMetrics.userGrowthRate.toFixed(1)}%` 
+                          : 'N/A'
+                        }
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        {productMetrics?.isEstimate ? 'estimated growth' : 'vs last month'}
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
 
+                {/* Average Price */}
                 <Card className="border-gray-100 dark:border-gray-800 hover:shadow-lg transition-shadow">
                   <CardContent className="pt-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Conversion Rate</p>
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                          Average Price
+                        </p>
                         <p className="text-3xl font-light text-gray-900 dark:text-white">
-                          {mockStats.conversionRate}%
+                          ${productMetrics?.averagePrice ? productMetrics.averagePrice.toFixed(0) : '0'}
                         </p>
                       </div>
                       <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
@@ -410,20 +529,23 @@ export function DashboardLayout({
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mt-4">
-                      <ArrowDown className="w-4 h-4 text-red-500" />
-                      <span className="text-sm text-red-600 dark:text-red-400 font-medium">-0.3%</span>
-                      <span className="text-sm text-gray-500">vs last month</span>
+                      <span className="text-sm text-gray-500">
+                        {productMetrics?.businessStage ? `${productMetrics.businessStage} stage` : 'per user/month'}
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
 
+                {/* Business Stage */}
                 <Card className="border-gray-100 dark:border-gray-800 hover:shadow-lg transition-shadow">
                   <CardContent className="pt-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Churn Rate</p>
-                        <p className="text-3xl font-light text-gray-900 dark:text-white">
-                          {mockStats.churnRate}%
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                          Business Stage
+                        </p>
+                        <p className="text-2xl font-light text-gray-900 dark:text-white capitalize">
+                          {productMetrics?.businessStage || 'Unknown'}
                         </p>
                       </div>
                       <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
@@ -431,9 +553,9 @@ export function DashboardLayout({
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mt-4">
-                      <ArrowDown className="w-4 h-4 text-green-500" />
-                      <span className="text-sm text-green-600 dark:text-green-400 font-medium">-0.8%</span>
-                      <span className="text-sm text-gray-500">vs last month</span>
+                      <Badge variant="secondary" className="text-xs">
+                        {productMetrics?.isEstimate ? 'Estimated metrics' : 'Actual data'}
+                      </Badge>
                     </div>
                   </CardContent>
                 </Card>
@@ -527,7 +649,7 @@ export function DashboardLayout({
                             </div>
                             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Analysis Runs</span>
                           </div>
-                          <span className="text-lg font-semibold text-gray-900 dark:text-white">{mockStats.analysisRuns}</span>
+                          <span className="text-lg font-semibold text-gray-900 dark:text-white">{productMetrics?.analysisRuns || 0}</span>
                         </div>
 
                         <div className="flex items-center justify-between">
@@ -537,7 +659,7 @@ export function DashboardLayout({
                             </div>
                             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Tests Created</span>
                           </div>
-                          <span className="text-lg font-semibold text-gray-900 dark:text-white">{mockStats.testsCreated}</span>
+                          <span className="text-lg font-semibold text-gray-900 dark:text-white">{productMetrics?.testsCreated || 0}</span>
                         </div>
 
                         <div className="flex items-center justify-between">
@@ -606,7 +728,7 @@ export function DashboardLayout({
               <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
                 Finish your product profile to unlock AI-powered pricing insights and analytics
               </p>
-              <Link href="/product-profile">
+              <Link href="/product">
                 <Button className="bg-amber-500 hover:bg-amber-600 text-white shadow-lg">
                   <Sparkles className="w-4 h-4 mr-2" />
                   Complete Setup

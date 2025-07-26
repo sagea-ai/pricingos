@@ -88,6 +88,9 @@ interface Product {
   market?: string
   currentPricingModel?: string
   currentPrice?: string
+  monthlyRevenue?: number
+  totalUsers?: number
+  businessStage?: string
   createdAt: string
   updatedAt: string
 }
@@ -99,6 +102,9 @@ interface ProductFormData {
   market: string
   currentPricingModel: string
   currentPrice: string
+  monthlyRevenue: string
+  totalUsers: string
+  businessStage: string
   currentFeature: string
 }
 
@@ -109,8 +115,21 @@ const emptyForm: ProductFormData = {
   market: '',
   currentPricingModel: '',
   currentPrice: '',
+  monthlyRevenue: '',
+  totalUsers: '',
+  businessStage: '',
   currentFeature: ''
 }
+
+// Business stage options
+const businessStageOptions = [
+  { id: 'idea', name: 'Idea Stage', description: 'Concept validation phase' },
+  { id: 'mvp', name: 'MVP/Prototype', description: 'Building initial version' },
+  { id: 'early', name: 'Early Stage', description: 'First customers, testing product-market fit' },
+  { id: 'growth', name: 'Growth Stage', description: 'Scaling and expanding market reach' },
+  { id: 'mature', name: 'Mature', description: 'Established market position' },
+  { id: 'enterprise', name: 'Enterprise', description: 'Large-scale operations' },
+]
 
 export function ProductPageClient({ organizations, currentOrganization: initialOrganization }: ProductPageClientProps) {
   const { user } = useUser()
@@ -220,6 +239,9 @@ export function ProductPageClient({ organizations, currentOrganization: initialO
       market: product.market || '',
       currentPricingModel: product.currentPricingModel || '',
       currentPrice: product.currentPrice || '',
+      monthlyRevenue: product.monthlyRevenue?.toString() || '',
+      totalUsers: product.totalUsers?.toString() || '',
+      businessStage: product.businessStage || '',
       currentFeature: ''
     })
     setErrors({})
@@ -227,141 +249,94 @@ export function ProductPageClient({ organizations, currentOrganization: initialO
     setShowCreateForm(true)
   }
 
-  const cancelForm = () => {
+  const cancelEditing = () => {
     setShowCreateForm(false)
     setEditingProduct(null)
     setFormData(emptyForm)
     setErrors({})
   }
 
-  const handleSave = async () => {
-    const isProductNameValid = validateField('productName', formData.productName)
-    const isCoreValueValid = validateField('coreValue', formData.coreValue)
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
     
-    if (!isProductNameValid || !isCoreValueValid) {
-      toast.error('Please fill in all required fields')
-      return
-    }
-
-    if (formData.features.length === 0) {
-      toast.error('Please add at least one feature')
+    // Validate required fields
+    const requiredFieldValid = validateField('productName', formData.productName) && 
+                              validateField('coreValue', formData.coreValue)
+    
+    if (!requiredFieldValid || formData.features.length === 0) {
+      if (formData.features.length === 0) {
+        toast.error('Please add at least one feature')
+      }
       return
     }
 
     setIsSubmitting(true)
-    
+
     try {
-      const payload = {
-        productName: formData.productName,
-        coreValue: formData.coreValue,
+      const productData = {
+        productName: formData.productName.trim(),
+        coreValue: formData.coreValue.trim(),
         features: formData.features,
-        market: formData.market,
-        currentPricingModel: formData.currentPricingModel,
-        currentPrice: formData.currentPrice
+        market: formData.market || undefined,
+        currentPricingModel: formData.currentPricingModel || undefined,
+        currentPrice: formData.currentPrice || undefined,
+        monthlyRevenue: formData.monthlyRevenue ? parseFloat(formData.monthlyRevenue) : undefined,
+        totalUsers: formData.totalUsers ? parseInt(formData.totalUsers) : undefined,
+        businessStage: formData.businessStage || undefined,
       }
 
       const url = editingProduct ? `/api/products/${editingProduct}` : '/api/products'
       const method = editingProduct ? 'PUT' : 'POST'
-      
+
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(productData),
       })
 
-      const result = await response.json()
-
-      if (response.ok && result.success) {
-        toast.success(editingProduct ? 'Product updated successfully!' : 'Product created successfully!')
-        setShowCreateForm(false)
-        setEditingProduct(null)
-        setFormData(emptyForm)
-        fetchProducts()
+      if (response.ok) {
+        await fetchProducts()
+        cancelEditing()
+        toast.success(editingProduct ? 'Product updated successfully' : 'Product created successfully')
       } else {
-        console.error('Product save failed:', result)
-        toast.error(result.error || 'Failed to save product')
+        const error = await response.text()
+        toast.error(error || 'Failed to save product')
       }
     } catch (error) {
-      console.error('Failed to save product:', error)
-      toast.error('Failed to save product. Please try again.')
+      console.error('Error saving product:', error)
+      toast.error('Failed to save product')
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const handleDelete = async (productId: string, productName: string) => {
-    if (!confirm(`Are you sure you want to delete "${productName}"? This action cannot be undone.`)) {
-      return
-    }
+  const deleteProduct = async (productId: string) => {
+    if (!confirm('Are you sure you want to delete this product?')) return
 
     try {
       const response = await fetch(`/api/products/${productId}`, {
         method: 'DELETE',
       })
 
-      const result = await response.json()
-
-      if (response.ok && result.success) {
-        toast.success('Product deleted successfully!')
-        fetchProducts()
+      if (response.ok) {
+        await fetchProducts()
+        toast.success('Product deleted successfully')
       } else {
-        console.error('Product deletion failed:', result)
-        toast.error(result.error || 'Failed to delete product')
+        toast.error('Failed to delete product')
       }
     } catch (error) {
-      console.error('Failed to delete product:', error)
-      toast.error('Failed to delete product. Please try again.')
+      console.error('Error deleting product:', error)
+      toast.error('Failed to delete product')
     }
-  }
-
-  const getMarketInfo = (marketId: string) => {
-    return marketOptions.find(m => m.id === marketId)
-  }
-
-  const getPricingModelInfo = (modelId: string) => {
-    return pricingModelOptions.find(m => m.id === modelId)
-  }
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  }
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
   }
 
   if (isLoading) {
     return (
-      <AppLayout
-        organizations={organizations}
-        currentOrganization={currentOrganization}
-        onOrganizationChange={handleOrganizationChange}
-        user={{
-          fullName: user?.fullName || undefined,
-          firstName: user?.firstName || undefined,
-          lastName: user?.lastName || undefined,
-        }}
-      >
+      <AppLayout organizations={organizations} currentOrganization={currentOrganization} onOrganizationChange={handleOrganizationChange}>
         <TrialProvider>
           <TrialBannerWrapper />
-          <div className="min-h-screen bg-gradient-to-br from-amber-50/30 via-white to-amber-50/20 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
-            <div className="max-w-7xl mx-auto px-6 py-12">
-              <div className="flex flex-col items-center justify-center min-h-[60vh]">
-                <div className="relative mb-8">
-                  <div className="animate-spin rounded-full h-16 w-16 border-2 border-amber-200 dark:border-amber-800"></div>
-                  <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-amber-500 absolute top-0 left-0"></div>
-                </div>
-                <h3 className="text-xl font-light text-gray-900 dark:text-white mb-2">Loading your products</h3>
-                <p className="text-gray-500 dark:text-gray-400 font-light">Please wait a moment...</p>
-              </div>
-            </div>
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           </div>
         </TrialProvider>
       </AppLayout>
@@ -369,560 +344,331 @@ export function ProductPageClient({ organizations, currentOrganization: initialO
   }
 
   return (
-    <AppLayout
-      organizations={organizations}
-      currentOrganization={currentOrganization}
-      onOrganizationChange={handleOrganizationChange}
-      user={{
-        fullName: user?.fullName || undefined,
-        firstName: user?.firstName || undefined,
-        lastName: user?.lastName || undefined,
-      }}
-    >
+    <AppLayout organizations={organizations} currentOrganization={currentOrganization} onOrganizationChange={handleOrganizationChange}>
       <TrialProvider>
         <TrialBannerWrapper />
-        
-        {/* Hero Background */}
-        <div className="min-h-screen bg-gradient-to-br from-amber-50/30 via-white to-amber-50/20 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
-          <div className="max-w-7xl mx-auto px-6 py-12">
-            
-            {/* Header Section */}
-            <motion.div 
-              className="mb-2"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <div className="text-left mb-8">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl shadow-lg shadow-amber-200 dark:shadow-amber-900/50">
-                    <Package className="h-6 w-6 text-white" />
-                  </div>
-                  <h1 className="text-3xl font-ultralight text-gray-900 dark:text-white tracking-tight">
-                    Product <span className="bg-gradient-to-r from-amber-500 to-amber-600 bg-clip-text text-transparent font-light">Builder</span>
-                  </h1>
-                </div>
-                <p className="text-lg text-gray-500 dark:text-gray-400 font-light max-w-3xl leading-relaxed">
-                  Design, iterate, and perfect your product portfolio with elegant simplicity
-                </p>
+        <div className="p-6 space-y-6">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Package className="h-6 w-6 text-blue-600" />
               </div>
-
-              {/* Quick Stats */}
-              <Card variant="elevated" className="border-amber-100 dark:border-amber-900/30 bg-gradient-to-br rounded-3xl from-amber-400 via-orange-400 to-orange-500 mb-8">
-                <CardContent className="p-8">
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                    <div className="text-center">
-                      <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                        <Package className="h-6 w-6 text-amber-600 dark:text-amber-400" />
-                      </div>
-                      <div className="text-2xl font-light text-gray-900 dark:text-white mb-1">{products.length}</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400 font-light">Products</div>
-                    </div>
-
-                    <div className="text-center">
-                      <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                        <TrendingUp className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-                      </div>
-                      <div className="text-2xl font-light text-gray-900 dark:text-white mb-1">{products.filter(p => p.currentPricingModel && p.currentPricingModel !== 'free').length}</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400 font-light">Monetized</div>
-                    </div>
-
-                    <div className="text-center">
-                      <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                        <Globe className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                      </div>
-                      <div className="text-2xl font-light text-gray-900 dark:text-white mb-1">{new Set(products.map(p => p.market).filter(Boolean)).size}</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400 font-light">Markets</div>
-                    </div>
-
-                    <div className="text-center">
-                      <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                        <Lightbulb className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                      </div>
-                      <div className="text-2xl font-light text-gray-900 dark:text-white mb-1">{products.reduce((acc, p) => acc + p.features.length, 0)}</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400 font-light">Features</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Action Bar */}
-              <div className="flex items-center justify-center">
-                <Button
-                  onClick={startCreating}
-                  disabled={showCreateForm}
-                  size="lg"
-                  className="bg-black  hover:bg-amber-500 hover:text-black text-white px-8 py-4 rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl disabled:opacity-50 disabled:scale-100"
-                >
-                  <Plus className="h-5 w-5 mr-3" />
-                  <span className="font-medium">Create Product</span>
-                </Button>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Products</h1>
+                <p className="text-gray-600">Manage your products and their pricing strategies</p>
               </div>
-            </motion.div>
+            </div>
+            <Button onClick={startCreating} className="bg-blue-600 hover:bg-blue-700">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Product
+            </Button>
+          </div>
 
-            {/* Create/Edit Form */}
-            <AnimatePresence>
-              {showCreateForm && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: -20 }}
-                  transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-                  className="mb-16"
-                >
-                  <Card variant="elevated" className="border-amber-200/50 dark:border-amber-800/30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-2xl shadow-amber-100/50 dark:shadow-amber-900/20">
-                    <CardHeader className="pb-8 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 rounded-t-2xl border-b border-amber-100 dark:border-amber-800/30">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="w-14 h-14 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl flex items-center justify-center shadow-lg">
-                            {editingProduct ? <Edit3 className="h-7 w-7 text-white" /> : <Rocket className="h-7 w-7 text-white" />}
-                          </div>
-                          <div>
-                            <CardTitle className="text-2xl font-light text-gray-900 dark:text-white">
-                              {editingProduct ? 'Refine Your Product' : 'Craft New Product'}
-                            </CardTitle>
-                            <p className="text-gray-500 dark:text-gray-400 font-light mt-1">
-                              {editingProduct ? 'Perfect every detail of your existing product' : 'Bring your vision to life with thoughtful design'}
-                            </p>
-                          </div>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          onClick={cancelForm}
-                          disabled={isSubmitting}
-                          className="h-10 w-10 p-0 rounded-xl hover:bg-white/50 dark:hover:bg-gray-800/50"
-                        >
-                          <X className="h-5 w-5 text-gray-400" />
-                        </Button>
-                      </div>
-                    </CardHeader>
-                    
-                    <CardContent className="p-8 space-y-8">
-                      {/* Identity Section */}
-                      <div className="space-y-6">
-                        <div className="flex items-center gap-3 mb-6">
-                          <div className="w-8 h-8 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
-                            <Target className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                          </div>
-                          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Product Identity</h3>
-                        </div>
-
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                          <div className="space-y-3">
-                            <Label htmlFor="productName" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                              Product Name *
-                            </Label>
-                            <Input
-                              id="productName"
-                              placeholder="Enter a memorable name..."
-                              value={formData.productName}
-                              onChange={(e) => handleInputChange('productName', e.target.value)}
-                              disabled={isSubmitting}
-                              className="h-14 text-lg border-gray-200 dark:border-gray-700 focus:border-amber-400 focus:ring-amber-400/20 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm transition-all duration-200"
-                            />
-                            {errors.productName && (
-                              <motion.p 
-                                initial={{ opacity: 0, y: -5 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="text-sm text-red-500 flex items-center gap-2"
-                              >
-                                <div className="w-1 h-1 bg-red-500 rounded-full"></div>
-                                {errors.productName}
-                              </motion.p>
-                            )}
-                          </div>
-
-                          <div className="space-y-3">
-                            <Label htmlFor="market" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                              Target Market
-                            </Label>
-                            <Select 
-                              onValueChange={(value) => setFormData(prev => ({ ...prev, market: value }))}
-                              value={formData.market}
-                              disabled={isSubmitting}
-                            >
-                              <SelectTrigger className="h-14 border-gray-200 dark:border-gray-700 focus:border-amber-400 focus:ring-amber-400/20 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
-                                <SelectValue placeholder="Choose your market..." />
-                              </SelectTrigger>
-                              <SelectContent className="rounded-xl border-gray-200 dark:border-gray-700">
-                                {marketOptions.map((market) => (
-                                  <SelectItem key={market.id} value={market.id} className="rounded-lg">
-                                    <div className="flex items-center gap-3">
-                                      <span className="text-lg">{market.icon}</span>
-                                      <span className="font-medium">{market.name}</span>
-                                    </div>
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-
-                        <div className="space-y-3">
-                          <Label htmlFor="coreValue" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Core Value Proposition *
-                          </Label>
-                          <Textarea
-                            id="coreValue"
-                            placeholder="Describe the transformative value your product delivers..."
-                            value={formData.coreValue}
-                            onChange={(e) => handleInputChange('coreValue', e.target.value)}
-                            disabled={isSubmitting}
-                            rows={4}
-                            className="border-gray-200 dark:border-gray-700 focus:border-amber-400 focus:ring-amber-400/20 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm resize-none transition-all duration-200"
+          {/* Product Form */}
+          <AnimatePresence>
+            {showCreateForm && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <span>{editingProduct ? 'Edit Product' : 'Create New Product'}</span>
+                      <Button variant="ghost" size="sm" onClick={cancelEditing}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Product Name */}
+                        <div>
+                          <Label htmlFor="productName">Product Name *</Label>
+                          <Input
+                            id="productName"
+                            value={formData.productName}
+                            onChange={(e) => handleInputChange('productName', e.target.value)}
+                            placeholder="Enter product name"
+                            className={errors.productName ? 'border-red-500' : ''}
                           />
-                          {errors.coreValue && (
-                            <motion.p 
-                              initial={{ opacity: 0, y: -5 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              className="text-sm text-red-500 flex items-center gap-2"
-                            >
-                              <div className="w-1 h-1 bg-red-500 rounded-full"></div>
-                              {errors.coreValue}
-                            </motion.p>
+                          {errors.productName && (
+                            <p className="text-sm text-red-500 mt-1">{errors.productName}</p>
                           )}
                         </div>
+
+                        {/* Market */}
+                        <div>
+                          <Label htmlFor="market">Target Market</Label>
+                          <Select value={formData.market} onValueChange={(value) => handleInputChange('market', value)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select target market" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {marketOptions.map((market) => (
+                                <SelectItem key={market.id} value={market.id}>
+                                  <span className="flex items-center">
+                                    <span className="mr-2">{market.icon}</span>
+                                    {market.name}
+                                  </span>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
 
-                      {/* Features Section */}
-                      <div className="space-y-6">
-                        <div className="flex items-center gap-3 mb-6">
-                          <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-                            <Zap className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                          </div>
-                          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Key Features *</h3>
-                        </div>
-                        
-                        <div className="space-y-4">
-                          <div className="flex gap-4">
+                      {/* Core Value */}
+                      <div>
+                        <Label htmlFor="coreValue">Core Value Proposition *</Label>
+                        <Textarea
+                          id="coreValue"
+                          value={formData.coreValue}
+                          onChange={(e) => handleInputChange('coreValue', e.target.value)}
+                          placeholder="Describe the core value your product provides to customers"
+                          rows={3}
+                          className={errors.coreValue ? 'border-red-500' : ''}
+                        />
+                        {errors.coreValue && (
+                          <p className="text-sm text-red-500 mt-1">{errors.coreValue}</p>
+                        )}
+                      </div>
+
+                      {/* Features */}
+                      <div>
+                        <Label>Features *</Label>
+                        <div className="space-y-3">
+                          <div className="flex space-x-2">
                             <Input
-                              placeholder="Add a compelling feature..."
                               value={formData.currentFeature}
                               onChange={(e) => setFormData(prev => ({ ...prev, currentFeature: e.target.value }))}
-                              onKeyPress={(e) => e.key === 'Enter' && addFeature()}
-                              disabled={isSubmitting}
-                              className="h-12 border-gray-200 dark:border-gray-700 focus:border-blue-400 focus:ring-blue-400/20 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm"
+                              placeholder="Add a feature"
+                              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addFeature())}
                             />
-                            <Button
-                              type="button"
-                              onClick={addFeature}
-                              disabled={!formData.currentFeature.trim() || isSubmitting}
-                              className="h-12 px-6 bg-blue-500 hover:bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-200 dark:shadow-blue-900/50 transition-all duration-200 hover:shadow-xl disabled:opacity-50"
-                            >
+                            <Button type="button" onClick={addFeature} variant="outline">
                               <Plus className="h-4 w-4" />
                             </Button>
                           </div>
-
                           {formData.features.length > 0 && (
-                            <motion.div 
-                              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
-                              variants={containerVariants}
-                              initial="hidden"
-                              animate="visible"
-                            >
+                            <div className="flex flex-wrap gap-2">
                               {formData.features.map((feature, index) => (
-                                <motion.div
-                                  key={index}
-                                  variants={itemVariants}
-                                  className="group"
-                                >
-                                  <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/30 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-all duration-200">
-                                    <span className="text-blue-700 dark:text-blue-300 font-medium text-sm">{feature}</span>
-                                    <button
-                                      type="button"
-                                      onClick={() => removeFeature(index)}
-                                      disabled={isSubmitting}
-                                      className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-blue-400 hover:text-red-500 p-1 rounded-lg hover:bg-white/50 dark:hover:bg-gray-800/50"
-                                    >
-                                      <X className="h-3 w-3" />
-                                    </button>
-                                  </div>
-                                </motion.div>
+                                <Badge key={index} variant="secondary" className="flex items-center space-x-1">
+                                  <span>{feature}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => removeFeature(index)}
+                                    className="ml-1 hover:text-red-500"
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </button>
+                                </Badge>
                               ))}
-                            </motion.div>
+                            </div>
                           )}
                         </div>
                       </div>
 
-                      {/* Pricing Section */}
-                      <div className="space-y-6">
-                        <div className="flex items-center gap-3 mb-6">
-                          <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center">
-                            <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                          </div>
-                          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Pricing Strategy</h3>
+                      {/* Additional Fields */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Current Pricing Model */}
+                        <div>
+                          <Label htmlFor="currentPricingModel">Current Pricing Model</Label>
+                          <Select value={formData.currentPricingModel} onValueChange={(value) => handleInputChange('currentPricingModel', value)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select pricing model" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {pricingModelOptions.map((model) => (
+                                <SelectItem key={model.id} value={model.id}>
+                                  <div>
+                                    <div className="font-medium">{model.name}</div>
+                                    <div className="text-sm text-gray-500">{model.description}</div>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                          <div className="space-y-3">
-                            <Label htmlFor="pricingModel" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                              Pricing Model
-                            </Label>
-                            <Select 
-                              onValueChange={(value) => setFormData(prev => ({ ...prev, currentPricingModel: value }))}
-                              value={formData.currentPricingModel}
-                              disabled={isSubmitting}
-                            >
-                              <SelectTrigger className="h-14 border-gray-200 dark:border-gray-700 focus:border-emerald-400 focus:ring-emerald-400/20 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
-                                <SelectValue placeholder="Select pricing approach..." />
-                              </SelectTrigger>
-                              <SelectContent className="rounded-xl border-gray-200 dark:border-gray-700">
-                                {pricingModelOptions.map((model) => (
-                                  <SelectItem key={model.id} value={model.id} className="rounded-lg">
-                                    <div className="py-2">
-                                      <div className="font-medium text-gray-900 dark:text-white">{model.name}</div>
-                                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{model.description}</div>
-                                    </div>
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
+                        {/* Business Stage */}
+                        <div>
+                          <Label htmlFor="businessStage">Business Stage</Label>
+                          <Select value={formData.businessStage} onValueChange={(value) => handleInputChange('businessStage', value)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select business stage" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {businessStageOptions.map((stage) => (
+                                <SelectItem key={stage.id} value={stage.id}>
+                                  <div>
+                                    <div className="font-medium">{stage.name}</div>
+                                    <div className="text-sm text-gray-500">{stage.description}</div>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
 
-                          <AnimatePresence>
-                            {formData.currentPricingModel && formData.currentPricingModel !== 'free' && (
-                              <motion.div 
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -20 }}
-                                className="space-y-3"
-                              >
-                                <Label htmlFor="currentPrice" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                  Current Price
-                                </Label>
-                                <Input
-                                  id="currentPrice"
-                                  placeholder="e.g., $29/month, $199 one-time, Custom"
-                                  value={formData.currentPrice}
-                                  onChange={(e) => setFormData(prev => ({ ...prev, currentPrice: e.target.value }))}
-                                  disabled={isSubmitting}
-                                  className="h-14 border-gray-200 dark:border-gray-700 focus:border-emerald-400 focus:ring-emerald-400/20 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm"
-                                />
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
+                        {/* Current Price */}
+                        <div>
+                          <Label htmlFor="currentPrice">Current Price</Label>
+                          <Input
+                            id="currentPrice"
+                            value={formData.currentPrice}
+                            onChange={(e) => handleInputChange('currentPrice', e.target.value)}
+                            placeholder="e.g., $29/month, $299, Free"
+                          />
+                        </div>
+
+                        {/* Monthly Revenue */}
+                        <div>
+                          <Label htmlFor="monthlyRevenue">Monthly Revenue ($)</Label>
+                          <Input
+                            id="monthlyRevenue"
+                            type="number"
+                            value={formData.monthlyRevenue}
+                            onChange={(e) => handleInputChange('monthlyRevenue', e.target.value)}
+                            placeholder="0"
+                          />
+                        </div>
+
+                        {/* Total Users */}
+                        <div>
+                          <Label htmlFor="totalUsers">Total Users</Label>
+                          <Input
+                            id="totalUsers"
+                            type="number"
+                            value={formData.totalUsers}
+                            onChange={(e) => handleInputChange('totalUsers', e.target.value)}
+                            placeholder="0"
+                          />
                         </div>
                       </div>
 
-                      {/* Action Buttons */}
-                      <div className="flex items-center justify-end gap-4 pt-8 border-t border-gray-100 dark:border-gray-800">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={cancelForm}
-                          disabled={isSubmitting}
-                          className="px-8 py-3 h-12 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition-all duration-200"
-                        >
-                          <X className="h-4 w-4 mr-2" />
+                      {/* Submit Buttons */}
+                      <div className="flex space-x-3">
+                        <Button type="submit" disabled={isSubmitting} className="bg-blue-600 hover:bg-blue-700">
+                          {isSubmitting ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          ) : (
+                            <Save className="h-4 w-4 mr-2" />
+                          )}
+                          {editingProduct ? 'Update Product' : 'Create Product'}
+                        </Button>
+                        <Button type="button" variant="outline" onClick={cancelEditing}>
                           Cancel
                         </Button>
-                        <Button
-                          onClick={handleSave}
-                          disabled={isSubmitting || !formData.productName || !formData.coreValue || formData.features.length === 0}
-                          className="px-8 py-3 h-12 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-xl shadow-lg shadow-amber-200 dark:shadow-amber-900/50 transition-all duration-200 hover:shadow-xl disabled:opacity-50"
-                        >
-                          {isSubmitting ? (
-                            <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                              {editingProduct ? 'Updating...' : 'Creating...'}
-                            </>
-                          ) : (
-                            <>
-                              <Save className="h-4 w-4 mr-2" />
-                              {editingProduct ? 'Update Product' : 'Create Product'}
-                            </>
+                      </div>
+                    </form>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Products List */}
+          {products.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <Package className="h-12 w-12 text-gray-400 mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No products yet</h3>
+                <p className="text-gray-600 text-center mb-6">
+                  Create your first product to start optimizing your pricing strategy
+                </p>
+                <Button onClick={startCreating} className="bg-blue-600 hover:bg-blue-700">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Your First Product
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              {products.map((product) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Card className="hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <CardTitle className="text-lg">{product.productName}</CardTitle>
+                          {product.market && (
+                            <Badge variant="outline" className="mt-2">
+                              {marketOptions.find(m => m.id === product.market)?.icon} {marketOptions.find(m => m.id === product.market)?.name}
+                            </Badge>
                           )}
-                        </Button>
+                        </div>
+                        <div className="flex space-x-1">
+                          <Button variant="ghost" size="sm" onClick={() => startEditing(product)}>
+                            <Edit3 className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => deleteProduct(product.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600 mb-4 line-clamp-3">{product.coreValue}</p>
+                      
+                      {product.features.length > 0 && (
+                        <div className="mb-4">
+                          <h4 className="text-sm font-medium mb-2">Features</h4>
+                          <div className="flex flex-wrap gap-1">
+                            {product.features.slice(0, 3).map((feature, index) => (
+                              <Badge key={index} variant="secondary" className="text-xs">
+                                {feature}
+                              </Badge>
+                            ))}
+                            {product.features.length > 3 && (
+                              <Badge variant="secondary" className="text-xs">
+                                +{product.features.length - 3} more
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        {product.currentPrice && (
+                          <div className="flex items-center">
+                            <DollarSign className="h-4 w-4 text-green-600 mr-1" />
+                            <span>{product.currentPrice}</span>
+                          </div>
+                        )}
+                        {product.totalUsers && (
+                          <div className="flex items-center">
+                            <Users className="h-4 w-4 text-blue-600 mr-1" />
+                            <span>{product.totalUsers.toLocaleString()}</span>
+                          </div>
+                        )}
+                        {product.monthlyRevenue && (
+                          <div className="flex items-center">
+                            <TrendingUp className="h-4 w-4 text-purple-600 mr-1" />
+                            <span>${product.monthlyRevenue.toLocaleString()}/mo</span>
+                          </div>
+                        )}
+                        {product.businessStage && (
+                          <div className="flex items-center">
+                            <Rocket className="h-4 w-4 text-orange-600 mr-1" />
+                            <span className="capitalize">{businessStageOptions.find(s => s.id === product.businessStage)?.name}</span>
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
                 </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Products Section */}
-            <motion.div 
-              className="space-y-8"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              {products.length === 0 && !showCreateForm ? (
-                <Card variant="elevated" className="border-gray-200 dark:border-gray-800 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl">
-                  <CardContent className="py-20 text-center">
-                    <div className="max-w-md mx-auto">
-                      <div className="w-24 h-24 mx-auto mb-8 bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-800 dark:to-amber-900 rounded-3xl flex items-center justify-center shadow-xl">
-                        <Package className="h-12 w-12 text-amber-600 dark:text-amber-400" />
-                      </div>
-                      <h3 className="text-2xl font-light text-gray-900 dark:text-white mb-4">
-                        Your canvas awaits
-                      </h3>
-                      <p className="text-gray-500 dark:text-gray-400 font-light mb-8 leading-relaxed">
-                        Begin your journey by creating your first product. Each creation is a step towards building something extraordinary.
-                      </p>
-                      <Button
-                        onClick={startCreating}
-                        size="lg"
-                        className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-8 py-4 rounded-2xl shadow-lg shadow-amber-200 dark:shadow-amber-900/50 transition-all duration-300 hover:shadow-xl hover:scale-105"
-                      >
-                        <Plus className="h-5 w-5 mr-3" />
-                        Create First Product
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : (
-                <>
-                  <div className="flex items-center justify-between mb-8">
-                    <div>
-                      <h2 className="text-2xl font-light text-gray-900 dark:text-white">
-                        Your Products
-                      </h2>
-                      <p className="text-gray-500 dark:text-gray-400 font-light mt-1">
-                        {products.length} {products.length === 1 ? 'product' : 'products'} in your portfolio
-                      </p>
-                    </div>
-                  </div>
-
-                  <motion.div 
-                    className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8"
-                    variants={containerVariants}
-                    initial="hidden"
-                    animate="visible"
-                  >
-                    {products.map((product, index) => (
-                      <motion.div
-                        key={product.id}
-                        variants={itemVariants}
-                        transition={{ delay: index * 0.1 }}
-                        className="group"
-                      >
-                        <Card variant="elevated" className="border-gray-200 dark:border-gray-800 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl hover:shadow-2xl hover:shadow-amber-100/20 dark:hover:shadow-amber-900/10 transition-all duration-500 hover:scale-[1.02] overflow-hidden">
-                          <CardHeader className="pb-4 relative">
-                            <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => startEditing(product)}
-                                  className="h-8 w-8 p-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl hover:bg-amber-50 hover:text-amber-600 border border-gray-200 dark:border-gray-700"
-                                >
-                                  <Edit3 className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleDelete(product.id, product.productName)}
-                                  className="h-8 w-8 p-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl hover:bg-red-50 hover:text-red-600 border border-gray-200 dark:border-gray-700"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </div>
-
-                            <div className="flex items-start gap-4">
-                              <div className="w-14 h-14 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
-                                <Ship className="h-7 w-7 text-white" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h3 className="font-medium text-gray-900 dark:text-white text-lg mb-2 truncate">
-                                  {product.productName}
-                                </h3>
-                                {product.market && (
-                                  <div className="flex items-center gap-2 mb-3">
-                                    <Badge className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1">
-                                      <span className="mr-2">{getMarketInfo(product.market)?.icon}</span>
-                                      {getMarketInfo(product.market)?.name}
-                                    </Badge>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </CardHeader>
-
-                          <CardContent className="space-y-6">
-                            <p className="text-gray-600 dark:text-gray-400 leading-relaxed font-light line-clamp-3">
-                              {product.coreValue}
-                            </p>
-                            
-                            <div className="space-y-3">
-                              <div className="flex items-center gap-2">
-                                <Zap className="h-4 w-4 text-blue-500" />
-                                <Label className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                                  Features ({product.features.length})
-                                </Label>
-                              </div>
-                              <div className="flex flex-wrap gap-2">
-                                {product.features.slice(0, 4).map((feature, index) => (
-                                  <Badge
-                                    key={index}
-                                    variant="secondary"
-                                    className="text-xs px-3 py-1 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/30 rounded-lg font-medium"
-                                  >
-                                    {feature}
-                                  </Badge>
-                                ))}
-                                {product.features.length > 4 && (
-                                  <Badge
-                                    variant="secondary"
-                                    className="text-xs px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 rounded-lg"
-                                  >
-                                    +{product.features.length - 4}
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-
-                            {product.currentPricingModel && (
-                              <div className="space-y-3">
-                                <div className="flex items-center gap-2">
-                                  <DollarSign className="h-4 w-4 text-emerald-500" />
-                                  <Label className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                                    Pricing
-                                  </Label>
-                                </div>
-                                <div className="flex items-center justify-between">
-                                  <Badge className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/30 rounded-lg px-3 py-1">
-                                    {getPricingModelInfo(product.currentPricingModel)?.name}
-                                  </Badge>
-                                  {product.currentPrice && (
-                                    <span className="text-sm font-medium text-gray-900 dark:text-white">
-                                      {product.currentPrice}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            )}
-
-                            <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-800">
-                              <div className="flex items-center gap-2">
-                                <Calendar className="h-3 w-3 text-gray-400" />
-                                <span className="text-xs text-gray-500 dark:text-gray-400 font-light">
-                                  {new Date(product.updatedAt).toLocaleDateString('en-US', { 
-                                    month: 'short', 
-                                    day: 'numeric',
-                                    year: 'numeric'
-                                  })}
-                                </span>
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => startEditing(product)}
-                                className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30 p-2 h-auto rounded-xl transition-all duration-200"
-                              >
-                                <ChevronRight className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-                    ))}
-                  </motion.div>
-                </>
-              )}
-            </motion.div>
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </TrialProvider>
     </AppLayout>

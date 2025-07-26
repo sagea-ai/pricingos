@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import Image from 'next/image'
+import { BasicMetricsStep } from '@/components/onboarding/basic-metrics-step'
 
 // Market options for the product
 const marketOptions = [
@@ -66,7 +67,13 @@ function ProductProfileContent() {
     market: '',
     currentPricingModel: '',
     currentPrice: '',
-    currentFeature: ''
+    currentFeature: '',
+    // Add metrics data
+    monthlyRevenue: undefined as number | undefined,
+    totalUsers: undefined as number | undefined,
+    averagePrice: undefined as number | undefined,
+    businessStage: '',
+    isEstimate: true
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -76,7 +83,8 @@ function ProductProfileContent() {
     'Core Value', 
     'Special Abilities',
     'Market',
-    'Current Pricing'
+    'Current Pricing',
+    'Business Metrics' // Add new step
   ]
 
   const progress = ((currentStep + 1) / steps.length) * 100
@@ -184,7 +192,13 @@ function ProductProfileContent() {
         features: formData.features,
         market: formData.market,
         currentPricingModel: formData.currentPricingModel,
-        currentPrice: formData.currentPrice
+        currentPrice: formData.currentPrice,
+        // Add metrics
+        monthlyRevenue: formData.monthlyRevenue,
+        totalUsers: formData.totalUsers,
+        averagePrice: formData.averagePrice,
+        businessStage: formData.businessStage,
+        isEstimate: formData.isEstimate
       }
 
       console.log('Completing product profile with data:', payload)
@@ -221,6 +235,7 @@ function ProductProfileContent() {
       case 2: return formData.features.length > 0
       case 3: return true // Market selection is optional
       case 4: return true // Current pricing is optional
+      case 5: return true // Metrics step is handled in the component
       default: return false
     }
   }
@@ -565,6 +580,26 @@ function ProductProfileContent() {
                         </div>
                       )}
                     </div>
+                  </motion.div>
+                )}
+
+                {/* Step 6: Business Metrics */}
+                {currentStep === 5 && (
+                  <motion.div
+                    key="business-metrics"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <BasicMetricsStep
+                      onComplete={(data) => {
+                        setFormData(prev => ({ ...prev, ...data }))
+                        setCurrentStep(currentStep + 1)
+                      }}
+                      onSkip={() => setCurrentStep(currentStep + 1)}
+                      isSubmitting={isSubmitting}
+                    />
                   </motion.div>
                 )}
               </AnimatePresence>

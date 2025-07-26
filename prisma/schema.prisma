@@ -60,6 +60,9 @@ model ProductProfile {
   churnRate           Float?
   monthlyRevenue      Float?
   totalUsers          Int?                @default(0)
+  averagePrice        Float?
+  businessStage       String?             @default("idea")
+  isEstimate          Boolean             @default(true)
   paymentIntegrations String[]            @default([])
   userId              String
   createdAt           DateTime            @default(now())

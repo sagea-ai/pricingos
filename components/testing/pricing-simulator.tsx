@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -80,6 +80,7 @@ export function PricingSimulator({ productProfile }: PricingSimulatorProps) {
     price: '',
     description: ''
   })
+  const [baselineMetrics, setBaselineMetrics] = useState<any>(null)
 
   const pricingModels = [
     'Flat Rate',
@@ -90,6 +91,24 @@ export function PricingSimulator({ productProfile }: PricingSimulatorProps) {
     'Value-Based',
     'Hybrid'
   ]
+
+  useEffect(() => {
+    const fetchBaselineMetrics = async () => {
+      try {
+        const response = await fetch('/api/dashboard/financial-metrics')
+        if (response.ok) {
+          const result = await response.json()
+          if (result.metrics) {
+            setBaselineMetrics(result.metrics)
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch baseline metrics:', error)
+      }
+    }
+
+    fetchBaselineMetrics()
+  }, [])
 
   const addVariant = () => {
     if (!newVariant.name || !newVariant.model || !newVariant.price) return
@@ -179,24 +198,38 @@ export function PricingSimulator({ productProfile }: PricingSimulatorProps) {
           </p>
         </CardHeader>
         <CardContent>
-          <div className="grid md:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">$4,800</div>
-              <div className="text-sm text-muted-foreground">Monthly Revenue</div>
+          {baselineMetrics ? (
+            <div className="grid md:grid-cols-4 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">
+                  ${baselineMetrics.mrr?.toLocaleString() || '0'}
+                </div>
+                <div className="text-sm text-muted-foreground">Monthly Recurring Revenue</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">
+                  ${baselineMetrics.ltv?.toLocaleString() || '0'}
+                </div>
+                <div className="text-sm text-muted-foreground">Customer Lifetime Value</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-600">
+                  {baselineMetrics.churnRate || '0'}%
+                </div>
+                <div className="text-sm text-muted-foreground">Churn Rate</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-orange-600">
+                  ${baselineMetrics.arpu?.toLocaleString() || '0'}
+                </div>
+                <div className="text-sm text-muted-foreground">Average Revenue Per User</div>
+              </div>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">$180</div>
-              <div className="text-sm text-muted-foreground">Customer LTV</div>
+          ) : (
+            <div className="text-center py-8">
+              <div className="text-muted-foreground">Loading baseline metrics...</div>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">5.2%</div>
-              <div className="text-sm text-muted-foreground">Monthly Churn</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-orange-600">2.8%</div>
-              <div className="text-sm text-muted-foreground">Conversion Rate</div>
-            </div>
-          </div>
+          )}
         </CardContent>
       </Card>
 
