@@ -43,11 +43,6 @@ model User {
   activeProductProfileId    String?
   activeProductProfile      ProductProfile? @relation("ActiveProductProfile", fields: [activeProductProfileId], references: [id])
 
-  financialMetrics          FinancialMetrics[]
-  financialTransactions     FinancialTransactions[]
-  paymentIntegrations       PaymentIntegrations[]
-  triggerSettings           TriggerSetting[]
-
   @@map("users")
 }
 
@@ -71,9 +66,6 @@ model ProductProfile {
   competitors         ProductCompetitor[]
   PricingAnalysis     PricingAnalysis[]
   activeForUsers      User[]              @relation("ActiveProductProfile")
-
-  financialMetrics          FinancialMetrics[]
-  financialTransactions     FinancialTransactions[]
 
   @@map("product_profiles")
 }
@@ -147,9 +139,6 @@ model Organization {
   creator             User                  @relation("OrganizationCreator", fields: [creatorId], references: [id], onDelete: Cascade)
   repositories        Repository[]
   workspaces          Workspace[]
-
-  triggerSettings           TriggerSetting[]
-  triggerEventLogs          TriggerEventLog[]
 
   @@map("organizations")
 }
@@ -578,105 +567,6 @@ model WorkspaceInvitation {
   @@map("workspace_invitations")
 }
 
-model FinancialMetrics {
-  id                        String         @id @default(cuid())
-  productProfileId          String
-  userId                    String
-  totalRevenue              Float          @default(0)
-  monthlyRecurringRevenue   Float          @default(0)
-  oneTimePayments           Float          @default(0)
-  averageRevenuePerUser     Float          @default(0)
-  activeSubscriptions       Int            @default(0)
-  revenueGrowthRate         Float          @default(0)
-  mrrGrowthRate             Float          @default(0)
-  subscriptionGrowthRate    Float          @default(0)
-  totalExpenses             Float          @default(0)
-  monthlyExpenses           Float          @default(0)
-  currentCash               Float          @default(0)
-  monthlyBurnRate           Float          @default(0)
-  dailyBurnRate             Float          @default(0)
-  dailyRevenue              Float          @default(0)
-  netDailyBurn              Float          @default(0)
-  runwayMonths              Float          @default(0)
-  runwayDays                Int            @default(0)
-  projectedCashDepletion    DateTime?
-  calculatedAt              DateTime       @default(now())
-  transactionCount          Int            @default(0)
-  createdAt                 DateTime       @default(now())
-  updatedAt                 DateTime       @default(now())
-  productProfile            ProductProfile @relation(fields: [productProfileId], references: [id], onDelete: Cascade)
-  user                      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([productProfileId, calculatedAt])
-  @@map("financial_metrics")
-}
-
-model FinancialTransactions {
-  id               String         @id @default(cuid())
-  amount           Float
-  type             TransactionType
-  description      String
-  category         String?
-  gateway          PaymentGateway?
-  date             DateTime
-  productProfileId String
-  userId           String
-  metadata         Json?
-  createdAt        DateTime       @default(now())
-  productProfile   ProductProfile @relation(fields: [productProfileId], references: [id], onDelete: Cascade)
-  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("financial_transactions")
-}
-
-model PaymentIntegrations {
-  id               String         @id @default(cuid())
-  gateway          PaymentGateway
-  isConnected      Boolean        @default(false)
-  accountId        String?
-  lastSync         DateTime?
-  syncStatus       SyncStatus     @default(PENDING)
-  productProfileId String
-  userId           String
-  settings         Json?
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @default(now())
-  productProfile   ProductProfile @relation(fields: [productProfileId], references: [id], onDelete: Cascade)
-  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([productProfileId, gateway])
-  @@map("payment_integrations")
-}
-
-model TriggerSetting {
-  id             String       @id @default(cuid())
-  triggerId      String
-  isEnabled      Boolean      @default(true)
-  threshold      Float?
-  organizationId String
-  userId         String
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @default(now())
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([organizationId, triggerId])
-  @@map("trigger_settings")
-}
-
-model TriggerEventLog {
-  id             String       @id @default(cuid())
-  organizationId String
-  triggerId      String
-  triggerData    Json
-  emailSent      Boolean      @default(false)
-  recipients     String[]     @default([])
-  createdAt      DateTime     @default(now())
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  @@map("trigger_event_logs")
-}
-
 enum CompanySize {
   JUST_ME
   TWO_TO_TEN
@@ -804,23 +694,4 @@ enum NotificationType {
   WORKSPACE_ACTIVITY
   ANALYSIS_COMPLETE
   MEMBER_JOINED
-}
-
-enum TransactionType {
-  REVENUE
-  EXPENSE
-}
-
-enum PaymentGateway {
-  STRIPE
-  KHALTI
-  PAYPAL
-  BANK_TRANSFER
-}
-
-enum SyncStatus {
-  PENDING
-  SYNCING
-  SYNC_COMPLETE
-  SYNC_ERROR
 }
