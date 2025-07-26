@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { FaStripe } from "react-icons/fa";
@@ -49,101 +49,27 @@ interface CashRunwayData {
   projectedCashDepletion: string;
 }
 
-// Realistic financial data with proper month-over-month growth patterns
-const mockFinancialData = {
-  overview: {
-    totalRevenue: 87450.00,
-    monthlyRecurringCurrent: 12500.00, // July 2025
-    monthlyRecurringPrevious: 11200.00, // June 2025  
-    oneTimePayments: 8750.00,
-    activeSubscriptions: 42,
-    activeSubscriptionsPrevious: 38,
-    churnRate: 3.1,
-    averageRevenuePerUser: 297.62
-  },
-  cashRunway: {
-    currentCash: 1200.00, // Very low cash to show 4 days runway
-    monthlyBurnRate: 8500.00, // High burn rate
-    monthlyRevenue: 12500.00,
-    dailyBurnRate: 283.33, // 8500/30 days
-    dailyRevenue: 416.67, // 12500/30 days
-    netDailyBurn: -133.34, // negative means burning cash
-    runwayMonths: 0.13, // 4 days = 0.13 months
-    runwayDays: 4, // 1200 / 300 net daily burn
-    projectedCashDepletion: '2025-07-29',
-    recommendations: [
-      { type: 'pricing', action: 'Increase prices by 25%', impact: '+12 days runway' },
-      { type: 'cac', action: 'Reduce marketing spend by 40%', impact: '+18 days runway' },
-      { type: 'funding', action: 'Raise $50K bridge funding', impact: '+167 days runway' }
-    ]
-  },
-  revenueChart: [
-    { month: 'Jan 2025', revenue: 8200, stripe: 5400, khalti: 2800, expenses: 7100 },
-    { month: 'Feb 2025', revenue: 9100, stripe: 6200, khalti: 2900, expenses: 7350 },
-    { month: 'Mar 2025', revenue: 9800, stripe: 6800, khalti: 3000, expenses: 7500 },
-    { month: 'Apr 2025', revenue: 10500, stripe: 7200, khalti: 3300, expenses: 7800 },
-    { month: 'May 2025', revenue: 11200, stripe: 7800, khalti: 3400, expenses: 8200 },
-    { month: 'Jun 2025', revenue: 11200, stripe: 7600, khalti: 3600, expenses: 8350 },
-    { month: 'Jul 2025', revenue: 12500, stripe: 8500, khalti: 4000, expenses: 8500 }
-  ],
-  recentTransactions: [
-    {
-      id: 'txn_001',
-      customer: 'John Doe',
-      amount: 99.00,
-      type: 'subscription',
-      status: 'completed',
-      date: '2025-01-24',
-      plan: 'Pro Monthly'
-    },
-    {
-      id: 'txn_002',
-      customer: 'Sarah Johnson',
-      amount: 299.00,
-      type: 'one-time',
-      status: 'completed',
-      date: '2025-01-24',
-      plan: 'Lifetime Deal'
-    },
-    {
-      id: 'txn_003',
-      customer: 'Mike Chen',
-      amount: 49.00,
-      type: 'subscription',
-      status: 'completed',
-      date: '2025-01-23',
-      plan: 'Basic Monthly'
-    },
-    {
-      id: 'txn_004',
-      customer: 'Emma Wilson',
-      amount: 99.00,
-      type: 'subscription',
-      status: 'failed',
-      date: '2025-01-23',
-      plan: 'Pro Monthly'
-    },
-    {
-      id: 'txn_005',
-      customer: 'David Brown',
-      amount: 199.00,
-      type: 'one-time',
-      status: 'completed',
-      date: '2025-01-22',
-      plan: 'Premium Package'
-    }
-  ],
-  paymentMethods: [
-    { name: 'Credit Cards', value: 65, color: '#8884d8' },
-    { name: 'PayPal', value: 25, color: '#82ca9d' },
-    { name: 'Bank Transfer', value: 10, color: '#ffc658' }
-  ]
-}
-
-interface StripeIntegration {
-  isConnected: boolean
-  accountId?: string
-  lastSync?: string
+interface StoredFinancialMetrics {
+  totalRevenue: number;
+  monthlyRecurringRevenue: number;
+  oneTimePayments: number;
+  averageRevenuePerUser: number;
+  activeSubscriptions: number;
+  revenueGrowthRate: number;
+  mrrGrowthRate: number;
+  subscriptionGrowthRate: number;
+  totalExpenses: number;
+  monthlyExpenses: number;
+  currentCash: number;
+  monthlyBurnRate: number;
+  dailyBurnRate: number;
+  dailyRevenue: number;
+  netDailyBurn: number;
+  runwayMonths: number;
+  runwayDays: number;
+  projectedCashDepletion: string | null;
+  calculatedAt: string;
+  transactionCount: number;
 }
 
 interface ProductProfile {
@@ -171,578 +97,124 @@ export function FinancesContent({ organizationName, organizationId, productProfi
     lastSync: null as string | null
   })
   const [isConnecting, setIsConnecting] = useState(false)
-  const [uploadedData, setUploadedData] = useState<TransactionData[]>([])
-  const [cashRunwayData, setCashRunwayData] = useState<CashRunwayData>(mockFinancialData.cashRunway)
+  const [storedMetrics, setStoredMetrics] = useState<StoredFinancialMetrics | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [uploadType, setUploadType] = useState<'stripe' | 'khalti' | 'expenses'>('stripe')
 
-  // Dynamic calculation functions with realistic data
-  const calculateFinancialMetrics = (transactions: TransactionData[]) => {
-    // If no uploaded data, use realistic mock data with proper growth patterns
-    if (transactions.length === 0) {
-      return {
-        totalRevenue: mockFinancialData.overview.totalRevenue,
-        monthlyRevenue: mockFinancialData.overview.monthlyRecurringCurrent,
-        monthlyRecurring: mockFinancialData.overview.monthlyRecurringCurrent,
-        oneTimePayments: mockFinancialData.overview.oneTimePayments,
-        activeSubscriptions: mockFinancialData.overview.activeSubscriptions,
-        averageRevenuePerUser: mockFinancialData.overview.averageRevenuePerUser,
-        // Realistic growth rates based on current vs previous month
-        revenueGrowthRate: ((mockFinancialData.overview.monthlyRecurringCurrent - mockFinancialData.overview.monthlyRecurringPrevious) / mockFinancialData.overview.monthlyRecurringPrevious) * 100, // 11.6%
-        mrrGrowthRate: ((mockFinancialData.overview.monthlyRecurringCurrent - mockFinancialData.overview.monthlyRecurringPrevious) / mockFinancialData.overview.monthlyRecurringPrevious) * 100, // 11.6%
-        subscriptionGrowthRate: ((mockFinancialData.overview.activeSubscriptions - mockFinancialData.overview.activeSubscriptionsPrevious) / mockFinancialData.overview.activeSubscriptionsPrevious) * 100, // 10.5%
-        totalExpenses: 59500.00, // 7 months * 8500 average
-        monthlyExpenses: 8500.00,
-        netProfit: mockFinancialData.overview.monthlyRecurringCurrent - 8500.00 // $4000 profit
-      }
-    }
+  // Fetch stored financial metrics on component mount
+  useEffect(() => {
+    fetchFinancialMetrics()
+  }, [])
 
-    // Calculate from actual uploaded data
-    const now = new Date()
-    const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate())
-    const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate())
-    
-    // Current month data
-    const currentMonthTransactions = transactions.filter(t => {
-      const transactionDate = new Date(t.date)
-      return transactionDate >= oneMonthAgo
-    })
-
-    // Last 3 months data
-    const threeMonthTransactions = transactions.filter(t => {
-      const transactionDate = new Date(t.date)
-      return transactionDate >= threeMonthsAgo
-    })
-
-    const totalRevenue = transactions.filter(t => t.type === 'revenue').reduce((sum, t) => sum + t.amount, 0)
-    const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0)
-    
-    const monthlyRevenue = currentMonthTransactions.filter(t => t.type === 'revenue').reduce((sum, t) => sum + t.amount, 0)
-    const monthlyExpenses = currentMonthTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0)
-    
-    // Calculate MRR (Monthly Recurring Revenue) from subscription transactions
-    const subscriptionRevenue = currentMonthTransactions
-      .filter(t => t.type === 'revenue' && (t.category?.toLowerCase().includes('subscription') || t.category?.toLowerCase().includes('monthly')))
-      .reduce((sum, t) => sum + t.amount, 0)
-    
-    const oneTimePayments = currentMonthTransactions
-      .filter(t => t.type === 'revenue' && !t.category?.toLowerCase().includes('subscription') && !t.category?.toLowerCase().includes('monthly'))
-      .reduce((sum, t) => sum + t.amount, 0)
-    
-    // Count active subscriptions (unique monthly subscription transactions)
-    const activeSubscriptions = currentMonthTransactions
-      .filter(t => t.type === 'revenue' && (t.category?.toLowerCase().includes('subscription') || t.category?.toLowerCase().includes('monthly')))
-      .length
-    
-    // Calculate average revenue per user
-    const uniqueCustomers = new Set(currentMonthTransactions.filter(t => t.type === 'revenue').map(t => t.description)).size
-    const averageRevenuePerUser = uniqueCustomers > 0 ? monthlyRevenue / uniqueCustomers : 0
-    
-    // Calculate growth rates (compare current month vs previous month)
-    const twoMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, now.getDate())
-    const previousMonthTransactions = transactions.filter(t => {
-      const transactionDate = new Date(t.date)
-      return transactionDate >= twoMonthsAgo && transactionDate < oneMonthAgo
-    })
-    
-    const previousMonthRevenue = previousMonthTransactions.filter(t => t.type === 'revenue').reduce((sum, t) => sum + t.amount, 0)
-    const revenueGrowthRate = previousMonthRevenue > 0 ? ((monthlyRevenue - previousMonthRevenue) / previousMonthRevenue) * 100 : 0
-    
-    const previousMonthMRR = previousMonthTransactions
-      .filter(t => t.type === 'revenue' && (t.category?.toLowerCase().includes('subscription') || t.category?.toLowerCase().includes('monthly')))
-      .reduce((sum, t) => sum + t.amount, 0)
-    const mrrGrowthRate = previousMonthMRR > 0 ? ((subscriptionRevenue - previousMonthMRR) / previousMonthMRR) * 100 : 0
-    
-    const previousMonthSubscriptions = previousMonthTransactions
-      .filter(t => t.type === 'revenue' && (t.category?.toLowerCase().includes('subscription') || t.category?.toLowerCase().includes('monthly')))
-      .length
-    const subscriptionGrowthRate = previousMonthSubscriptions > 0 ? ((activeSubscriptions - previousMonthSubscriptions) / previousMonthSubscriptions) * 100 : 0
-    
-    return {
-      totalRevenue,
-      monthlyRevenue,
-      monthlyRecurring: subscriptionRevenue,
-      oneTimePayments,
-      activeSubscriptions,
-      averageRevenuePerUser,
-      revenueGrowthRate,
-      mrrGrowthRate,
-      subscriptionGrowthRate,
-      totalExpenses,
-      monthlyExpenses,
-      netProfit: monthlyRevenue - monthlyExpenses
-    }
-  }
-
-  const getRecentTransactions = (transactions: TransactionData[], limit: number = 5) => {
-    // If no uploaded data, return realistic mock transactions
-    if (transactions.length === 0) {
-      return [
-        {
-          id: 'txn_001',
-          customer: 'Sarah Tech Co.',
-          amount: 299.00,
-          type: 'subscription' as const,
-          status: 'completed' as const,
-          date: '2025-07-24',
-          plan: 'Pro Annual'
-        },
-        {
-          id: 'txn_002',
-          customer: 'DevStudio Inc.',
-          amount: 99.00,
-          type: 'subscription' as const,
-          status: 'completed' as const,
-          date: '2025-07-24',
-          plan: 'Basic Monthly'
-        },
-        {
-          id: 'txn_003',
-          customer: 'StartupXYZ',
-          amount: 499.00,
-          type: 'subscription' as const,
-          status: 'completed' as const,
-          date: '2025-07-23',
-          plan: 'Enterprise'
-        },
-        {
-          id: 'txn_004',
-          customer: 'Design Agency',
-          amount: 149.00,
-          type: 'subscription' as const,
-          status: 'failed' as const,
-          date: '2025-07-23',
-          plan: 'Pro Monthly'
-        },
-        {
-          id: 'txn_005',
-          customer: 'Mobile App Co.',
-          amount: 199.00,
-          type: 'subscription' as const,
-          status: 'completed' as const,
-          date: '2025-07-22',
-          plan: 'Team Plan'
-        }
-      ]
-    }
-
-    return transactions
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, limit)
-      .map(t => ({
-        id: `txn_${Math.random().toString(36).substr(2, 9)}`,
-        customer: t.description.split(' ')[0] + ' Customer',
-        amount: t.amount,
-        type: t.type === 'revenue' ? 'subscription' : 'expense',
-        status: 'completed' as const,
-        date: t.date,
-        plan: t.category || 'Standard'
-      }))
-  }
-
-  const getPaymentMethodDistribution = (transactions: TransactionData[]) => {
-    const revenueTransactions = transactions.filter(t => t.type === 'revenue')
-    const total = revenueTransactions.length
-    
-    // If no uploaded data, return realistic default distribution
-    if (total === 0) {
-      return [
-        { name: 'Stripe', value: 68, color: '#635BFF' },
-        { name: 'Khalti', value: 32, color: '#5C2E91' }
-      ]
-    }
-    
-    const stripeCount = revenueTransactions.filter(t => t.gateway === 'stripe').length
-    const khaltiCount = revenueTransactions.filter(t => t.gateway === 'khalti').length
-    const otherCount = total - stripeCount - khaltiCount
-    
-    return [
-      { name: 'Stripe', value: Math.round((stripeCount / total) * 100), color: '#635BFF' },
-      { name: 'Khalti', value: Math.round((khaltiCount / total) * 100), color: '#5C2E91' },
-      { name: 'Other', value: Math.round((otherCount / total) * 100), color: '#00A86B' }
-    ].filter(item => item.value > 0)
-  }
-
-  // Calculate dynamic financial metrics
-  const financialMetrics = calculateFinancialMetrics(uploadedData)
-  const recentTransactions = getRecentTransactions(uploadedData)
-  const paymentMethods = getPaymentMethodDistribution(uploadedData)
-
-  // Generate product-specific dummy data
-  const generateProductSpecificData = (): TransactionData[] => {
-    const productName = productProfile?.productName || 'Your Product'
-    const currentPrice = productProfile?.currentPrice ? parseFloat(productProfile.currentPrice) : 99.00
-    const pricingModel = productProfile?.currentPricingModel || 'subscription'
-    
-    const baseRevenue: TransactionData[] = [
-      {
-        date: '2024-12-15',
-        amount: currentPrice,
-        type: 'revenue',
-        description: `${pricingModel === 'subscription' ? 'Monthly subscription' : 'One-time purchase'} - ${productName}`,
-        category: pricingModel,
-        gateway: 'stripe'
-      },
-      {
-        date: '2024-12-14',
-        amount: currentPrice * (pricingModel === 'subscription' ? 12 : 1.5), // Annual or premium pricing
-        type: 'revenue',
-        description: `${pricingModel === 'subscription' ? 'Annual subscription' : 'Premium package'} - ${productName}`,
-        category: pricingModel,
-        gateway: 'stripe'
-      },
-      {
-        date: '2024-12-13',
-        amount: currentPrice * 0.5, // Basic tier
-        type: 'revenue',
-        description: `Basic plan - ${productName}`,
-        category: 'basic',
-        gateway: 'stripe'
-      },
-      {
-        date: '2024-12-10',
-        amount: currentPrice,
-        type: 'revenue',
-        description: `${pricingModel === 'subscription' ? 'Monthly subscription' : 'Standard purchase'} - ${productName}`,
-        category: pricingModel,
-        gateway: 'stripe'
-      },
-      {
-        date: '2024-12-08',
-        amount: currentPrice * 1.5, // Premium tier
-        type: 'revenue',
-        description: `Premium plan - ${productName}`,
-        category: 'premium',
-        gateway: 'stripe'
-      },
-      {
-        date: '2024-11-28',
-        amount: currentPrice,
-        type: 'revenue',
-        description: `${pricingModel === 'subscription' ? 'Monthly subscription' : 'Purchase'} - ${productName}`,
-        category: pricingModel,
-        gateway: 'stripe'
-      },
-      {
-        date: '2024-11-25',
-        amount: currentPrice * 0.7, // Discounted price
-        type: 'revenue',
-        description: `Black Friday discount - ${productName}`,
-        category: 'promotion',
-        gateway: 'stripe'
-      }
-    ]
-
-    const baseExpenses: TransactionData[] = [
-      {
-        date: '2024-12-01',
-        amount: 2500.00,
-        type: 'expense',
-        description: 'Server hosting and infrastructure',
-        category: 'infrastructure',
-        gateway: undefined
-      },
-      {
-        date: '2024-12-01',
-        amount: 1200.00,
-        type: 'expense',
-        description: 'Marketing and advertising',
-        category: 'marketing',
-        gateway: undefined
-      },
-      {
-        date: '2024-12-01',
-        amount: 800.00,
-        type: 'expense',
-        description: 'Software subscriptions and tools',
-        category: 'software',
-        gateway: undefined
-      },
-      {
-        date: '2024-11-01',
-        amount: 2500.00,
-        type: 'expense',
-        description: 'Server hosting and infrastructure',
-        category: 'infrastructure',
-        gateway: undefined
-      },
-      {
-        date: '2024-11-01',
-        amount: 1500.00,
-        type: 'expense',
-        description: 'Marketing and advertising',
-        category: 'marketing',
-        gateway: undefined
-      },
-      {
-        date: '2024-11-01',
-        amount: 900.00,
-        type: 'expense',
-        description: 'Software subscriptions and tools',
-        category: 'software',
-        gateway: undefined
-      }
-    ]
-
-    return [...baseRevenue, ...baseExpenses]
-  }
-
-  const handleStripeConnect = async () => {
-    setIsConnecting(true)
-    
+  const fetchFinancialMetrics = async () => {
     try {
-      // In production, this would redirect to Stripe Connect OAuth flow
-      // For now, we'll simulate the connection and populate with dummy data
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      setIsLoading(true)
+      const response = await fetch('/api/finances/metrics')
+      const data = await response.json()
       
-      // Generate product-specific dummy Stripe data
-      const dummyStripeData = generateProductSpecificData()
-      
-      // Add the dummy data to uploaded data
-      const newData = [...uploadedData, ...dummyStripeData]
-      setUploadedData(newData)
-      updateCashRunwayCalculations(newData)
-      
-      setStripeIntegration({
-        isConnected: true,
-        accountId: 'acct_1234567890',
-        lastSync: new Date().toISOString()
-      })
-    } catch (error) {
-      console.error('Failed to connect Stripe:', error)
-    } finally {
-      setIsConnecting(false)
-    }
-  }
-
-  const handleKhaltiConnect = async () => {
-    setIsConnecting(true)
-    
-    try {
-      // In production, this would redirect to Khalti OAuth flow
-      // For now, we'll simulate the connection and populate with dummy data
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      // Generate dummy Khalti CSV data (typically for Nepali market)
-      const dummyKhaltiData: TransactionData[] = [
-        {
-          date: '2024-12-16',
-          amount: 1500.00, // NPR amounts
-          type: 'revenue',
-          description: 'Digital wallet payment - Premium Service',
-          category: 'service',
-          gateway: 'khalti'
-        },
-        {
-          date: '2024-12-12',
-          amount: 800.00,
-          type: 'revenue',
-          description: 'Mobile payment - Basic Plan',
-          category: 'subscription',
-          gateway: 'khalti'
-        },
-        {
-          date: '2024-12-09',
-          amount: 2200.00,
-          type: 'revenue',
-          description: 'Digital payment - Enterprise Package',
-          category: 'enterprise',
-          gateway: 'khalti'
-        },
-        {
-          date: '2024-12-06',
-          amount: 1200.00,
-          type: 'revenue',
-          description: 'QR payment - Standard Service',
-          category: 'service',
-          gateway: 'khalti'
-        },
-        {
-          date: '2024-11-30',
-          amount: 950.00,
-          type: 'revenue',
-          description: 'Mobile banking - Monthly subscription',
-          category: 'subscription',
-          gateway: 'khalti'
+      if (data.metrics) {
+        setStoredMetrics(data.metrics)
+        
+        // Update integration status
+        if (data.integrations) {
+          data.integrations.forEach((integration: any) => {
+            if (integration.gateway === 'STRIPE') {
+              setStripeIntegration({
+                isConnected: integration.isConnected,
+                accountId: integration.accountId,
+                lastSync: integration.lastSync
+              })
+            } else if (integration.gateway === 'KHALTI') {
+              setKhaltiIntegration({
+                isConnected: integration.isConnected,
+                accountId: integration.accountId,
+                lastSync: integration.lastSync
+              })
+            }
+          })
         }
-      ]
-      
-      // Add the dummy data to uploaded data
-      const newData = [...uploadedData, ...dummyKhaltiData]
-      setUploadedData(newData)
-      updateCashRunwayCalculations(newData)
-      
-      setKhaltiIntegration({
-        isConnected: true,
-        accountId: 'khalti_1234567890',
-        lastSync: new Date().toISOString()
-      })
+      }
     } catch (error) {
-      console.error('Failed to connect Khalti:', error)
+      console.error('Failed to fetch financial metrics:', error)
     } finally {
-      setIsConnecting(false)
+      setIsLoading(false)
     }
   }
 
   const handleCSVUpload = async (file: File, type: 'stripe' | 'khalti' | 'expenses') => {
     try {
-      const text = await file.text()
-      const lines = text.split('\n').filter(line => line.trim())
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('type', type)
       
-      if (lines.length < 2) {
-        throw new Error('CSV file must have at least a header row and one data row')
+      const response = await fetch('/api/finances/upload-csv', {
+        method: 'POST',
+        body: formData
+      })
+      
+      const result = await response.json()
+      
+      if (result.success) {
+        // Refresh metrics after successful upload
+        await fetchFinancialMetrics()
+        setShowUploadModal(false)
+        alert(`Successfully calculated financial metrics from ${result.message}`)
+      } else {
+        throw new Error(result.error || 'Upload failed')
       }
-      
-      const headers = lines[0].split(',').map(h => h.trim().toLowerCase())
-      
-      // Validate required headers
-      const requiredHeaders = ['date', 'amount', 'description']
-      const missingHeaders = requiredHeaders.filter(header => !headers.includes(header))
-      if (missingHeaders.length > 0) {
-        throw new Error(`Missing required headers: ${missingHeaders.join(', ')}`)
-      }
-      
-      const transactions: TransactionData[] = lines.slice(1).map((line, index) => {
-        try {
-          const values = line.split(',').map(v => v.trim())
-          const transactionData: any = {}
-          
-          headers.forEach((header, headerIndex) => {
-            transactionData[header] = values[headerIndex] || ''
-          })
-          
-          // Validate and parse date
-          const dateStr = transactionData.date || transactionData.created_at
-          if (!dateStr) {
-            throw new Error(`Missing date in row ${index + 2}`)
-          }
-          
-          const parsedDate = new Date(dateStr)
-          if (isNaN(parsedDate.getTime())) {
-            throw new Error(`Invalid date format in row ${index + 2}: ${dateStr}`)
-          }
-          
-          // Validate and parse amount
-          const amountStr = transactionData.amount || transactionData.gross || '0'
-          const amount = parseFloat(amountStr)
-          if (isNaN(amount)) {
-            throw new Error(`Invalid amount in row ${index + 2}: ${amountStr}`)
-          }
-          
-          return {
-            date: parsedDate.toISOString().split('T')[0], // Normalize to YYYY-MM-DD format
-            amount: amount,
-            type: (transactionData.type || (type === 'expenses' ? 'expense' : 'revenue')) as 'revenue' | 'expense',
-            description: transactionData.description || transactionData.customer_email || 'Transaction',
-            category: transactionData.category || type,
-            gateway: (transactionData.gateway && transactionData.gateway.trim() !== '' ? transactionData.gateway : (type === 'expenses' ? undefined : type)) as 'stripe' | 'khalti' | undefined
-          }
-        } catch (rowError) {
-          console.error(`Error parsing row ${index + 2}:`, rowError)
-          throw rowError
-        }
-      }).filter(t => t.amount > 0) // Only include positive amounts
-      
-      if (transactions.length === 0) {
-        throw new Error('No valid transactions found in the CSV file')
-      }
-      
-      const newData = [...uploadedData, ...transactions]
-      setUploadedData(newData)
-      updateCashRunwayCalculations(newData)
-      
-      // Mark the appropriate integration as connected
-      if (type === 'stripe') {
-        setStripeIntegration(prev => ({ ...prev, isConnected: true, lastSync: new Date().toISOString() }))
-      } else if (type === 'khalti') {
-        setKhaltiIntegration(prev => ({ ...prev, isConnected: true, lastSync: new Date().toISOString() }))
-      }
-      
-      setShowUploadModal(false)
-      
-      // Show success message
-      alert(`Successfully imported ${transactions.length} transactions from CSV file`)
-      
     } catch (error) {
-      console.error('Failed to parse CSV:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
-      alert(`Failed to parse CSV file: ${errorMessage}`)
+      console.error('Failed to upload CSV:', error)
+      alert(`Failed to upload CSV: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 
-  const updateCashRunwayCalculations = (newTransactions: TransactionData[]) => {
-    const allTransactions = [...uploadedData, ...newTransactions]
-    const now = new Date()
-    const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate())
-    
-    const recentTransactions = allTransactions.filter(t => new Date(t.date) >= threeMonthsAgo)
-    
-    const totalRevenue = recentTransactions
-      .filter(t => t.type === 'revenue')
-      .reduce((sum, t) => sum + t.amount, 0)
-    
-    const totalExpenses = recentTransactions
-      .filter(t => t.type === 'expense')
-      .reduce((sum, t) => sum + t.amount, 0)
-    
-    const monthlyRevenue = totalRevenue / 3 // Average over 3 months
-    const monthlyExpenses = totalExpenses / 3 // Average over 3 months
-    const netBurn = monthlyExpenses - monthlyRevenue
-    
-    // Simulate critical cash situation - very low cash to show urgency
-    const simulatedCurrentCash = 1200.00 // Critical level
-    const dailyBurnRate = monthlyExpenses / 30
-    const dailyRevenue = monthlyRevenue / 30
-    const netDailyBurn = dailyBurnRate - dailyRevenue
-    
-    // Calculate runway in days for more precision when low
-    let runwayDays = 0
-    let runwayMonths = 0
-    
-    if (netDailyBurn > 0) {
-      runwayDays = Math.floor(simulatedCurrentCash / netDailyBurn)
-      runwayMonths = runwayDays / 30
-    } else {
-      runwayDays = 365 * 10 // 10 years if profitable
-      runwayMonths = 120
-    }
-    
-    // Calculate projected depletion date
-    let projectedDepletionDate: string
-    if (runwayDays > 3650) { // More than 10 years
-      const farFuture = new Date(now.getFullYear() + 10, now.getMonth(), now.getDate())
-      projectedDepletionDate = farFuture.toISOString().split('T')[0]
-    } else {
-      const projectedDepletion = new Date(now.getTime() + (runwayDays * 24 * 60 * 60 * 1000))
-      projectedDepletionDate = projectedDepletion.toISOString().split('T')[0]
-    }
-    
-    setCashRunwayData({
-      currentCash: simulatedCurrentCash,
-      monthlyBurnRate: monthlyExpenses,
-      monthlyRevenue,
-      dailyBurnRate,
-      dailyRevenue,
-      netDailyBurn,
-      runwayMonths: runwayMonths > 120 ? 120 : runwayMonths,
-      runwayDays: runwayDays > 3650 ? 3650 : runwayDays,
-      projectedCashDepletion: projectedDepletionDate
-    })
+  // Use stored metrics if available, otherwise show setup screen
+  const hasData = storedMetrics !== null
+  const financialMetrics = storedMetrics ? {
+    totalRevenue: storedMetrics.totalRevenue,
+    monthlyRevenue: storedMetrics.monthlyRecurringRevenue + storedMetrics.oneTimePayments,
+    monthlyRecurring: storedMetrics.monthlyRecurringRevenue,
+    oneTimePayments: storedMetrics.oneTimePayments,
+    activeSubscriptions: storedMetrics.activeSubscriptions,
+    averageRevenuePerUser: storedMetrics.averageRevenuePerUser,
+    revenueGrowthRate: storedMetrics.revenueGrowthRate,
+    mrrGrowthRate: storedMetrics.mrrGrowthRate,
+    subscriptionGrowthRate: storedMetrics.subscriptionGrowthRate,
+    totalExpenses: storedMetrics.totalExpenses,
+    monthlyExpenses: storedMetrics.monthlyExpenses,
+    netProfit: (storedMetrics.monthlyRecurringRevenue + storedMetrics.oneTimePayments) - storedMetrics.monthlyExpenses
+  } : null
+
+  const cashRunwayData: CashRunwayData = storedMetrics ? {
+    currentCash: storedMetrics.currentCash,
+    monthlyBurnRate: storedMetrics.monthlyBurnRate,
+    monthlyRevenue: storedMetrics.monthlyRecurringRevenue + storedMetrics.oneTimePayments,
+    dailyBurnRate: storedMetrics.dailyBurnRate,
+    dailyRevenue: storedMetrics.dailyRevenue,
+    netDailyBurn: storedMetrics.netDailyBurn,
+    runwayMonths: storedMetrics.runwayMonths,
+    runwayDays: storedMetrics.runwayDays,
+    projectedCashDepletion: storedMetrics.projectedCashDepletion || new Date().toISOString().split('T')[0]
+  } : {
+    currentCash: 0,
+    monthlyBurnRate: 0,
+    monthlyRevenue: 0,
+    runwayMonths: 0,
+    projectedCashDepletion: new Date().toISOString().split('T')[0]
   }
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount)
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    })
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/40 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <BarChart3 className="h-8 w-8 text-amber-600 dark:text-amber-400 animate-pulse" />
+          </div>
+          <p className="text-gray-500 dark:text-gray-400">Loading financial data...</p>
+        </div>
+      </div>
+    )
   }
 
   return (

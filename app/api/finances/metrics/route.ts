@@ -29,21 +29,21 @@ export async function GET() {
       orderBy: { calculatedAt: 'desc' }
     });
 
-    // Get recent transactions
-    const recentTransactions = await db.financialTransactions.findMany({
-      where: { productProfileId: user.activeProductProfileId },
-      orderBy: { date: 'desc' },
-      take: 10
-    });
-
     // Get payment integrations
     const paymentIntegrations = await db.paymentIntegrations.findMany({
       where: { productProfileId: user.activeProductProfileId }
     });
 
+    // Get historical metrics for trends (last 6 months)
+    const historicalMetrics = await db.financialMetrics.findMany({
+      where: { productProfileId: user.activeProductProfileId },
+      orderBy: { calculatedAt: 'desc' },
+      take: 6
+    });
+
     return NextResponse.json({
       metrics: latestMetrics,
-      transactions: recentTransactions,
+      historical: historicalMetrics,
       integrations: paymentIntegrations
     });
 

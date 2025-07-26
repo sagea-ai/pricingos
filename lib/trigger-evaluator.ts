@@ -16,6 +16,7 @@ interface CashRunwayData {
   currentCashBalance: number
   monthlyBurnRate: number
   runwayDays: number
+  monthlyRevenue?: number
 }
 
 export class TriggerEvaluator {
@@ -513,25 +514,119 @@ export class TriggerEvaluator {
     }
   }
 
-  // Helper methods - implement these based on your data structure
+  // Helper methods - Updated to use database instead of mock data
   private async getCurrentCashBalance(): Promise<number> {
-    // Implement based on your financial data structure
-    return 50000 // Example value
+    // Get the latest financial metrics for this organization's active product profile
+    const orgMembers = await db.organizationMember.findMany({
+      where: { organizationId: this.organizationId },
+      include: {
+        user: {
+          include: {
+            activeProductProfile: {
+              include: {
+                financialMetrics: {
+                  orderBy: { calculatedAt: 'desc' },
+                  take: 1
+                }
+              }
+            }
+          }
+        }
+      }
+    })
+
+    for (const member of orgMembers) {
+      if (member.user.activeProductProfile?.financialMetrics[0]) {
+        return member.user.activeProductProfile.financialMetrics[0].currentCash
+      }
+    }
+
+    return 0 // Default if no data found
   }
 
   private async getMonthlyBurnRate(): Promise<number> {
-    // Implement based on your expense tracking
-    return 10000 // Example value
+    const orgMembers = await db.organizationMember.findMany({
+      where: { organizationId: this.organizationId },
+      include: {
+        user: {
+          include: {
+            activeProductProfile: {
+              include: {
+                financialMetrics: {
+                  orderBy: { calculatedAt: 'desc' },
+                  take: 1
+                }
+              }
+            }
+          }
+        }
+      }
+    })
+
+    for (const member of orgMembers) {
+      if (member.user.activeProductProfile?.financialMetrics[0]) {
+        return member.user.activeProductProfile.financialMetrics[0].monthlyBurnRate
+      }
+    }
+
+    return 0
   }
 
   private async getCurrentMRR(): Promise<number> {
-    // Implement based on subscription data
-    return 25000 // Example value
+    const orgMembers = await db.organizationMember.findMany({
+      where: { organizationId: this.organizationId },
+      include: {
+        user: {
+          include: {
+            activeProductProfile: {
+              include: {
+                financialMetrics: {
+                  orderBy: { calculatedAt: 'desc' },
+                  take: 1
+                }
+              }
+            }
+          }
+        }
+      }
+    })
+
+    for (const member of orgMembers) {
+      if (member.user.activeProductProfile?.financialMetrics[0]) {
+        return member.user.activeProductProfile.financialMetrics[0].monthlyRecurringRevenue
+      }
+    }
+
+    return 0
   }
 
   private async getPreviousMRR(): Promise<number> {
-    // Implement based on historical subscription data
-    return 23000 // Example value
+    const orgMembers = await db.organizationMember.findMany({
+      where: { organizationId: this.organizationId },
+      include: {
+        user: {
+          include: {
+            activeProductProfile: {
+              include: {
+                financialMetrics: {
+                  orderBy: { calculatedAt: 'desc' },
+                  take: 2
+                }
+              }
+            }
+          }
+        }
+      }
+    })
+
+    for (const member of orgMembers) {
+      const metrics = member.user.activeProductProfile?.financialMetrics
+      if (metrics && metrics.length >= 2) {
+        return metrics[1].monthlyRecurringRevenue
+      }
+    }
+
+    return 0
   }
 
   private async calculateChurnRate(): Promise<number> {
