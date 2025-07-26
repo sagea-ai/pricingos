@@ -218,9 +218,14 @@ async function parseCSVTransactions(lines: string[], uploadType: string): Promis
 async function calculateFinancialMetrics(transactions: TransactionData[], productProfileId: string, userId: string) {
   const now = new Date();
   const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+  const twoMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, now.getDate());
   
   // Current month transactions
   const currentMonthTransactions = transactions.filter(t => new Date(t.date) >= oneMonthAgo);
+  const previousMonthTransactions = transactions.filter(t => {
+    const date = new Date(t.date);
+    return date >= twoMonthsAgo && date < oneMonthAgo;
+  });
   
   // Calculate all metrics
   const totalRevenue = transactions.filter(t => t.type === 'revenue').reduce((sum, t) => sum + t.amount, 0);
@@ -229,32 +234,60 @@ async function calculateFinancialMetrics(transactions: TransactionData[], produc
   const monthlyRevenue = currentMonthTransactions.filter(t => t.type === 'revenue').reduce((sum, t) => sum + t.amount, 0);
   const monthlyExpenses = currentMonthTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
   
+  const previousMonthRevenue = previousMonthTransactions.filter(t => t.type === 'revenue').reduce((sum, t) => sum + t.amount, 0);
+  
   // MRR calculation
   const monthlyRecurringRevenue = currentMonthTransactions
     .filter(t => t.type === 'revenue' && (
       t.category?.toLowerCase().includes('subscription') || 
-      t.category?.toLowerCase().includes('monthly')
+      t.category?.toLowerCase().includes('monthly') ||
+      t.description?.toLowerCase().includes('subscription') ||
+      t.description?.toLowerCase().includes('monthly')
+    ))
+    .reduce((sum, t) => sum + t.amount, 0);
+  
+  const previousMRR = previousMonthTransactions
+    .filter(t => t.type === 'revenue' && (
+      t.category?.toLowerCase().includes('subscription') || 
+      t.category?.toLowerCase().includes('monthly') ||
+      t.description?.toLowerCase().includes('subscription') ||
+      t.description?.toLowerCase().includes('monthly')
     ))
     .reduce((sum, t) => sum + t.amount, 0);
   
   const oneTimePayments = monthlyRevenue - monthlyRecurringRevenue;
   
-  // Active subscriptions count
-  const activeSubscriptions = currentMonthTransactions
-    .filter(t => t.type === 'revenue' && (
-      t.category?.toLowerCase().includes('subscription') || 
-      t.category?.toLowerCase().includes('monthly')
-    ))
-    .length;
+  // Active subscriptions count (unique subscription transactions)
+  const activeSubscriptions = new Set(
+    currentMonthTransactions
+      .filter(t => t.type === 'revenue' && (
+        t.category?.toLowerCase().includes('subscription') || 
+        t.category?.toLowerCase().includes('monthly') ||
+        t.description?.toLowerCase().includes('subscription') ||
+        t.description?.toLowerCase().includes('monthly')
+      ))
+      .map(t => t.description)
+  ).size;
+
+  const previousActiveSubscriptions = new Set(
+    previousMonthTransactions
+      .filter(t => t.type === 'revenue' && (
+        t.category?.toLowerCase().includes('subscription') || 
+        t.category?.toLowerCase().includes('monthly') ||
+        t.description?.toLowerCase().includes('subscription') ||
+        t.description?.toLowerCase().includes('monthly')
+      ))
+      .map(t => t.description)
+  ).size;
   
-  // ARPU calculation
+  // ARPU calculation based on unique customers
   const uniqueCustomers = new Set(currentMonthTransactions.filter(t => t.type === 'revenue').map(t => t.description)).size;
   const averageRevenuePerUser = uniqueCustomers > 0 ? monthlyRevenue / uniqueCustomers : 0;
   
-  // Growth rates (simplified for now)
-  const revenueGrowthRate = 0; // Would need historical data
-  const mrrGrowthRate = 0;
-  const subscriptionGrowthRate = 0;
+  // Growth rates calculation
+  const revenueGrowthRate = previousMonthRevenue > 0 ? ((monthlyRevenue - previousMonthRevenue) / previousMonthRevenue) * 100 : 0;
+  const mrrGrowthRate = previousMRR > 0 ? ((monthlyRecurringRevenue - previousMRR) / previousMRR) * 100 : 0;
+  const subscriptionGrowthRate = previousActiveSubscriptions > 0 ? ((activeSubscriptions - previousActiveSubscriptions) / previousActiveSubscriptions) * 100 : 0;
   
   // Cash runway calculations
   const currentCash = 15000; // Could be input from user or API

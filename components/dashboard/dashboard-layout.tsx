@@ -60,6 +60,18 @@ interface DashboardLayoutProps {
   isLoading?: boolean
 }
 
+interface FinancialMetrics {
+  monthlyRevenue: number
+  totalUsers: number
+  conversionRate: number
+  churnRate: number
+  revenueGrowthRate: number
+  userGrowthRate: number
+  conversionGrowthRate: number
+  churnGrowthRate: number
+  lastUpdated: Date
+}
+
 // Time-based greeting function
 function getTimeBasedGreeting(userName?: string): string {
   const hour = new Date().getHours();
@@ -88,6 +100,8 @@ export function DashboardLayout({
   const [analysisLoading, setAnalysisLoading] = useState(true)
   const [products, setProducts] = useState<any[]>([])
   const [activeProductId, setActiveProductId] = useState<string | null>(null)
+  const [financialMetrics, setFinancialMetrics] = useState<FinancialMetrics | null>(null)
+  const [hasFinancialData, setHasFinancialData] = useState(false)
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -129,6 +143,30 @@ export function DashboardLayout({
     }
   }, [activeProductId])
 
+  useEffect(() => {
+    const fetchFinancialMetrics = async () => {
+      if (!activeProductId) return
+      
+      try {
+        const response = await fetch('/api/dashboard/financial-metrics')
+        if (response.ok) {
+          const result = await response.json()
+          if (result.metrics) {
+            setFinancialMetrics(result.metrics)
+            setHasFinancialData(true)
+          } else {
+            setHasFinancialData(false)
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch financial metrics:', error)
+        setHasFinancialData(false)
+      }
+    }
+
+    fetchFinancialMetrics()
+  }, [activeProductId])
+
   const handleProductChange = async (productId: string) => {
     try {
       const response = await fetch('/api/products/set-active', {
@@ -156,10 +194,10 @@ export function DashboardLayout({
   }
 
   const mockStats = {
-    monthlyRevenue: productInfo?.monthly_revenue || 12450,
-    totalUsers: productInfo?.total_users || 1247,
-    conversionRate: 3.2,
-    churnRate: 2.1,
+    monthlyRevenue: financialMetrics?.monthlyRevenue || 0,
+    totalUsers: financialMetrics?.totalUsers || 0,
+    conversionRate: financialMetrics?.conversionRate || 0,
+    churnRate: financialMetrics?.churnRate || 0,
     analysisRuns: 23,
     testsCreated: 8
   }
@@ -229,6 +267,24 @@ export function DashboardLayout({
                 <Button className="bg-amber-500 hover:bg-amber-600 text-white shadow-lg">
                   <Sparkles className="w-4 h-4 mr-2" />
                   Create Product
+                </Button>
+              </Link>
+            </div>
+          ) : !hasFinancialData ? (
+            <div className="text-center py-16">
+              <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/30 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                <BarChart3 className="w-10 h-10 text-amber-600 dark:text-amber-400" />
+              </div>
+              <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-3">
+                Upload Your Financial Data
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
+                Upload your transaction data (CSV) to see real metrics and insights for {productInfo?.name || 'your product'}
+              </p>
+              <Link href="/finances">
+                <Button className="bg-amber-500 hover:bg-amber-600 text-white shadow-lg">
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Integrate Your Finances
                 </Button>
               </Link>
             </div>
@@ -360,7 +416,7 @@ export function DashboardLayout({
                       <div>
                         <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Monthly Revenue</p>
                         <p className="text-3xl font-light text-gray-900 dark:text-white">
-                          ${mockStats.monthlyRevenue.toLocaleString()}
+                          ${financialMetrics?.monthlyRevenue?.toLocaleString() || '0'}
                         </p>
                       </div>
                       <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
@@ -368,8 +424,21 @@ export function DashboardLayout({
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mt-4">
-                      <ArrowUp className="w-4 h-4 text-green-500" />
-                      <span className="text-sm text-green-600 dark:text-green-400 font-medium">+12.5%</span>
+                      {(financialMetrics?.revenueGrowthRate || 0) >= 0 ? (
+                        <ArrowUp className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <ArrowDown className="w-4 h-4 text-red-500" />
+                      )}
+                      <span className={`text-sm font-medium ${
+                        (financialMetrics?.revenueGrowthRate || 0) >= 0 
+                          ? 'text-green-600 dark:text-green-400' 
+                          : 'text-red-600 dark:text-red-400'
+                      }`}>
+                        {financialMetrics?.revenueGrowthRate ? 
+                          `${financialMetrics.revenueGrowthRate > 0 ? '+' : ''}${financialMetrics.revenueGrowthRate.toFixed(1)}%` 
+                          : 'N/A'
+                        }
+                      </span>
                       <span className="text-sm text-gray-500">vs last month</span>
                     </div>
                   </CardContent>
@@ -381,7 +450,7 @@ export function DashboardLayout({
                       <div>
                         <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Active Users</p>
                         <p className="text-3xl font-light text-gray-900 dark:text-white">
-                          {mockStats.totalUsers.toLocaleString()}
+                          {financialMetrics?.totalUsers?.toLocaleString() || '0'}
                         </p>
                       </div>
                       <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
@@ -389,8 +458,21 @@ export function DashboardLayout({
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mt-4">
-                      <ArrowUp className="w-4 h-4 text-green-500" />
-                      <span className="text-sm text-green-600 dark:text-green-400 font-medium">+8.2%</span>
+                      {(financialMetrics?.userGrowthRate || 0) >= 0 ? (
+                        <ArrowUp className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <ArrowDown className="w-4 h-4 text-red-500" />
+                      )}
+                      <span className={`text-sm font-medium ${
+                        (financialMetrics?.userGrowthRate || 0) >= 0 
+                          ? 'text-green-600 dark:text-green-400' 
+                          : 'text-red-600 dark:text-red-400'
+                      }`}>
+                        {financialMetrics?.userGrowthRate ? 
+                          `${financialMetrics.userGrowthRate > 0 ? '+' : ''}${financialMetrics.userGrowthRate.toFixed(1)}%` 
+                          : 'N/A'
+                        }
+                      </span>
                       <span className="text-sm text-gray-500">vs last month</span>
                     </div>
                   </CardContent>
@@ -402,7 +484,7 @@ export function DashboardLayout({
                       <div>
                         <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Conversion Rate</p>
                         <p className="text-3xl font-light text-gray-900 dark:text-white">
-                          {mockStats.conversionRate}%
+                          {financialMetrics?.conversionRate ? `${financialMetrics.conversionRate.toFixed(1)}%` : '0%'}
                         </p>
                       </div>
                       <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
@@ -410,8 +492,21 @@ export function DashboardLayout({
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mt-4">
-                      <ArrowDown className="w-4 h-4 text-red-500" />
-                      <span className="text-sm text-red-600 dark:text-red-400 font-medium">-0.3%</span>
+                      {(financialMetrics?.conversionGrowthRate || 0) >= 0 ? (
+                        <ArrowUp className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <ArrowDown className="w-4 h-4 text-red-500" />
+                      )}
+                      <span className={`text-sm font-medium ${
+                        (financialMetrics?.conversionGrowthRate || 0) >= 0 
+                          ? 'text-green-600 dark:text-green-400' 
+                          : 'text-red-600 dark:text-red-400'
+                      }`}>
+                        {financialMetrics?.conversionGrowthRate ? 
+                          `${financialMetrics.conversionGrowthRate > 0 ? '+' : ''}${financialMetrics.conversionGrowthRate.toFixed(1)}%` 
+                          : 'N/A'
+                        }
+                      </span>
                       <span className="text-sm text-gray-500">vs last month</span>
                     </div>
                   </CardContent>
@@ -423,7 +518,7 @@ export function DashboardLayout({
                       <div>
                         <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Churn Rate</p>
                         <p className="text-3xl font-light text-gray-900 dark:text-white">
-                          {mockStats.churnRate}%
+                          {financialMetrics?.churnRate ? `${financialMetrics.churnRate.toFixed(1)}%` : '0%'}
                         </p>
                       </div>
                       <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
@@ -431,8 +526,21 @@ export function DashboardLayout({
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mt-4">
-                      <ArrowDown className="w-4 h-4 text-green-500" />
-                      <span className="text-sm text-green-600 dark:text-green-400 font-medium">-0.8%</span>
+                      {(financialMetrics?.churnGrowthRate || 0) <= 0 ? (
+                        <ArrowDown className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <ArrowUp className="w-4 h-4 text-red-500" />
+                      )}
+                      <span className={`text-sm font-medium ${
+                        (financialMetrics?.churnGrowthRate || 0) <= 0 
+                          ? 'text-green-600 dark:text-green-400' 
+                          : 'text-red-600 dark:text-red-400'
+                      }`}>
+                        {financialMetrics?.churnGrowthRate ? 
+                          `${financialMetrics.churnGrowthRate > 0 ? '+' : ''}${financialMetrics.churnGrowthRate.toFixed(1)}%` 
+                          : 'N/A'
+                        }
+                      </span>
                       <span className="text-sm text-gray-500">vs last month</span>
                     </div>
                   </CardContent>
