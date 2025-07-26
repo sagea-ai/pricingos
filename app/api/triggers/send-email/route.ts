@@ -204,7 +204,7 @@ export async function POST(request: NextRequest) {
     try {
       // Send email with Resend
       const emailResult = await resend.emails.send({
-        from: 'PricingOS <alerts@pricingos.com>',
+        from: 'PricingOS <noreply@basabjha.com.np>',
         to: [recipientEmail],
         subject: template.subject,
         html: template.getHtml(data || {})
