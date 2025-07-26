@@ -281,6 +281,8 @@ export function DeepResearchPageClient({ organizations, currentOrganization }: D
   const [currentReasoningStep, setCurrentReasoningStep] = useState<string>('')
   const [reasoningPhase, setReasoningPhase] = useState<'forward' | 'backward' | 'validation' | 'synthesis'>('forward')
   const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false)
+  const [isAutoAnalysis, setIsAutoAnalysis] = useState(false)
+  const [completedAnalysisKey, setCompletedAnalysisKey] = useState<string>('')
   const carouselRef = useRef<HTMLDivElement>(null)
 
   const suggestionPrompts = [
@@ -406,58 +408,81 @@ Please provide detailed reasoning for each component, with specific confidence l
     const productName = searchParams.get('product')
     
     if (analysisType === 'pricing_recommendation' && productName) {
-      // Show loading immediately
-      setIsLoadingAnalysis(true)
-      setCurrentReasoningStep('Preparing comprehensive analysis...')
+      const currentAnalysisKey = `${analysisType}-${productName}`
       
-      // Fetch fresh analysis data from API
-      const fetchAnalysisAndGenerate = async () => {
-        try {
-          setCurrentReasoningStep('Fetching latest pricing analysis...')
-          const response = await fetch('/api/dashboard/pricing-analysis')
-          if (response.ok) {
-            const result = await response.json()
-            const analysisData = {
-              type: 'pricing_recommendation',
-              recommendation: result.data.sage_recommendation,
-              productInfo: {
-                name: result.productInfo?.name || productName,
-                pricing_model: result.productInfo?.current_pricing_model,
-                price: result.productInfo?.current_price,
-                market: result.productInfo?.market,
-                revenue: result.productInfo?.monthly_revenue,
-                users: result.productInfo?.total_users
-              },
-              analysis: {
-                feature_mapping: result.data.feature_to_value_mapping,
-                pricing_fit: result.data.pricing_model_fit,
-                competitors: result.data.competitor_analysis,
-                ab_tests: result.data.ab_test_scenarios
+      // Only run if we haven't completed this specific analysis yet
+      if (completedAnalysisKey !== currentAnalysisKey) {
+        // Show loading immediately and set auto analysis mode
+        setIsLoadingAnalysis(true)
+        setIsAutoAnalysis(true)
+        setCurrentReasoningStep('Preparing comprehensive analysis...')
+        
+        // Fetch fresh analysis data from API and start research
+        const fetchAnalysisAndGenerate = async () => {
+          try {
+            setCurrentReasoningStep('Fetching latest pricing analysis...')
+            console.log('Fetching pricing analysis...')
+            const response = await fetch('/api/dashboard/pricing-analysis')
+            console.log('Pricing analysis response status:', response.status)
+            
+            let queryToUse = ''
+            
+            if (response.ok) {
+              console.log('Parsing pricing analysis response...')
+              const result = await response.json()
+              console.log('Pricing analysis result:', result)
+              const analysisData = {
+                type: 'pricing_recommendation',
+                recommendation: result.data.sage_recommendation,
+                productInfo: {
+                  name: result.productInfo?.name || productName,
+                  pricing_model: result.productInfo?.current_pricing_model,
+                  price: result.productInfo?.current_price,
+                  market: result.productInfo?.market,
+                  revenue: result.productInfo?.monthly_revenue,
+                  users: result.productInfo?.total_users
+                },
+                analysis: {
+                  feature_mapping: result.data.feature_to_value_mapping,
+                  pricing_fit: result.data.pricing_model_fit,
+                  competitors: result.data.competitor_analysis,
+                  ab_tests: result.data.ab_test_scenarios
+                }
               }
+              
+              setCurrentReasoningStep('Generating comprehensive research prompt...')
+              console.log('Generated analysis data:', analysisData)
+              queryToUse = generateComprehensivePrompt(analysisData)
+              console.log('Generated prompt length:', queryToUse.length)
+            } else {
+              console.error('Failed to fetch pricing analysis, status:', response.status)
+              // Fallback to basic analysis with just the product name
+              queryToUse = `Comprehensive pricing strategy analysis for ${productName}. Analyze market positioning, competitor pricing, value proposition, and provide strategic pricing recommendations with detailed reasoning.`
+              setCurrentReasoningStep('Starting analysis with available data...')
             }
             
-            setCurrentReasoningStep('Generating comprehensive research prompt...')
-            const comprehensivePrompt = generateComprehensivePrompt(analysisData)
-            setQuery(comprehensivePrompt)
-            
+            // Set query and start research directly
+            setQuery(queryToUse)
             setCurrentReasoningStep('Starting deep analysis...')
-            setIsLoadingAnalysis(false)
             
-            // Auto-start research after populating the query
-            setTimeout(() => {
-              handleResearch()
-            }, 500)
+            // Start research immediately with the generated query
+            console.log('Starting auto-research with query length:', queryToUse.length)
+            await startResearchWithQuery(queryToUse)
+            console.log('Auto-research completed successfully')
+            
+          } catch (error) {
+            console.error('Failed to fetch analysis data:', error)
+            setIsLoadingAnalysis(false)
+            setIsAutoAnalysis(false)
+            setCurrentReasoningStep('')
+            toast.error('Failed to start analysis. Please try again.')
           }
-        } catch (error) {
-          console.error('Failed to fetch analysis data:', error)
-          setIsLoadingAnalysis(false)
-          setCurrentReasoningStep('')
         }
+        
+        fetchAnalysisAndGenerate()
       }
-      
-      fetchAnalysisAndGenerate()
     }
-  }, [searchParams])
+  }, [searchParams, completedAnalysisKey])
 
   useEffect(() => {
     const carousel = carouselRef.current
@@ -490,13 +515,19 @@ Please provide detailed reasoning for each component, with specific confidence l
     }
   }, [])
 
-  const handleResearch = async () => {
-    if (!query.trim()) return
+  // Core research function that takes a query parameter
+  const startResearchWithQuery = async (researchQuery: string) => {
+    console.log('startResearchWithQuery called with query length:', researchQuery.length)
+    if (!researchQuery.trim()) {
+      console.log('No query provided, aborting research')
+      return
+    }
 
+    console.log('Starting research...')
     setIsResearching(true)
     setResult(null)
     setReasoning({
-      userPrompt: query,
+      userPrompt: researchQuery,
       forwardReasoning: [],
       backwardReasoning: [],
       validation: []
@@ -504,13 +535,22 @@ Please provide detailed reasoning for each component, with specific confidence l
     setCurrentReasoningStep('Initializing research process...')
     setReasoningPhase('forward')
 
+    // Set up timeout to clear loading analysis if it takes too long
+    const loadingTimeout = setTimeout(() => {
+      if (isLoadingAnalysis) {
+        console.log('Clearing loading analysis due to timeout')
+        setIsLoadingAnalysis(false)
+        setIsAutoAnalysis(false)
+      }
+    }, 10000) // 10 second timeout
+
     try {
       const response = await fetch('/api/deepresearch/analyze', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ query }),
+        body: JSON.stringify({ query: researchQuery }),
       })
 
       if (!response.ok) {
@@ -536,6 +576,14 @@ Please provide detailed reasoning for each component, with specific confidence l
                 const data = JSON.parse(line.slice(6))
                 
                 if (data.type === 'reasoning') {
+                  // Clear analyzing screen when first reasoning step arrives
+                  if (isLoadingAnalysis) {
+                    console.log('First reasoning step received, clearing loading analysis state')
+                    setIsLoadingAnalysis(false)
+                    setIsAutoAnalysis(false)
+                    clearTimeout(loadingTimeout)
+                  }
+                  
                   setCurrentReasoningStep(data.step)
                   setReasoningPhase(data.reasoningType)
                   setReasoning(prev => {
@@ -570,14 +618,45 @@ Please provide detailed reasoning for each component, with specific confidence l
         }
       }
 
-      setResearchHistory(prev => [query, ...prev.slice(0, 9)])
+      setResearchHistory(prev => [researchQuery, ...prev.slice(0, 9)])
       toast.success('Research completed')
+      
+      // Mark auto-analysis as completed to prevent useEffect from re-running
+      if (isAutoAnalysis) {
+        const analysisType = searchParams.get('type')
+        const productName = searchParams.get('product')
+        if (analysisType && productName) {
+          setCompletedAnalysisKey(`${analysisType}-${productName}`)
+        }
+      }
     } catch (error) {
       console.error('Research failed:', error)
       toast.error('Failed to perform research. Please try again.')
+      // Clear all loading states on error
+      setIsLoadingAnalysis(false)
+      setIsAutoAnalysis(false)
+      setCurrentReasoningStep('')
+      clearTimeout(loadingTimeout)
     } finally {
       setIsResearching(false)
+      clearTimeout(loadingTimeout)
     }
+  }
+
+  // Wrapper function for manual research (from UI)
+  const handleResearch = async () => {
+    console.log('handleResearch called with query:', query.trim().substring(0, 100))
+    if (!query.trim()) {
+      console.log('No query provided, aborting research')
+      return
+    }
+
+    // Don't clear isLoadingAnalysis immediately if we're in auto mode - let first reasoning step clear it
+    if (!isAutoAnalysis) {
+      setIsAutoAnalysis(false)
+    }
+
+    await startResearchWithQuery(query)
   }
 
   const getPhaseLabel = (phase: string) => {
@@ -671,14 +750,11 @@ Please provide detailed reasoning for each component, with specific confidence l
               <h2 className="text-2xl font-light text-gray-900 dark:text-white">
                 Preparing Full Analysis
               </h2>
-              <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto leading-relaxed">
-                {currentReasoningStep || 'Setting up comprehensive analysis of your SAGE AI recommendation...'}
-              </p>
             </div>
           </motion.div>
         )}
 
-        {!result && !isResearching && !isLoadingAnalysis && (
+        {!result && !isResearching && !isLoadingAnalysis && !isAutoAnalysis && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -1655,16 +1731,6 @@ Please provide detailed reasoning for each component, with specific confidence l
           )}
         </AnimatePresence>
       </div>
-
-      {/* Floating Search Bar for when results are shown */}
-      {(result || isResearching) && !isLoadingAnalysis && (
-        <DeepResearchSearchBar
-          query={query}
-          onQueryChange={setQuery}
-          onSubmit={handleResearch}
-          isLoading={isResearching}
-        />
-      )}
     </div>
   )
 }
