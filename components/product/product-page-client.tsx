@@ -335,82 +335,127 @@ export function ProductPageClient({ organizations, currentOrganization: initialO
       <AppLayout organizations={organizations} currentOrganization={currentOrganization} onOrganizationChange={handleOrganizationChange}>
         <TrialProvider>
           <TrialBannerWrapper />
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="flex items-center justify-center min-h-[50vh]">
+            <div className="animate-spin rounded-full h-6 w-6 border-2 border-amber-500 border-t-transparent"></div>
           </div>
         </TrialProvider>
       </AppLayout>
     )
   }
 
+  // Calculate stats
+  const totalProducts = products.length
+  const totalRevenue = products.reduce((sum, p) => sum + (p.monthlyRevenue || 0), 0)
+  const totalUsers = products.reduce((sum, p) => sum + (p.totalUsers || 0), 0)
+  const avgRevenue = totalProducts > 0 ? totalRevenue / totalProducts : 0
+
   return (
     <AppLayout organizations={organizations} currentOrganization={currentOrganization} onOrganizationChange={handleOrganizationChange}>
       <TrialProvider>
         <TrialBannerWrapper />
-        <div className="p-6 space-y-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
           {/* Header */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Package className="h-6 w-6 text-blue-600" />
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Package className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Products</h1>
-                <p className="text-gray-600">Manage your products and their pricing strategies</p>
+                <h1 className="text-3xl font-light text-gray-900 tracking-tight">Product Builder</h1>
+                <p className="text-gray-500 text-sm mt-1">Design your pricing strategy</p>
               </div>
             </div>
-            <Button onClick={startCreating} className="bg-blue-600 hover:bg-blue-700">
+            <Button 
+              onClick={startCreating} 
+              className="bg-black hover:bg-amber-600 text-white border-0 rounded-full px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-200 font-medium"
+            >
               <Plus className="h-4 w-4 mr-2" />
-              Add Product
+              New Product
             </Button>
           </div>
+
+          {/* Stats Card */}
+          {products.length > 0 && (
+            <div className="grid grid-cols-2 bg-gradient-to-br rounded-3xl from-amber-400 via-orange-400 to-orange-500 dark:from-amber-950/20 dark:via-orange-950/10 dark:to-yellow-950/20 border-amber-200 dark:border-amber-800/50 relative overflow-hidden p-6 lg:grid-cols-4 gap-6">
+              <div className="text-center group cursor-default">
+                <div className="w-16 h-16 bg-amber-600 rounded-2xl flex items-center justify-center transition-all duration-300 transform group-hover:scale-101 mx-auto mb-3">
+                  <Package className="h-8 w-8 text-white" />
+                </div>
+                <div className="text-2xl font-semibold text-gray-900">{totalProducts}</div>
+                <div className="text-sm text-gray-600 mt-1">Products</div>
+              </div>
+              
+              <div className="text-center group cursor-default">
+                <div className="w-16 h-16 bg-amber-600 rounded-2xl flex items-center justify-center transition-all duration-300 transform group-hover:scale-101 mx-auto mb-3">
+                  <DollarSign className="h-8 w-8 text-white" />
+                </div>
+                <div className="text-2xl font-semibold text-gray-900">${totalRevenue.toLocaleString()}</div>
+                <div className="text-sm text-gray-600 mt-1">Monthly Revenue</div>
+              </div>
+              
+              <div className="text-center group cursor-default">
+                <div className="w-16 h-16 bg-amber-600 rounded-2xl flex items-center justify-center transition-all duration-300 transform group-hover:scale-101 mx-auto mb-3">
+                  <Users className="h-8 w-8 text-white" />
+                </div>
+                <div className="text-2xl font-semibold text-gray-900">{totalUsers.toLocaleString()}</div>
+                <div className="text-sm text-gray-600 mt-1">Total Users</div>
+              </div>
+              
+              <div className="text-center group cursor-default">
+                <div className="w-16 h-16 bg-amber-600 rounded-2xl flex items-center justify-center transition-all duration-300 transform group-hover:scale-101 mx-auto mb-3">
+                  <TrendingUp className="h-8 w-8 text-white" />
+                </div>
+                <div className="text-2xl font-semibold text-gray-900">${Math.round(avgRevenue).toLocaleString()}</div>
+                <div className="text-sm text-gray-600 mt-1">Avg Revenue</div>
+              </div>
+            </div>
+          )}
 
           {/* Product Form */}
           <AnimatePresence>
             {showCreateForm && (
               <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
               >
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <span>{editingProduct ? 'Edit Product' : 'Create New Product'}</span>
-                      <Button variant="ghost" size="sm" onClick={cancelEditing}>
+                <Card className="border-0 shadow-xl rounded-3xl bg-white/80 backdrop-blur-sm">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="flex items-center justify-between text-xl font-light text-gray-900">
+                      <span>{editingProduct ? 'Edit Product' : 'New Product'}</span>
+                      <Button variant="ghost" size="sm" onClick={cancelEditing} className="rounded-full h-8 w-8 p-0">
                         <X className="h-4 w-4" />
                       </Button>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="pt-0">
                     <form onSubmit={handleSubmit} className="space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Product Name */}
                         <div>
-                          <Label htmlFor="productName">Product Name *</Label>
+                          <Label className="text-sm font-medium text-gray-700">Product Name *</Label>
                           <Input
-                            id="productName"
                             value={formData.productName}
                             onChange={(e) => handleInputChange('productName', e.target.value)}
                             placeholder="Enter product name"
-                            className={errors.productName ? 'border-red-500' : ''}
+                            className={`mt-1 border-0 bg-gray-50 rounded-xl focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all ${errors.productName ? 'ring-2 ring-red-400' : ''}`}
                           />
                           {errors.productName && (
-                            <p className="text-sm text-red-500 mt-1">{errors.productName}</p>
+                            <p className="text-xs text-red-500 mt-1">{errors.productName}</p>
                           )}
                         </div>
 
                         {/* Market */}
                         <div>
-                          <Label htmlFor="market">Target Market</Label>
+                          <Label className="text-sm font-medium text-gray-700">Target Market</Label>
                           <Select value={formData.market} onValueChange={(value) => handleInputChange('market', value)}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select target market" />
+                            <SelectTrigger className="mt-1 border-0 bg-gray-50 rounded-xl focus:ring-2 focus:ring-amber-500">
+                              <SelectValue placeholder="Select market" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="rounded-xl border-0 shadow-lg">
                               {marketOptions.map((market) => (
-                                <SelectItem key={market.id} value={market.id}>
+                                <SelectItem key={market.id} value={market.id} className="rounded-lg">
                                   <span className="flex items-center">
                                     <span className="mr-2">{market.icon}</span>
                                     {market.name}
@@ -424,44 +469,44 @@ export function ProductPageClient({ organizations, currentOrganization: initialO
 
                       {/* Core Value */}
                       <div>
-                        <Label htmlFor="coreValue">Core Value Proposition *</Label>
+                        <Label className="text-sm font-medium text-gray-700">Core Value Proposition *</Label>
                         <Textarea
-                          id="coreValue"
                           value={formData.coreValue}
                           onChange={(e) => handleInputChange('coreValue', e.target.value)}
-                          placeholder="Describe the core value your product provides to customers"
+                          placeholder="What unique value does your product provide?"
                           rows={3}
-                          className={errors.coreValue ? 'border-red-500' : ''}
+                          className={`mt-1 border-0 bg-gray-50 rounded-xl focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all resize-none ${errors.coreValue ? 'ring-2 ring-red-400' : ''}`}
                         />
                         {errors.coreValue && (
-                          <p className="text-sm text-red-500 mt-1">{errors.coreValue}</p>
+                          <p className="text-xs text-red-500 mt-1">{errors.coreValue}</p>
                         )}
                       </div>
 
                       {/* Features */}
                       <div>
-                        <Label>Features *</Label>
-                        <div className="space-y-3">
+                        <Label className="text-sm font-medium text-gray-700">Features *</Label>
+                        <div className="space-y-3 mt-1">
                           <div className="flex space-x-2">
                             <Input
                               value={formData.currentFeature}
                               onChange={(e) => setFormData(prev => ({ ...prev, currentFeature: e.target.value }))}
                               placeholder="Add a feature"
                               onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addFeature())}
+                              className="border-0 bg-gray-50 rounded-xl focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all"
                             />
-                            <Button type="button" onClick={addFeature} variant="outline">
+                            <Button type="button" onClick={addFeature} className="bg-amber-500 hover:bg-amber-600 rounded-xl px-4 border-0">
                               <Plus className="h-4 w-4" />
                             </Button>
                           </div>
                           {formData.features.length > 0 && (
                             <div className="flex flex-wrap gap-2">
                               {formData.features.map((feature, index) => (
-                                <Badge key={index} variant="secondary" className="flex items-center space-x-1">
+                                <Badge key={index} className="bg-amber-100 text-amber-800 border-amber-200 rounded-full px-3 py-1 text-xs">
                                   <span>{feature}</span>
                                   <button
                                     type="button"
                                     onClick={() => removeFeature(index)}
-                                    className="ml-1 hover:text-red-500"
+                                    className="ml-2 hover:text-red-600 transition-colors"
                                   >
                                     <X className="h-3 w-3" />
                                   </button>
@@ -473,20 +518,20 @@ export function ProductPageClient({ organizations, currentOrganization: initialO
                       </div>
 
                       {/* Additional Fields */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {/* Current Pricing Model */}
                         <div>
-                          <Label htmlFor="currentPricingModel">Current Pricing Model</Label>
+                          <Label className="text-sm font-medium text-gray-700">Pricing Model</Label>
                           <Select value={formData.currentPricingModel} onValueChange={(value) => handleInputChange('currentPricingModel', value)}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select pricing model" />
+                            <SelectTrigger className="mt-1 border-0 bg-gray-50 rounded-xl focus:ring-2 focus:ring-amber-500">
+                              <SelectValue placeholder="Select model" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="rounded-xl border-0 shadow-lg">
                               {pricingModelOptions.map((model) => (
-                                <SelectItem key={model.id} value={model.id}>
+                                <SelectItem key={model.id} value={model.id} className="rounded-lg">
                                   <div>
                                     <div className="font-medium">{model.name}</div>
-                                    <div className="text-sm text-gray-500">{model.description}</div>
+                                    <div className="text-xs text-gray-500">{model.description}</div>
                                   </div>
                                 </SelectItem>
                               ))}
@@ -496,17 +541,17 @@ export function ProductPageClient({ organizations, currentOrganization: initialO
 
                         {/* Business Stage */}
                         <div>
-                          <Label htmlFor="businessStage">Business Stage</Label>
+                          <Label className="text-sm font-medium text-gray-700">Business Stage</Label>
                           <Select value={formData.businessStage} onValueChange={(value) => handleInputChange('businessStage', value)}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select business stage" />
+                            <SelectTrigger className="mt-1 border-0 bg-gray-50 rounded-xl focus:ring-2 focus:ring-amber-500">
+                              <SelectValue placeholder="Select stage" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="rounded-xl border-0 shadow-lg">
                               {businessStageOptions.map((stage) => (
-                                <SelectItem key={stage.id} value={stage.id}>
+                                <SelectItem key={stage.id} value={stage.id} className="rounded-lg">
                                   <div>
                                     <div className="font-medium">{stage.name}</div>
-                                    <div className="text-sm text-gray-500">{stage.description}</div>
+                                    <div className="text-xs text-gray-500">{stage.description}</div>
                                   </div>
                                 </SelectItem>
                               ))}
@@ -516,51 +561,60 @@ export function ProductPageClient({ organizations, currentOrganization: initialO
 
                         {/* Current Price */}
                         <div>
-                          <Label htmlFor="currentPrice">Current Price</Label>
+                          <Label className="text-sm font-medium text-gray-700">Current Price</Label>
                           <Input
-                            id="currentPrice"
                             value={formData.currentPrice}
                             onChange={(e) => handleInputChange('currentPrice', e.target.value)}
-                            placeholder="e.g., $29/month, $299, Free"
+                            placeholder="$29/month"
+                            className="mt-1 border-0 bg-gray-50 rounded-xl focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all"
                           />
                         </div>
 
                         {/* Monthly Revenue */}
                         <div>
-                          <Label htmlFor="monthlyRevenue">Monthly Revenue ($)</Label>
+                          <Label className="text-sm font-medium text-gray-700">Monthly Revenue ($)</Label>
                           <Input
-                            id="monthlyRevenue"
                             type="number"
                             value={formData.monthlyRevenue}
                             onChange={(e) => handleInputChange('monthlyRevenue', e.target.value)}
                             placeholder="0"
+                            className="mt-1 border-0 bg-gray-50 rounded-xl focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all"
                           />
                         </div>
 
                         {/* Total Users */}
                         <div>
-                          <Label htmlFor="totalUsers">Total Users</Label>
+                          <Label className="text-sm font-medium text-gray-700">Total Users</Label>
                           <Input
-                            id="totalUsers"
                             type="number"
                             value={formData.totalUsers}
                             onChange={(e) => handleInputChange('totalUsers', e.target.value)}
                             placeholder="0"
+                            className="mt-1 border-0 bg-gray-50 rounded-xl focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all"
                           />
                         </div>
                       </div>
 
                       {/* Submit Buttons */}
-                      <div className="flex space-x-3">
-                        <Button type="submit" disabled={isSubmitting} className="bg-blue-600 hover:bg-blue-700">
+                      <div className="flex space-x-3 pt-4">
+                        <Button 
+                          type="submit" 
+                          disabled={isSubmitting} 
+                          className="bg-amber-500 hover:bg-amber-600 text-white rounded-xl px-6 py-2 border-0 shadow-lg hover:shadow-xl transition-all duration-200"
+                        >
                           {isSubmitting ? (
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
                           ) : (
                             <Save className="h-4 w-4 mr-2" />
                           )}
-                          {editingProduct ? 'Update Product' : 'Create Product'}
+                          {editingProduct ? 'Update' : 'Create'}
                         </Button>
-                        <Button type="button" variant="outline" onClick={cancelEditing}>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          onClick={cancelEditing}
+                          className="border-gray-200 rounded-xl px-6 py-2 hover:bg-gray-50 transition-all"
+                        >
                           Cancel
                         </Button>
                       </div>
@@ -573,16 +627,21 @@ export function ProductPageClient({ organizations, currentOrganization: initialO
 
           {/* Products List */}
           {products.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <Package className="h-12 w-12 text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No products yet</h3>
-                <p className="text-gray-600 text-center mb-6">
-                  Create your first product to start optimizing your pricing strategy
+            <Card className="border-0 shadow-sm rounded-3xl bg-white/60 backdrop-blur-sm">
+              <CardContent className="flex flex-col items-center justify-center py-16">
+                <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                  <Package className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-xl font-light text-gray-900 mb-2">No products yet</h3>
+                <p className="text-gray-500 text-center mb-8 max-w-md">
+                  Create your first product to start designing your pricing strategy
                 </p>
-                <Button onClick={startCreating} className="bg-blue-600 hover:bg-blue-700">
+                <Button 
+                  onClick={startCreating} 
+                  className="bg-amber-500 hover:bg-amber-600 text-white rounded-full px-8 py-3 border-0 shadow-lg hover:shadow-xl transition-all duration-200"
+                >
                   <Plus className="h-4 w-4 mr-2" />
-                  Create Your First Product
+                  Create First Product
                 </Button>
               </CardContent>
             </Card>
@@ -594,72 +653,82 @@ export function ProductPageClient({ organizations, currentOrganization: initialO
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
+                  className="group"
                 >
-                  <Card className="hover:shadow-lg transition-shadow">
-                    <CardHeader>
+                  <Card className="border-0 shadow-sm hover:shadow-xl transition-all duration-300 rounded-3xl bg-white/80 backdrop-blur-sm group-hover:bg-white">
+                    <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
-                        <div>
-                          <CardTitle className="text-lg">{product.productName}</CardTitle>
+                        <div className="flex-1">
+                          <CardTitle className="text-lg font-medium text-gray-900 mb-2">{product.productName}</CardTitle>
                           {product.market && (
-                            <Badge variant="outline" className="mt-2">
+                            <Badge className="bg-amber-100 text-amber-800 border-amber-200 rounded-full text-xs px-2 py-1">
                               {marketOptions.find(m => m.id === product.market)?.icon} {marketOptions.find(m => m.id === product.market)?.name}
                             </Badge>
                           )}
                         </div>
-                        <div className="flex space-x-1">
-                          <Button variant="ghost" size="sm" onClick={() => startEditing(product)}>
-                            <Edit3 className="h-4 w-4" />
+                        <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => startEditing(product)}
+                            className="h-8 w-8 p-0 rounded-full hover:bg-amber-50"
+                          >
+                            <Edit3 className="h-4 w-4 text-amber-600" />
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={() => deleteProduct(product.id)}>
-                            <Trash2 className="h-4 w-4" />
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => deleteProduct(product.id)}
+                            className="h-8 w-8 p-0 rounded-full hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4 text-red-500" />
                           </Button>
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent>
-                      <p className="text-gray-600 mb-4 line-clamp-3">{product.coreValue}</p>
+                    <CardContent className="pt-0">
+                      <p className="text-gray-600 text-sm mb-4 line-clamp-2 leading-relaxed">{product.coreValue}</p>
                       
                       {product.features.length > 0 && (
                         <div className="mb-4">
-                          <h4 className="text-sm font-medium mb-2">Features</h4>
                           <div className="flex flex-wrap gap-1">
-                            {product.features.slice(0, 3).map((feature, index) => (
-                              <Badge key={index} variant="secondary" className="text-xs">
+                            {product.features.slice(0, 2).map((feature, index) => (
+                              <Badge key={index} variant="secondary" className="text-xs bg-gray-100 text-gray-700 rounded-full px-2 py-1">
                                 {feature}
                               </Badge>
                             ))}
-                            {product.features.length > 3 && (
-                              <Badge variant="secondary" className="text-xs">
-                                +{product.features.length - 3} more
+                            {product.features.length > 2 && (
+                              <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-600 rounded-full px-2 py-1">
+                                +{product.features.length - 2}
                               </Badge>
                             )}
                           </div>
                         </div>
                       )}
 
-                      <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="grid grid-cols-2 gap-3 text-xs">
                         {product.currentPrice && (
-                          <div className="flex items-center">
-                            <DollarSign className="h-4 w-4 text-green-600 mr-1" />
-                            <span>{product.currentPrice}</span>
+                          <div className="flex items-center space-x-1">
+                            <DollarSign className="h-3 w-3 text-green-600" />
+                            <span className="text-gray-700 font-medium">{product.currentPrice}</span>
                           </div>
                         )}
                         {product.totalUsers && (
-                          <div className="flex items-center">
-                            <Users className="h-4 w-4 text-blue-600 mr-1" />
-                            <span>{product.totalUsers.toLocaleString()}</span>
+                          <div className="flex items-center space-x-1">
+                            <Users className="h-3 w-3 text-blue-600" />
+                            <span className="text-gray-700 font-medium">{product.totalUsers.toLocaleString()}</span>
                           </div>
                         )}
                         {product.monthlyRevenue && (
-                          <div className="flex items-center">
-                            <TrendingUp className="h-4 w-4 text-purple-600 mr-1" />
-                            <span>${product.monthlyRevenue.toLocaleString()}/mo</span>
+                          <div className="flex items-center space-x-1">
+                            <TrendingUp className="h-3 w-3 text-amber-600" />
+                            <span className="text-gray-700 font-medium">${product.monthlyRevenue.toLocaleString()}/mo</span>
                           </div>
                         )}
                         {product.businessStage && (
-                          <div className="flex items-center">
-                            <Rocket className="h-4 w-4 text-orange-600 mr-1" />
-                            <span className="capitalize">{businessStageOptions.find(s => s.id === product.businessStage)?.name}</span>
+                          <div className="flex items-center space-x-1">
+                            <Rocket className="h-3 w-3 text-purple-600" />
+                            <span className="text-gray-700 font-medium capitalize">{businessStageOptions.find(s => s.id === product.businessStage)?.name}</span>
                           </div>
                         )}
                       </div>
