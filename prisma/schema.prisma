@@ -654,6 +654,18 @@ model TriggerEmailLog {
   @@map("trigger_email_logs")
 }
 
+model TriggerEventLog {
+  id             String   @id @default(cuid())
+  organizationId String
+  triggerId      String
+  triggerData    Json
+  emailSent      Boolean  @default(false)
+  recipients     String[] @default([])
+  createdAt      DateTime @default(now())
+
+  @@map("trigger_event_logs")
+}
+
 enum CompanySize {
   JUST_ME
   TWO_TO_TEN
