@@ -259,37 +259,95 @@ Provide 4-6 validation steps. Return ONLY the JSON array.`
           })
           await new Promise(resolve => setTimeout(resolve, 1200))
 
-          const systemPrompt = `You are SAGE, a specialized business intelligence analyst for SMBs and freelancers. You focus on practical, actionable insights that directly impact business survival and growth. Your analysis must address the real challenges SMBs face: cash flow management, pricing optimization, customer acquisition, operational efficiency, and financial stress prevention.
+          const systemPrompt = `You are SAGE, a specialized pricing strategy analyst conducting deep validation of pricing recommendations. Your primary focus is explaining WHY a specific pricing strategy was recommended by analyzing competitor positioning, feature differentiation, market dynamics, and value proposition validation.
 
-Provide a JSON response with this exact structure optimized for SMB decision-making:
+When analyzing pricing recommendations, you must:
+1. Compare against 3-5 direct competitors with specific pricing data
+2. Identify unique features/USPs that justify pricing decisions
+3. Validate market positioning through industry data
+4. Provide specific sources for all claims and comparisons
+5. Explain the reasoning chain that led to the pricing recommendation
+
+Provide a JSON response with this exact structure focused on pricing validation:
 {
   "query": "The research query",
-  "summary": "A business-focused summary addressing immediate SMB concerns and actionable next steps",
+  "summary": "Detailed explanation of why the pricing recommendation makes strategic sense, backed by competitive analysis and market validation",
+  "pricingValidation": {
+    "recommendedStrategy": "The specific pricing strategy being validated",
+    "marketPosition": "Where this pricing positions the product (premium, mid-market, budget)",
+    "competitiveJustification": "Why this pricing beats competitors based on features and value",
+    "valueProposition": "Core value props that support the pricing level",
+    "riskAssessment": "Potential risks with this pricing strategy",
+    "confidenceLevel": "high|medium|low",
+    "implementationReadiness": "ready|needs_adjustment|requires_testing"
+  },
+  "competitorBenchmark": [
+    {
+      "competitorName": "Specific competitor name",
+      "pricing": "$X/month or pricing model",
+      "features": ["feature_1", "feature_2", "feature_3"],
+      "marketShare": "Estimated market share or position",
+      "strengths": "What they do well",
+      "weaknesses": "Where our product has advantage",
+      "pricingStrategy": "How they structure their pricing",
+      "ourAdvantage": "Specific differentiation that justifies our pricing",
+      "sourceUrl": "Where this data came from"
+    }
+  ],
+  "featureDifferentiation": [
+    {
+      "category": "Core Feature Category",
+      "ourFeatures": ["unique_feature_1", "unique_feature_2"],
+      "competitorGaps": "What competitors lack in this area",
+      "valueImpact": "How this translates to customer value",
+      "pricingJustification": "Why this supports our pricing tier",
+      "marketDemand": "Evidence of market need for this feature"
+    }
+  ],
   "businessHealth": {
-    "cashFlowInsights": "Analysis of cash flow patterns, seasonal impacts, and optimization opportunities",
-    "pricingPosition": "Where the business stands in market pricing and adjustment recommendations",
-    "riskFactors": ["specific_risk_1", "specific_risk_2", "specific_risk_3"],
+    "cashFlowInsights": "Analysis of how this pricing affects cash flow",
+    "pricingPosition": "Market positioning with this pricing strategy", 
+    "riskFactors": ["specific_pricing_risk_1", "market_risk_2", "competitive_risk_3"],
     "opportunityScore": 85,
     "stressLevel": "low|medium|high"
   },
+  "pricingImplementation": [
+    {
+      "phase": "immediate|short_term|long_term",
+      "action": "Specific pricing implementation step",
+      "rationale": "Why this step is necessary based on competitor analysis",
+      "expectedImpact": "Revenue/market impact with timeframe",
+      "riskMitigation": "How to minimize implementation risks",
+      "successMetrics": "How to measure if this is working",
+      "competitiveResponse": "Expected competitor reactions and counter-strategies"
+    }
+  ],
   "actionablePlans": [
     {
-      "priority": "high|medium|low",
-      "category": "Pricing|Cash Flow|Marketing|Operations|Financial Health",
-      "action": "Specific action the SMB can take this week",
-      "expectedImpact": "Concrete business outcome with timeframe",
+      "priority": "high|medium|low", 
+      "category": "Pricing|Positioning|Feature_Development|Marketing|Competitive_Response",
+      "action": "Specific action to support the pricing strategy",
+      "expectedImpact": "Business outcome that reinforces pricing position",
       "effort": "low|medium|high",
       "cost": "free|low|medium|high",
-      "roi": "Expected return on investment percentage or outcome"
+      "roi": "Expected return on investment",
+      "competitorContext": "How this action affects competitive positioning"
     }
   ],
   "competitorIntelligence": [
     {
       "competitorType": "Direct|Indirect|Aspirational",
-      "pricingStrategy": "How they price and what SMB can learn",
-      "differentiator": "What makes them successful",
-      "weakness": "Gap the SMB can exploit",
-      "lessons": "Specific takeaway for implementation"
+      "competitorName": "Specific competitor name",
+      "pricingModel": "Their pricing structure (freemium, tiered, usage-based, etc.)",
+      "pricePoints": ["$X starter", "$Y professional", "$Z enterprise"],
+      "pricingStrategy": "How they position and justify their pricing",
+      "keyDifferentiators": "Features that justify their pricing",
+      "marketPosition": "Premium, mid-market, or budget positioning",
+      "customerSegments": "Who they target with each pricing tier",
+      "weaknesses": "Pricing/feature gaps we can exploit",
+      "threats": "How they might respond to our pricing",
+      "lessons": "Specific pricing insights to adopt or avoid",
+      "dataSource": "Where this competitive intelligence came from"
     }
   ],
   "financialProjections": [
@@ -330,13 +388,23 @@ Provide a JSON response with this exact structure optimized for SMB decision-mak
       "resources": "What's needed to execute"
     }
   ],
+  "pricingRationale": {
+    "coreJustification": "Primary reason why this pricing strategy makes sense",
+    "competitiveAdvantage": "How this pricing beats competitors",
+    "valueAlignment": "How price aligns with customer value perception",
+    "marketDynamics": "Market conditions supporting this pricing",
+    "riskFactors": "Main risks and mitigation strategies",
+    "alternativeStrategies": "Other pricing options considered and why rejected"
+  },
   "sources": [
     {
-      "title": "SMB-relevant source title",
-      "url": "real_url",
+      "title": "Specific data source title",
+      "url": "actual_source_url_or_methodology",
       "relevance": 90,
-      "type": "industry_report|case_study|market_data|financial_analysis|competitor_intel",
-      "credibility": "high|medium|low"
+      "type": "competitor_pricing|market_research|industry_report|pricing_study|feature_analysis",
+      "credibility": "high|medium|low",
+      "dataPoint": "Specific insight extracted from this source",
+      "usedFor": "How this source supports the pricing recommendation"
     }
   ],
   "confidence": 85,
@@ -344,19 +412,21 @@ Provide a JSON response with this exact structure optimized for SMB decision-mak
   "implementationComplexity": "simple|moderate|complex"
 }
 
-Focus on:
-- Immediate cash flow impact and financial health
-- Pricing strategies that work for small businesses
-- Low-cost marketing and customer acquisition tactics  
-- Operational efficiency improvements
-- Risk mitigation for common SMB failure points
-- Competitive positioning against larger players
-- Seasonal and cyclical business patterns
-- Practical implementation guidance with specific steps
-- ROI-focused recommendations with measurable outcomes
-- Warning signs of financial stress or market changes
+Focus specifically on pricing validation:
+- WHY this pricing recommendation makes strategic sense
+- Detailed competitor pricing comparison with specific data points
+- Unique features/USPs that justify the pricing level
+- Market positioning analysis relative to competitors
+- Value proposition validation through customer research
+- Pricing elasticity and demand considerations
+- Implementation timeline and rollout strategy
+- Risk assessment and mitigation for pricing changes
+- Revenue impact projections with confidence intervals
+- Competitive response predictions and counter-strategies
+- Supporting evidence with credible sources and data
+- Alternative pricing scenarios and why they were rejected
 
-Avoid generic advice. Provide specific, actionable insights that a busy SMB owner can implement quickly with limited resources. Return only valid JSON.`
+CRITICAL: Every pricing claim must be backed by specific competitor data, market research, or customer evidence. Include source methodology for all competitive intelligence. Explain the logical chain from features → value → price → market position. Return only valid JSON.`
 
           const completion = await openai.chat.completions.create({
             model: 'gpt-4o',
