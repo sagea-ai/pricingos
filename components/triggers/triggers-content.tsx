@@ -19,9 +19,12 @@ import {
   Save,
   CheckCircle,
   XCircle,
-  Loader2
+  Loader2,
+  Send,
+  Zap,
+  Shield
 } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 
 interface User {
@@ -277,204 +280,280 @@ export function TriggersContent({ organizationName, organizationId, user, produc
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white dark:from-green-950 dark:to-gray-950">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="flex items-center justify-center min-h-screen">
-          <div className="flex items-center gap-2">
-            <Loader2 className="h-6 w-6 animate-spin" />
-            <span>Loading trigger settings...</span>
-          </div>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex items-center gap-3 bg-white dark:bg-gray-800 px-6 py-4 rounded-2xl shadow-lg"
+          >
+            <div className="relative">
+              <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
+              <div className="absolute inset-0 bg-amber-500/20 rounded-full animate-ping" />
+            </div>
+            <span className="text-gray-700 dark:text-gray-300 font-medium">Loading triggers...</span>
+          </motion.div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white dark:from-green-950 dark:to-gray-950">
-      <div className="p-6 space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Email Triggers</h1>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">
-              Configure automated email notifications for {productProfile?.productName || 'your product'}
-            </p>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Compact Header */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-4xl font-light text-gray-900 dark:text-white tracking-tight">
+                Email Triggers
+              </h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                Smart notifications for {productProfile?.productName || 'your product'}
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.1 }}
+              >
+                <Badge 
+                  variant="outline" 
+                  className="bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-300"
+                >
+                  {enabledTriggersCount} of {triggers.length} active
+                </Badge>
+              </motion.div>
+              
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.2 }}
+              >
+                <Button 
+                  onClick={handleSendAlerts} 
+                  disabled={isSendingAlerts}
+                  className="bg-amber-500 hover:bg-amber-600 text-white shadow-md border-0 rounded-xl px-4 py-2 h-auto font-medium transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5"
+                >
+                  {isSendingAlerts ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Sending
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4 mr-2" />
+                      Test Alerts
+                    </>
+                  )}
+                </Button>
+              </motion.div>
+            </div>
           </div>
-          
-          <div className="flex items-center gap-3">
-            <Badge variant="outline" className="text-sm">
-              {enabledTriggersCount} of {triggers.length} enabled
-            </Badge>
-            <Button 
-              onClick={handleSendAlerts} 
-              disabled={isSendingAlerts}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              {isSendingAlerts ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Sending...
-                </>
-              ) : (
-                'Send alerts'
-              )}
-            </Button>
-            <Button 
-              onClick={saveTriggerSettings}
-              disabled={isSaving}
-              variant="outline"
-              className="border-amber-600 text-amber-600 hover:bg-amber-50"
-            >
-              <Save className="h-4 w-4 mr-2" />
-              {isSaving ? 'Syncing...' : 'Force Sync'}
-            </Button>
-          </div>
-        </div>
 
-        {/* Summary Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="border-amber-200 dark:border-gray-700">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-red-500" />
-                <div>
-                  <div className="text-sm font-medium text-gray-900 dark:text-white">Critical Alerts</div>
-                  <div className="text-lg font-bold text-red-600">
-                    {triggers.filter(t => t.severity === 'CRITICAL' && t.isEnabled).length}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="border-amber-200 dark:border-gray-700">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <DollarSign className="h-5 w-5 text-amber-600" />
-                <div>
-                  <div className="text-sm font-medium text-gray-900 dark:text-white">Financial</div>
-                  <div className="text-lg font-bold text-amber-600">
-                    {triggers.filter(t => t.category === 'FINANCIAL' && t.isEnabled).length}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="border-amber-200 dark:border-gray-700">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-blue-600" />
-                <div>
-                  <div className="text-sm font-medium text-gray-900 dark:text-white">Customer</div>
-                  <div className="text-lg font-bold text-blue-600">
-                    {triggers.filter(t => t.category === 'USER' && t.isEnabled).length}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="border-amber-200 dark:border-gray-700">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <Mail className="h-5 w-5 text-gray-600" />
-                <div>
-                  <div className="text-sm font-medium text-gray-900 dark:text-white">Email Target</div>
-                  <div className="text-sm font-bold text-gray-600 truncate">
-                    {user.email || 'No email set'}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Last Saved Indicator */}
-        {lastSaved && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
+          {/* Status Indicators */}
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400"
+            transition={{ delay: 0.3 }}
+            className="grid grid-cols-2 md:grid-cols-4 gap-4"
           >
-            <CheckCircle className="h-4 w-4" />
-            Settings saved at {lastSaved.toLocaleTimeString()}
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                  <AlertTriangle className="h-4 w-4 text-red-500" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium">Critical</p>
+                  <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {triggers.filter(t => t.severity === 'CRITICAL' && t.isEnabled).length}
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                  <DollarSign className="h-4 w-4 text-amber-500" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium">Financial</p>
+                  <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {triggers.filter(t => t.category === 'FINANCIAL' && t.isEnabled).length}
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <Users className="h-4 w-4 text-blue-500" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium">Customer</p>
+                  <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {triggers.filter(t => t.category === 'USER' && t.isEnabled).length}
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                  <Mail className="h-4 w-4 text-green-500" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium">Target</p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                    {user.email?.split('@')[0] || 'Not set'}
+                  </p>
+                </div>
+              </div>
+            </div>
           </motion.div>
-        )}
+
+          {/* Last Saved Status */}
+          <AnimatePresence>
+            {lastSaved && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="mt-4 flex items-center gap-2 text-sm text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-3 py-2 rounded-lg border border-green-200 dark:border-green-800"
+              >
+                <CheckCircle className="h-4 w-4" />
+                Synced at {lastSaved.toLocaleTimeString()}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
 
         {/* Trigger Categories */}
         <div className="space-y-6">
-          {Object.entries(groupedTriggers).map(([category, categoryTriggers]) => (
+          {Object.entries(groupedTriggers).map(([category, categoryTriggers], categoryIndex) => (
             <motion.div
               key={category}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.4, delay: categoryIndex * 0.1 }}
             >
-              <Card className="border-amber-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-                    {getCategoryIcon(category)}
-                    {categoryNames[category as keyof typeof categoryNames]}
-                  </CardTitle>
-                  <CardDescription>
-                    Configure email notifications for {category} events
-                  </CardDescription>
+              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-sm rounded-2xl overflow-hidden">
+                <CardHeader className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                      {getCategoryIcon(category)}
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
+                        {categoryNames[category as keyof typeof categoryNames]}
+                      </CardTitle>
+                      <CardDescription className="text-sm text-gray-600 dark:text-gray-400">
+                        {categoryTriggers.length} triggers available
+                      </CardDescription>
+                    </div>
+                  </div>
                 </CardHeader>
-                <CardContent>
+                
+                <CardContent className="p-6">
                   <div className="space-y-4">
-                    {categoryTriggers.map((trigger) => (
-                      <div 
-                        key={trigger.id} 
-                        className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${
+                    {categoryTriggers.map((trigger, triggerIndex) => (
+                      <motion.div
+                        key={trigger.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: (categoryIndex * 0.1) + (triggerIndex * 0.05) }}
+                        className={`group relative bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border-2 transition-all duration-200 hover:shadow-md ${
                           trigger.isEnabled 
-                            ? 'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/20' 
-                            : 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800'
+                            ? 'border-amber-200 dark:border-amber-800/50 bg-gradient-to-r from-amber-50 to-white dark:from-amber-900/10 dark:to-gray-800/50' 
+                            : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                         }`}
                       >
-                        <div className="flex items-start gap-3 flex-1">
-                          <div className="mt-1">
+                        <div className="flex items-start gap-4">
+                          <div className={`p-2 rounded-lg transition-colors ${
+                            trigger.isEnabled 
+                              ? 'bg-amber-100 dark:bg-amber-900/30' 
+                              : 'bg-gray-100 dark:bg-gray-700'
+                          }`}>
                             {(trigger as TriggerWithIcon).icon}
                           </div>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-medium text-gray-900 dark:text-white">
+                          
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h3 className="font-medium text-gray-900 dark:text-white truncate">
                                 {trigger.name}
                               </h3>
                               <Badge 
-                                className={`text-xs ${getSeverityColor(trigger.severity)}`}
+                                className={`text-xs px-2 py-1 rounded-full font-medium ${getSeverityColor(trigger.severity)}`}
                                 variant="outline"
                               >
-                                {trigger.severity.toUpperCase()}
+                                {trigger.severity}
                               </Badge>
                             </div>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                               {trigger.description}
                             </p>
                           </div>
+                          
+                          <div className="flex items-center gap-4">
+                            <AnimatePresence>
+                              {savingTriggerId === trigger.triggerId ? (
+                                <motion.div
+                                  initial={{ opacity: 0, scale: 0.8 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  exit={{ opacity: 0, scale: 0.8 }}
+                                  className="flex items-center gap-2 text-amber-600 dark:text-amber-400"
+                                >
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                  <span className="text-xs font-medium">Syncing</span>
+                                </motion.div>
+                              ) : (
+                                <motion.div
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  className="flex items-center gap-3"
+                                >
+                                  <Label 
+                                    htmlFor={trigger.id} 
+                                    className={`text-xs font-medium cursor-pointer transition-colors ${
+                                      trigger.isEnabled 
+                                        ? 'text-amber-700 dark:text-amber-300' 
+                                        : 'text-gray-500 dark:text-gray-400'
+                                    }`}
+                                  >
+                                    {trigger.isEnabled ? 'Active' : 'Inactive'}
+                                  </Label>
+                                  <Switch
+                                    id={trigger.id}
+                                    checked={trigger.isEnabled}
+                                    disabled={savingTriggerId === trigger.triggerId}
+                                    onCheckedChange={() => toggleTrigger(trigger.triggerId)}
+                                    className="data-[state=checked]:bg-amber-500"
+                                  />
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
                         </div>
                         
-                        <div className="flex items-center gap-3">
-                          {savingTriggerId === trigger.triggerId ? (
-                            <div className="flex items-center gap-2">
-                              <Loader2 className="h-4 w-4 animate-spin text-amber-600" />
-                              <span className="text-sm text-amber-600">Saving...</span>
-                            </div>
-                          ) : (
-                            <Label 
-                              htmlFor={trigger.id} 
-                              className="text-sm font-medium cursor-pointer"
-                            >
-                              {trigger.isEnabled ? 'Enabled' : 'Disabled'}
-                            </Label>
-                          )}
-                          <Switch
-                            id={trigger.id}
-                            checked={trigger.isEnabled}
-                            disabled={savingTriggerId === trigger.triggerId}
-                            onCheckedChange={() => toggleTrigger(trigger.triggerId)}
-                          />
-                        </div>
-                      </div>
+                        {trigger.isEnabled && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="absolute -top-1 -right-1 p-1 bg-amber-500 rounded-full shadow-lg"
+                          >
+                            <Zap className="h-3 w-3 text-white" />
+                          </motion.div>
+                        )}
+                      </motion.div>
                     ))}
                   </div>
                 </CardContent>
@@ -483,33 +562,56 @@ export function TriggersContent({ organizationName, organizationId, user, produc
           ))}
         </div>
 
-        {/* Email Configuration Info */}
-        <Card className="border-amber-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-              <Mail className="h-5 w-5 text-amber-600" />
-              Email Configuration
-            </CardTitle>
-            <CardDescription>
-              All notifications will be sent to your registered email address
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
-                <div>
-                  <div className="font-medium text-gray-900 dark:text-white">Primary Email</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    {user.email || 'No email address configured'}
-                  </div>
+        {/* Email Configuration */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.4 }}
+          className="mt-8"
+        >
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-sm rounded-2xl overflow-hidden">
+            <CardHeader className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                  <Shield className="h-5 w-5 text-blue-600" />
                 </div>
-                <Button variant="outline" size="sm">
-                  Update Email
-                </Button>
+                <div>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Notification Settings
+                  </CardTitle>
+                  <CardDescription className="text-sm text-gray-600 dark:text-gray-400">
+                    Configure where alerts are delivered
+                  </CardDescription>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardHeader>
+            
+            <CardContent className="p-6">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                      <Mail className="h-4 w-4 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">Primary Email</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {user.email || 'No email configured'}
+                      </p>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="border-blue-200 text-blue-700 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-300 dark:hover:bg-blue-900/20 rounded-lg"
+                  >
+                    Update
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     </div>
   )
