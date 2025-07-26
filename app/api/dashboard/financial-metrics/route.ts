@@ -28,14 +28,56 @@ export async function GET(request: NextRequest) {
     }
 
     const metrics = user.activeProductProfile.financialMetrics
+    const productProfile = user.activeProductProfile
     
     if (metrics.length === 0) {
+      // If no financial metrics but we have basic data, create estimates
+      if (productProfile.monthlyRevenue || productProfile.totalUsers || productProfile.averagePrice) {
+        const monthlyRevenue = productProfile.monthlyRevenue || 0
+        const totalUsers = productProfile.totalUsers || 0
+        const averagePrice = productProfile.averagePrice || 0
+        
+        // Calculate realistic derived metrics based on business stage
+        const stageMultipliers = {
+          idea: { conversionRate: 0, churnRate: 0, revenueGrowth: 0, userGrowth: 0 },
+          building: { conversionRate: 0, churnRate: 0, revenueGrowth: 0, userGrowth: 0 },
+          launched: { conversionRate: 1.5, churnRate: 15, revenueGrowth: 25, userGrowth: 30 },
+          growing: { conversionRate: 3.2, churnRate: 8, revenueGrowth: 15, userGrowth: 18 },
+          established: { conversionRate: 4.5, churnRate: 5, revenueGrowth: 8, userGrowth: 10 }
+        }
+        
+        const multipliers = stageMultipliers[productProfile.businessStage as keyof typeof stageMultipliers] || stageMultipliers.launched
+        
+        const estimatedMetrics = {
+          monthlyRevenue: monthlyRevenue,
+          totalUsers: totalUsers,
+          conversionRate: multipliers.conversionRate,
+          churnRate: multipliers.churnRate,
+          revenueGrowthRate: multipliers.revenueGrowth,
+          userGrowthRate: multipliers.userGrowth,
+          conversionGrowthRate: 5,
+          churnGrowthRate: -2,
+          lastUpdated: new Date(),
+          // Additional context
+          averagePrice: averagePrice,
+          businessStage: productProfile.businessStage
+        }
+        
+        return NextResponse.json({
+          hasData: true,
+          metrics: estimatedMetrics,
+          isEstimate: true,
+          source: 'product_profile'
+        })
+      }
+      
       return NextResponse.json({ 
         hasData: false,
-        message: 'No financial data found. Please upload your transaction data first.'
+        message: 'No financial data found. Please add your business metrics or upload CSV data.'
       })
     }
 
+    // If we have CSV-based financial metrics, use those
     const currentMetrics = metrics[0]
     const previousMetrics = metrics[1] // May be undefined if only one record
 
@@ -83,7 +125,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       hasData: true,
       metrics: financialMetrics,
-      lastUpdated: currentMetrics.calculatedAt
+      lastUpdated: currentMetrics.calculatedAt,
+      source: 'csv_upload'
     })
 
   } catch (error) {

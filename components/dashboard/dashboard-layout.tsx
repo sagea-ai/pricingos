@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { BarChart3, Calendar, AlertTriangle, TrendingDown, ArrowRight, MessageSquare, TrendingUp, DollarSign, Shield, Target, Activity, Zap, PieChart, TestTube, Users, Clock, Lightbulb, ArrowUp, ArrowDown, Sparkles, Package, Plus } from "lucide-react"
+import { BarChart3, Calendar, AlertTriangle, TrendingDown, ArrowRight, MessageSquare, TrendingUp, DollarSign, Shield, Target, Activity, Zap, PieChart, TestTube, Users, Clock, Lightbulb, ArrowUp, ArrowDown, Sparkles, Package, Plus, Calculator, Upload } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { TrialProvider } from "../trial/trial-provider"
@@ -151,7 +151,7 @@ export function DashboardLayout({
         const response = await fetch('/api/dashboard/financial-metrics')
         if (response.ok) {
           const result = await response.json()
-          if (result.metrics) {
+          if (result.hasData && result.metrics) {
             setFinancialMetrics(result.metrics)
             setHasFinancialData(true)
           } else {
@@ -265,28 +265,36 @@ export function DashboardLayout({
               </p>
               <Link href="/product-profile">
                 <Button className="bg-amber-500 hover:bg-amber-600 text-white shadow-lg">
-                  <Sparkles className="w-4 h-4 mr-2" />
+                  <Sparkles className="w-4 mr-2" />
                   Create Product
                 </Button>
               </Link>
             </div>
           ) : !hasFinancialData ? (
             <div className="text-center py-16">
-              <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/30 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                <BarChart3 className="w-10 h-10 text-amber-600 dark:text-amber-400" />
+              <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                <DollarSign className="w-10 h-10 text-blue-600 dark:text-blue-400" />
               </div>
               <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-3">
-                Upload Your Financial Data
+                Add Your Business Metrics
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
-                Upload your transaction data (CSV) to see real metrics and insights for {productInfo?.name || 'your product'}
+                Share some basic numbers about {productInfo?.name || 'your product'} to see meaningful insights and AI recommendations
               </p>
-              <Link href="/finances">
-                <Button className="bg-amber-500 hover:bg-amber-600 text-white shadow-lg">
-                  <BarChart3 className="w-4 h-4 mr-2" />
-                  Integrate Your Finances
-                </Button>
-              </Link>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Link href="/product-profile">
+                  <Button className="bg-blue-500 hover:bg-blue-600 text-white shadow-lg">
+                    <Calculator className="w-4 h-4 mr-2" />
+                    Add Basic Metrics
+                  </Button>
+                </Link>
+                <Link href="/finances">
+                  <Button variant="outline" className="border-blue-200 text-blue-600 hover:bg-blue-50">
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Or Upload CSV Data
+                  </Button>
+                </Link>
+              </div>
             </div>
           ) : analysisLoading ? (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
@@ -301,6 +309,33 @@ export function DashboardLayout({
             </div>
           ) : pricingAnalysis ? (
             <>
+              {/* Show data source indicator if using estimates */}
+              {financialMetrics && (
+                <div className="mb-6">
+                  <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-950/20 rounded-xl border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/40 rounded-lg flex items-center justify-center">
+                        <Calculator className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                          Metrics from Basic Business Data
+                        </p>
+                        <p className="text-xs text-blue-700 dark:text-blue-300">
+                          Upload CSV data for more detailed analytics
+                        </p>
+                      </div>
+                    </div>
+                    <Link href="/finances">
+                      <Button size="sm" variant="outline" className="border-blue-300 text-blue-700 hover:bg-blue-100">
+                        <Upload className="w-4 h-4 mr-2" />
+                        Upload Data
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              )}
+              
               {/* SAGE AI Recommendation - Hero Section */}
               <div className="mb-12">
                 <Card className="bg-gradient-to-br rounded-3xl from-amber-400 via-orange-400 to-orange-500 dark:from-amber-950/20 dark:via-orange-950/10 dark:to-yellow-950/20 border-amber-200 dark:border-amber-800/50 relative overflow-hidden">
