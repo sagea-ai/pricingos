@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     // Calculate financial metrics from parsed data
     const calculatedMetrics = await calculateFinancialMetrics(transactions, user.activeProductProfileId, user.id);
 
-    // Store only the calculated metrics
+    // Store only the calculated metrics - using correct model name
     const financialMetrics = await db.financialMetrics.create({
       data: {
         id: `fm_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -82,9 +82,9 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // Update payment integration status
+    // Update gateway connection status - using correct model name
     if (uploadType === 'stripe' || uploadType === 'khalti') {
-      await db.paymentIntegrations.upsert({
+      await db.gatewayConnection.upsert({
         where: {
           productProfileId_gateway: {
             productProfileId: user.activeProductProfileId,
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
           syncStatus: 'SYNC_COMPLETE'
         },
         create: {
-          id: `pi_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          id: `gc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           gateway: uploadType.toUpperCase() as PaymentGateway,
           isConnected: true,
           lastSync: new Date(),

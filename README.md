@@ -10,10 +10,13 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
    npm install
    ```
 
-2. Set up the db (very imp hai):
+2. Set up the database (CRITICAL STEP):
 
    ```bash
+   # Generate Prisma client (MUST run this first)
    npm run db:generate
+   
+   # Push schema to database
    npm run db:push
    ```
 
@@ -48,10 +51,28 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 ## IMP HAI IMP
 
-- Always run `npm run db:generate` after changing the Prisma schema
-- Make sure your database is running before starting the application
-- If you encounter "undefined model" errors, run `npm run db:generate` to regenerate the Prisma client
-- Complete product profile setup before accessing the Testing Lab (/testing)
+⚠️ **IMPORTANT**: Always run these commands in order when:
+- Setting up the project for the first time
+- After pulling changes that modify the Prisma schema
+- When encountering "undefined model" errors
+
+```bash
+# 1. Generate Prisma client first
+npm run db:generate
+
+# 2. Then push schema to database
+npm run db:push
+
+# 3. Start the development server
+npm run dev
+```
+
+### Troubleshooting
+
+- **"Cannot read properties of undefined" errors**: Run `npm run db:generate` to regenerate the Prisma client
+- **"Model not found" errors**: Ensure your database is running and run `npm run db:push`
+- **Build errors in Docker**: The Dockerfile automatically runs `npx prisma generate` before building
+- **Complete product profile setup before accessing the Testing Lab (/testing)**
 
 ## Learn More
 

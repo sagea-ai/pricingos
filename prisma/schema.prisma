@@ -42,6 +42,8 @@ model User {
   productProfiles           ProductProfile[]
   activeProductProfileId    String?
   activeProductProfile      ProductProfile? @relation("ActiveProductProfile", fields: [activeProductProfileId], references: [id])
+  financialMetrics          FinancialMetrics[]
+  gatewayConnections        GatewayConnection[]
 
   @@map("users")
 }
@@ -66,8 +68,58 @@ model ProductProfile {
   competitors         ProductCompetitor[]
   PricingAnalysis     PricingAnalysis[]
   activeForUsers      User[]              @relation("ActiveProductProfile")
+  financialMetrics    FinancialMetrics[]
+  gatewayConnections  GatewayConnection[]
 
   @@map("product_profiles")
+}
+
+model FinancialMetrics {
+  id                      String         @id @default(cuid())
+  productProfileId        String
+  userId                  String
+  totalRevenue            Float          @default(0)
+  monthlyRecurringRevenue Float          @default(0)
+  oneTimePayments         Float          @default(0)
+  averageRevenuePerUser   Float          @default(0)
+  activeSubscriptions     Int            @default(0)
+  revenueGrowthRate       Float          @default(0)
+  mrrGrowthRate           Float          @default(0)
+  subscriptionGrowthRate  Float          @default(0)
+  totalExpenses           Float          @default(0)
+  monthlyExpenses         Float          @default(0)
+  currentCash             Float          @default(0)
+  monthlyBurnRate         Float          @default(0)
+  dailyBurnRate           Float          @default(0)
+  dailyRevenue            Float          @default(0)
+  netDailyBurn            Float          @default(0)
+  runwayMonths            Float          @default(0)
+  runwayDays              Int            @default(0)
+  projectedCashDepletion  DateTime?
+  calculatedAt            DateTime       @default(now())
+  transactionCount        Int            @default(0)
+  productProfile          ProductProfile @relation(fields: [productProfileId], references: [id], onDelete: Cascade)
+  user                    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("financial_metrics")
+}
+
+model GatewayConnection {
+  id               String         @id @default(cuid())
+  productProfileId String
+  userId           String
+  gateway          PaymentGateway
+  isConnected      Boolean        @default(false)
+  lastSync         DateTime?
+  syncStatus       String?
+  accountId        String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @default(now())
+  productProfile   ProductProfile @relation(fields: [productProfileId], references: [id], onDelete: Cascade)
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([productProfileId, gateway])
+  @@map("gateway_connections")
 }
 
 model Competitor {
@@ -567,6 +619,33 @@ model WorkspaceInvitation {
   @@map("workspace_invitations")
 }
 
+model TriggerSetting {
+  id             String  @id @default(cuid())
+  organizationId String
+  triggerId      String
+  isEnabled      Boolean @default(true)
+  threshold      Float?
+  settings       Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now())
+
+  @@unique([organizationId, triggerId])
+  @@map("trigger_settings")
+}
+
+model TriggerEventLog {
+  id             String   @id @default(cuid())
+  organizationId String
+  triggerId      String
+  triggerData    Json?
+  emailSent      Boolean  @default(false)
+  recipients     String[]
+  error          String?
+  createdAt      DateTime @default(now())
+
+  @@map("trigger_event_logs")
+}
+
 enum CompanySize {
   JUST_ME
   TWO_TO_TEN
@@ -694,4 +773,9 @@ enum NotificationType {
   WORKSPACE_ACTIVITY
   ANALYSIS_COMPLETE
   MEMBER_JOINED
+}
+
+enum PaymentGateway {
+  STRIPE
+  KHALTI
 }

@@ -101,6 +101,81 @@ export function FinancesContent({ organizationName, organizationId, productProfi
   const [isLoading, setIsLoading] = useState(true)
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [uploadType, setUploadType] = useState<'stripe' | 'khalti' | 'expenses'>('stripe')
+  const [uploadedData, setUploadedData] = useState<TransactionData[]>([])
+  const [recentTransactions, setRecentTransactions] = useState<any[]>([])
+  const [paymentMethods, setPaymentMethods] = useState<any[]>([])
+
+  // Mock data for charts and UI
+  const mockFinancialData = {
+    revenueChart: [
+      { month: 'Jan 2024', revenue: 8500, stripe: 5800, khalti: 2700 },
+      { month: 'Feb 2024', revenue: 9200, stripe: 6300, khalti: 2900 },
+      { month: 'Mar 2024', revenue: 10800, stripe: 7200, khalti: 3600 },
+      { month: 'Apr 2024', revenue: 12500, stripe: 8500, khalti: 4000 },
+      { month: 'May 2024', revenue: 11900, stripe: 8100, khalti: 3800 },
+      { month: 'Jun 2024', revenue: 13200, stripe: 8900, khalti: 4300 }
+    ],
+    cashRunway: {
+      recommendations: [
+        { action: 'Reduce burn rate', impact: '+2 months runway' },
+        { action: 'Increase pricing', impact: '+15% revenue' },
+        { action: 'Cut non-essential costs', impact: 'Save $2K/month' }
+      ]
+    }
+  }
+
+  // Helper functions
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount)
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric'
+    })
+  }
+
+  const handleStripeConnect = async () => {
+    setIsConnecting(true)
+    try {
+      // Stripe connection logic would go here
+      setTimeout(() => {
+        setStripeIntegration({
+          isConnected: true,
+          accountId: 'acct_stripe_demo',
+          lastSync: new Date().toISOString()
+        })
+        setIsConnecting(false)
+      }, 2000)
+    } catch (error) {
+      console.error('Stripe connection failed:', error)
+      setIsConnecting(false)
+    }
+  }
+
+  const handleKhaltiConnect = async () => {
+    setIsConnecting(true)
+    try {
+      // Khalti connection logic would go here
+      setTimeout(() => {
+        setKhaltiIntegration({
+          isConnected: true,
+          accountId: 'khalti_demo_account',
+          lastSync: new Date().toISOString()
+        })
+        setIsConnecting(false)
+      }, 2000)
+    } catch (error) {
+      console.error('Khalti connection failed:', error)
+      setIsConnecting(false)
+    }
+  }
 
   // Fetch stored financial metrics on component mount
   useEffect(() => {
@@ -184,7 +259,20 @@ export function FinancesContent({ organizationName, organizationId, productProfi
     totalExpenses: storedMetrics.totalExpenses,
     monthlyExpenses: storedMetrics.monthlyExpenses,
     netProfit: (storedMetrics.monthlyRecurringRevenue + storedMetrics.oneTimePayments) - storedMetrics.monthlyExpenses
-  } : null
+  } : {
+    totalRevenue: 0,
+    monthlyRevenue: 0,
+    monthlyRecurring: 0,
+    oneTimePayments: 0,
+    activeSubscriptions: 0,
+    averageRevenuePerUser: 0,
+    revenueGrowthRate: 0,
+    mrrGrowthRate: 0,
+    subscriptionGrowthRate: 0,
+    totalExpenses: 0,
+    monthlyExpenses: 0,
+    netProfit: 0
+  }
 
   const cashRunwayData: CashRunwayData = storedMetrics ? {
     currentCash: storedMetrics.currentCash,
