@@ -305,22 +305,22 @@ export function DashboardLayout({
               {/* Data Source Banner */}
               {productMetrics && (
                 <div className="mb-6">
-                  <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-950/20 rounded-xl border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-950/20 rounded-xl border border-amber-200 dark:border-amber-800">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/40 rounded-lg flex items-center justify-center">
-                        <Calculator className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      <div className="w-8 h-8 bg-amber-100 dark:bg-amber-900/40 rounded-lg flex items-center justify-center">
+                        <Calculator className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                        <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
                           {productMetrics.isEstimate ? 'Metrics from Basic Business Data' : 'Metrics from Uploaded Data'}
                         </p>
-                        <p className="text-xs text-blue-700 dark:text-blue-300">
+                        <p className="text-xs text-amber-700 dark:text-amber-300">
                           {productMetrics.isEstimate ? 'Upload CSV data for more detailed analytics' : 'Real data from your business'}
                         </p>
                       </div>
                     </div>
                     <Link href="/finances">
-                      <Button size="sm" variant="outline" className="border-blue-300 text-blue-700 hover:bg-blue-100">
+                      <Button size="sm" variant="outline" className="border-amber-300 text-amber-700 hover:bg-blue-100">
                         <Upload className="w-4 h-4 mr-2" />
                         Upload Data
                       </Button>

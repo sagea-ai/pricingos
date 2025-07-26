@@ -361,13 +361,13 @@ export function ProductPageClient({ organizations, currentOrganization: initialO
                 <Package className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-43xl font-light text-gray-900 tracking-tight">Product Builder</h1>
+                <h1 className="text-3xl font-light text-gray-900 tracking-tight">Product Builder</h1>
                 <p className="text-gray-500 text-sm mt-1">Design your pricing strategy</p>
               </div>
             </div>
             <Button 
               onClick={startCreating} 
-              className="bg-amber-500 hover:bg-amber-600 text-white border-0 rounded-full px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-200 font-medium"
+              className="bg-black hover:bg-amber-600 text-white border-0 rounded-full px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-200 font-medium"
             >
               <Plus className="h-4 w-4 mr-2" />
               New Product
@@ -376,28 +376,39 @@ export function ProductPageClient({ organizations, currentOrganization: initialO
 
           {/* Stats Card */}
           {products.length > 0 && (
-            <Card className="bg-gradient-to-br from-amber-500 to-amber-600/50 border-amber-200/50 shadow-sm rounded-2xl">
-              <CardContent className="p-16">
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                  <div className="text-center">
-                    <div className="text-2xl font-light text-neutral-800">{totalProducts}</div>
-                    <div className="text-sm text-neutral-600 mt-1">Products</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-light text-neutral-800">${totalRevenue.toLocaleString()}</div>
-                    <div className="text-sm text-neutral-600 mt-1">Monthly Revenue</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-light text-neutral-800">{totalUsers.toLocaleString()}</div>
-                    <div className="text-sm text-neutral-600 mt-1">Total Users</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-light text-neutral-800">${Math.round(avgRevenue).toLocaleString()}</div>
-                    <div className="text-sm text-neutral-600 mt-1">Avg Revenue</div>
-                  </div>
+            <div className="grid grid-cols-2 bg-gradient-to-br rounded-3xl from-amber-400 via-orange-400 to-orange-500 dark:from-amber-950/20 dark:via-orange-950/10 dark:to-yellow-950/20 border-amber-200 dark:border-amber-800/50 relative overflow-hidden p-6 lg:grid-cols-4 gap-6">
+              <div className="text-center group cursor-default">
+                <div className="w-16 h-16 bg-amber-600 rounded-2xl flex items-center justify-center transition-all duration-300 transform group-hover:scale-101 mx-auto mb-3">
+                  <Package className="h-8 w-8 text-white" />
                 </div>
-              </CardContent>
-            </Card>
+                <div className="text-2xl font-semibold text-gray-900">{totalProducts}</div>
+                <div className="text-sm text-gray-600 mt-1">Products</div>
+              </div>
+              
+              <div className="text-center group cursor-default">
+                <div className="w-16 h-16 bg-amber-600 rounded-2xl flex items-center justify-center transition-all duration-300 transform group-hover:scale-101 mx-auto mb-3">
+                  <DollarSign className="h-8 w-8 text-white" />
+                </div>
+                <div className="text-2xl font-semibold text-gray-900">${totalRevenue.toLocaleString()}</div>
+                <div className="text-sm text-gray-600 mt-1">Monthly Revenue</div>
+              </div>
+              
+              <div className="text-center group cursor-default">
+                <div className="w-16 h-16 bg-amber-600 rounded-2xl flex items-center justify-center transition-all duration-300 transform group-hover:scale-101 mx-auto mb-3">
+                  <Users className="h-8 w-8 text-white" />
+                </div>
+                <div className="text-2xl font-semibold text-gray-900">{totalUsers.toLocaleString()}</div>
+                <div className="text-sm text-gray-600 mt-1">Total Users</div>
+              </div>
+              
+              <div className="text-center group cursor-default">
+                <div className="w-16 h-16 bg-amber-600 rounded-2xl flex items-center justify-center transition-all duration-300 transform group-hover:scale-101 mx-auto mb-3">
+                  <TrendingUp className="h-8 w-8 text-white" />
+                </div>
+                <div className="text-2xl font-semibold text-gray-900">${Math.round(avgRevenue).toLocaleString()}</div>
+                <div className="text-sm text-gray-600 mt-1">Avg Revenue</div>
+              </div>
+            </div>
           )}
 
           {/* Product Form */}
