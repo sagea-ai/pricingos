@@ -23,13 +23,13 @@ export async function GET() {
       return NextResponse.json({ error: "No active product profile found" }, { status: 400 });
     }
 
-    // Get latest financial metrics - using correct model name
+    // Get latest financial metrics - using correct model name from schema
     const latestMetrics = await db.financialMetrics.findFirst({
       where: { productProfileId: user.activeProductProfileId },
       orderBy: { calculatedAt: 'desc' }
     });
 
-    // Get payment integrations - using correct model name
+    // Get payment integrations - using correct model name from schema
     const paymentIntegrations = await db.gatewayConnection.findMany({
       where: { productProfileId: user.activeProductProfileId }
     });
