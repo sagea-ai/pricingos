@@ -19,7 +19,7 @@ export default async function TriggersPage() {
         firstName: true,
         lastName: true,
         email: true,
-        productProfile: {
+        activeProductProfile: {
           select: {
             productName: true,
             currentPricingModel: true,
@@ -65,7 +65,7 @@ export default async function TriggersPage() {
           lastName: user.lastName,
           email: user.email,
         }}
-        productProfile={user.productProfile}
+        productProfile={user.activeProductProfile}
       />
     );
   } catch (error) {
