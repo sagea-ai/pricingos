@@ -67,16 +67,86 @@ export class TriggerEvaluator {
       // If no settings exist, create default ones
       if (triggerSettings.length === 0) {
         const defaultTriggers = [
-          { triggerId: 'critical-cash-runway', isEnabled: true, threshold: 15 },
-          { triggerId: 'low-cash-runway', isEnabled: true, threshold: 30 },
-          { triggerId: 'negative-mrr-growth', isEnabled: true },
-          { triggerId: 'high-churn-rate', isEnabled: true, threshold: 5 },
-          { triggerId: 'failed-payments', isEnabled: true, threshold: 10 },
-          { triggerId: 'subscription-cancellations', isEnabled: true, threshold: 50 },
-          { triggerId: 'revenue-milestone', isEnabled: true },
-          { triggerId: 'customer-milestone', isEnabled: true },
-          { triggerId: 'integration-failures', isEnabled: true, threshold: 2 },
-          { triggerId: 'data-sync-delays', isEnabled: true, threshold: 24 }
+          { 
+            triggerId: 'critical-cash-runway', 
+            name: 'Critical Cash Runway Alert',
+            description: 'Alert when cash runway drops below 15 days',
+            category: 'FINANCIAL' as const,
+            severity: 'CRITICAL' as const,
+            isEnabled: true 
+          },
+          { 
+            triggerId: 'low-cash-runway', 
+            name: 'Low Cash Runway Warning',
+            description: 'Warning when cash runway drops below 30 days',
+            category: 'FINANCIAL' as const,
+            severity: 'HIGH' as const,
+            isEnabled: true 
+          },
+          { 
+            triggerId: 'negative-mrr-growth', 
+            name: 'Negative MRR Growth Alert',
+            description: 'Alert when Monthly Recurring Revenue shows negative growth',
+            category: 'FINANCIAL' as const,
+            severity: 'HIGH' as const,
+            isEnabled: true 
+          },
+          { 
+            triggerId: 'high-churn-rate', 
+            name: 'High Churn Rate Alert',
+            description: 'Alert when churn rate exceeds 5%',
+            category: 'USER' as const,
+            severity: 'HIGH' as const,
+            isEnabled: true 
+          },
+          { 
+            triggerId: 'failed-payments', 
+            name: 'Failed Payments Alert',
+            description: 'Alert when payment failure rate exceeds 10%',
+            category: 'FINANCIAL' as const,
+            severity: 'MEDIUM' as const,
+            isEnabled: true 
+          },
+          { 
+            triggerId: 'subscription-cancellations', 
+            name: 'Subscription Cancellations Alert',
+            description: 'Alert when subscription cancellations increase by 50%',
+            category: 'USER' as const,
+            severity: 'MEDIUM' as const,
+            isEnabled: true 
+          },
+          { 
+            triggerId: 'revenue-milestone', 
+            name: 'Revenue Milestone Reached',
+            description: 'Notification when revenue milestones are achieved',
+            category: 'FINANCIAL' as const,
+            severity: 'LOW' as const,
+            isEnabled: true 
+          },
+          { 
+            triggerId: 'customer-milestone', 
+            name: 'Customer Milestone Reached',
+            description: 'Notification when customer count milestones are achieved',
+            category: 'USER' as const,
+            severity: 'LOW' as const,
+            isEnabled: true 
+          },
+          { 
+            triggerId: 'integration-failures', 
+            name: 'Integration Failures Alert',
+            description: 'Alert when integration sync failures occur',
+            category: 'SYSTEM' as const,
+            severity: 'MEDIUM' as const,
+            isEnabled: true 
+          },
+          { 
+            triggerId: 'data-sync-delays', 
+            name: 'Data Sync Delays Alert',
+            description: 'Alert when data sync is delayed beyond 24 hours',
+            category: 'SYSTEM' as const,
+            severity: 'MEDIUM' as const,
+            isEnabled: true 
+          }
         ]
 
         for (const trigger of defaultTriggers) {
