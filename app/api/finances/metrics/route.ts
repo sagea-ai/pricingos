@@ -23,14 +23,14 @@ export async function GET() {
       return NextResponse.json({ error: "No active product profile found" }, { status: 400 });
     }
 
-    // Get latest financial metrics
+    // Get latest financial metrics - using correct model name
     const latestMetrics = await db.financialMetrics.findFirst({
       where: { productProfileId: user.activeProductProfileId },
       orderBy: { calculatedAt: 'desc' }
     });
 
-    // Get payment integrations
-    const paymentIntegrations = await db.paymentIntegrations.findMany({
+    // Get payment integrations - using correct model name
+    const paymentIntegrations = await db.gatewayConnection.findMany({
       where: { productProfileId: user.activeProductProfileId }
     });
 
@@ -50,7 +50,8 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching financial metrics:', error);
     return NextResponse.json({ 
-      error: "Internal server error" 
+      error: "Internal server error",
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }

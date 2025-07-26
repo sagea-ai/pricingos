@@ -619,6 +619,33 @@ model WorkspaceInvitation {
   @@map("workspace_invitations")
 }
 
+model TriggerSetting {
+  id             String  @id @default(cuid())
+  organizationId String
+  triggerId      String
+  isEnabled      Boolean @default(true)
+  threshold      Float?
+  settings       Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now())
+
+  @@unique([organizationId, triggerId])
+  @@map("trigger_settings")
+}
+
+model TriggerEventLog {
+  id             String   @id @default(cuid())
+  organizationId String
+  triggerId      String
+  triggerData    Json?
+  emailSent      Boolean  @default(false)
+  recipients     String[]
+  error          String?
+  createdAt      DateTime @default(now())
+
+  @@map("trigger_event_logs")
+}
+
 enum CompanySize {
   JUST_ME
   TWO_TO_TEN
