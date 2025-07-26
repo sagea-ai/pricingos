@@ -191,6 +191,7 @@ model Organization {
   creator             User                  @relation("OrganizationCreator", fields: [creatorId], references: [id], onDelete: Cascade)
   repositories        Repository[]
   workspaces          Workspace[]
+  triggerSettings     TriggerSetting[]
 
   @@map("organizations")
 }
@@ -620,30 +621,37 @@ model WorkspaceInvitation {
 }
 
 model TriggerSetting {
-  id             String  @id @default(cuid())
-  organizationId String
+  id             String          @id @default(cuid())
   triggerId      String
-  isEnabled      Boolean @default(true)
-  threshold      Float?
-  settings       Json?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @default(now())
+  name           String
+  description    String
+  category       TriggerCategory
+  severity       TriggerSeverity
+  isEnabled      Boolean         @default(false)
+  emailTemplate  String?
+  organizationId String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @default(now())
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  emailLogs      TriggerEmailLog[]
 
-  @@unique([organizationId, triggerId])
+  @@unique([triggerId, organizationId])
   @@map("trigger_settings")
 }
 
-model TriggerEventLog {
-  id             String   @id @default(cuid())
-  organizationId String
-  triggerId      String
-  triggerData    Json?
-  emailSent      Boolean  @default(false)
-  recipients     String[]
-  error          String?
-  createdAt      DateTime @default(now())
+model TriggerEmailLog {
+  id                String         @id @default(cuid())
+  triggerSettingId  String
+  recipientEmail    String
+  subject           String
+  emailTemplate     String
+  sentAt            DateTime       @default(now())
+  status            String
+  errorMessage      String?
+  resendId          String?
+  triggerSetting    TriggerSetting @relation(fields: [triggerSettingId], references: [id], onDelete: Cascade)
 
-  @@map("trigger_event_logs")
+  @@map("trigger_email_logs")
 }
 
 enum CompanySize {
@@ -778,4 +786,17 @@ enum NotificationType {
 enum PaymentGateway {
   STRIPE
   KHALTI
+}
+
+enum TriggerCategory {
+  FINANCIAL
+  USER
+  SYSTEM
+}
+
+enum TriggerSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
 }
