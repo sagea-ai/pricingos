@@ -9,7 +9,7 @@ interface SendEmailParams {
   from?: string
 }
 
-export async function sendEmail({ to, subject, html, from = 'alerts@yourcompany.com' }: SendEmailParams) {
+export async function sendEmail({ to, subject, html, from = 'alerts@basabjha.com.np' }: SendEmailParams) {
   try {
     const data = await resend.emails.send({
       from,
